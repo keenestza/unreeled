@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNREELED — Daily Media Releases</title>
+<meta name="description" content="Track daily releases across movies, TV, books, games, anime and music. Community spoiler discussions.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08090c;--card:#0f1014;--el:#16171d;--hov:#1c1d25;--accent:#ff6b35;--agl:rgba(255,107,53,0.12);--text:#e8e8ec;--ts:#a0a0ae;--td:#5e5e6e;--tm:#3e3e4e;--brd:#1e1f28;--bl:#282935;--sl:#3ec98c;--slb:rgba(62,201,140,0.08);--slr:rgba(62,201,140,0.25);--sm:#f0c038;--smb:rgba(240,192,56,0.08);--smr:rgba(240,192,56,0.25);--sh:#ef4444;--shb:rgba(239,68,68,0.08);--shr:rgba(239,68,68,0.25)}
+body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:#fff}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:1000;height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,9,12,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--brd)}
+.nav-l{display:flex;align-items:center;gap:24px}
+.logo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo i{width:26px;height:26px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;font-style:normal}
+.logo span{font-family:'Fraunces',serif;font-size:19px;font-weight:700;letter-spacing:-0.5px}
+.tabs{display:flex;gap:3px}
+.tab{padding:5px 13px;font-size:12.5px;font-weight:500;color:var(--td);border-radius:6px;transition:all .15s}
+.tab:hover{color:var(--ts);background:var(--el)}
+.tab.on{color:var(--text);background:var(--el)}
+.btn-a{padding:6px 15px;background:var(--accent);border-radius:6px;color:#fff;font-size:12.5px;font-weight:600}
+.page{display:none;max-width:920px;margin:0 auto;padding:28px 20px 60px}
+.page.on{display:block}
+h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spacing:-1.5px;margin-bottom:4px}
+.sub{color:var(--td);font-size:14px;margin-bottom:22px}
+.sub b{color:var(--accent);font-weight:600}
+
+/* FILTERS */
+.fbar{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap}
+.fc{padding:5px 12px;border-radius:100px;font-size:12px;font-weight:500;background:var(--card);border:1px solid var(--brd);color:var(--td);transition:all .15s;display:flex;align-items:center;gap:6px}
+.fc:hover{border-color:var(--bl);color:var(--ts)}
+.fc.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.fc .dot{width:7px;height:7px;border-radius:50%}
+
+/* CARDS */
+.rc{display:flex;gap:14px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .2s;animation:fi .3s ease both}
+.rc:hover{border-color:var(--bl);background:var(--el);transform:translateX(3px)}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.pb{flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.pb::after{content:'';position:absolute;inset:0;border:1px solid rgba(255,255,255,0.06);border-radius:inherit}
+.pb.movie{background:linear-gradient(145deg,#312e81,#4338ca)}
+.pb.tv{background:linear-gradient(145deg,#581c87,#7e22ce)}
+.pb.book{background:linear-gradient(145deg,#134e4a,#0f766e)}
+.pb.game{background:linear-gradient(145deg,#881337,#be123c)}
+.pb.anime{background:linear-gradient(145deg,#831843,#be185d)}
+.pb.music{background:linear-gradient(145deg,#713f12,#a16207)}
+.pb img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.ri{flex:1;min-width:0}
+.rt{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:3px}
+.rn{font-family:'Fraunces',serif;font-size:16px;font-weight:600;letter-spacing:-0.3px;line-height:1.25}
+.mb{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;flex-shrink:0;white-space:nowrap}
+.mb.movie{background:rgba(99,102,241,0.15);color:#6366f1}
+.mb.tv{background:rgba(168,85,247,0.15);color:#a855f7}
+.mb.book{background:rgba(20,184,166,0.15);color:#14b8a6}
+.mb.game{background:rgba(244,63,94,0.15);color:#f43f5e}
+.mb.anime{background:rgba(236,72,153,0.15);color:#ec4899}
+.mb.music{background:rgba(234,179,8,0.15);color:#eab308}
+.rm{font-size:11.5px;color:var(--td);margin-bottom:6px}
+.rm .s{color:var(--bl);margin:0 4px}
+.rs{font-size:12.5px;color:var(--ts);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.rf{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.gt{display:flex;gap:4px;flex-wrap:wrap}
+.gt span{padding:2px 6px;background:var(--el);border-radius:4px;font-size:10.5px;color:var(--td)}
+.rst{font-size:11px;color:var(--td);display:flex;align-items:center;gap:10px}
+.sds{display:inline-flex;gap:2px;align-items:center}
+.sds i{width:6px;height:6px;border-radius:50%;font-style:normal;display:inline-block}
+.sds .l{background:var(--sl)}.sds .m{background:var(--sm)}.sds .h{background:var(--sh)}
+
+/* DETAIL */
+.dbk{color:var(--td);font-size:13px;padding:4px 0;margin-bottom:18px;display:inline-flex;align-items:center;gap:6px;transition:color .15s}
+.dbk:hover{color:var(--text)}
+.dh{display:flex;gap:24px;margin-bottom:26px}
+.dn{font-family:'Fraunces',serif;font-size:28px;font-weight:700;letter-spacing:-1.2px;line-height:1.12;margin:8px 0 6px}
+.dd{font-size:14px;color:var(--ts);line-height:1.65;max-width:580px;margin:12px 0 16px}
+.da{display:flex;gap:8px;flex-wrap:wrap}
+.da .p{padding:8px 18px;background:var(--accent);border-radius:7px;color:#fff;font-size:13px;font-weight:600}
+.da .o{padding:8px 18px;border:1px solid var(--brd);border-radius:7px;color:var(--ts);font-size:13px;font-weight:500}
+.spb{display:flex;gap:10px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:24px}
+.sps{flex:1;text-align:center;padding:10px 8px;border-radius:8px}
+.sps em{font-size:22px;font-weight:700;font-style:normal;display:block}
+.sps small{font-size:10px;color:var(--td);text-transform:uppercase;letter-spacing:.8px}
+.sps.sl{background:var(--slb)}.sps.sl em{color:var(--sl)}
+.sps.sm{background:var(--smb)}.sps.sm em{color:var(--sm)}
+.sps.sv{background:var(--shb)}.sps.sv em{color:var(--sh)}
+.st{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-bottom:14px}
+
+/* COMPOSER */
+.cmp{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px}
+.cmp textarea{width:100%;min-height:68px;background:var(--el);border:1px solid var(--brd);border-radius:7px;padding:11px;color:var(--text);font-size:13px;resize:vertical;outline:none;font-family:inherit}
+.cmp textarea:focus{border-color:rgba(255,107,53,0.5)}
+.cmp textarea::placeholder{color:var(--td)}
+.cmpf{display:flex;align-items:center;justify-content:space-between;margin-top:9px;flex-wrap:wrap;gap:8px}
+.spp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.spp>span{font-size:11px;color:var(--td);margin-right:3px}
+.slb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;transition:all .15s}
+.bps{padding:6px 15px;background:var(--accent);border-radius:7px;color:#fff;font-size:12.5px;font-weight:600}
+
+/* COMMENT FILTERS */
+.cfs{display:flex;gap:4px;margin-bottom:16px;align-items:center;flex-wrap:wrap}
+.cfs>span{font-size:11px;color:var(--td);margin-right:2px}
+.cfb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;background:var(--card);border:1px solid var(--brd);color:var(--td);transition:all .15s}
+.cfb:hover{color:var(--ts)}
+.cfb.on{background:var(--el);color:var(--text);border-color:var(--bl)}
+
+/* COMMENTS */
+.cm{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:7px}
+.cm:hover{border-color:var(--bl)}
+.cmh{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.cmu{display:flex;align-items:center;gap:8px}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.cmn{font-size:12.5px;font-weight:600}
+.cmt{font-size:10.5px;color:var(--td)}
+.sb{padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
+.cmb{font-size:13.5px;line-height:1.6;color:var(--ts);transition:filter .3s}
+.cmb.bl{filter:blur(6px);user-select:none}
+.rvb{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px;margin-top:7px;background:var(--el);border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;color:var(--td)}
+.rvb:hover{color:var(--text);background:var(--hov)}
+.cmf{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--td)}
+.cmf span{cursor:pointer;transition:color .15s}
+.cmf span:hover{color:var(--text)}
+
+/* STREAMS */
+.shd p{color:var(--td);font-size:14px;margin-bottom:28px;max-width:460px}
+.sst{font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin-bottom:12px;margin-top:28px}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:9px}
+.sc{padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;transition:all .2s}
+.sc:hover{border-color:var(--bl);transform:translateY(-2px)}
+.sct{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px}
+.si{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--agl)}
+.ssb{padding:4px 11px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid var(--brd);color:var(--td)}
+.ssb:hover{border-color:var(--accent);color:var(--accent)}
+.ssb.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.sc h3{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.sc p{font-size:11.5px;color:var(--td);line-height:1.4;margin-bottom:8px}
+.scs{display:flex;gap:12px;font-size:11px;color:var(--td)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:60px 20px;color:var(--td)}
+.empty h2{font-family:'Fraunces',serif;font-size:22px;color:var(--ts);margin-bottom:8px}
+
+/* RESPONSIVE */
+@media(max-width:640px){.nav{padding:0 14px}.tabs{display:none}.page{padding:18px 12px 50px}h1.hero{font-size:26px}.dh{flex-direction:column;gap:14px}.dn{font-size:24px}.sg{grid-template-columns:1fr}.rc{gap:10px}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-l">
+    <div class="logo" onclick="go('feed')"><i>U</i><span>unreeled</span></div>
+    <div class="tabs">
+      <button class="tab on" data-p="feed" onclick="go('feed')">Today's Releases</button>
+      <button class="tab" data-p="streams" onclick="go('streams')">My Streams</button>
+    </div>
+  </div>
+  <div><button class="btn-a">Sign Up</button></div>
+</nav>
+
+<div id="p-feed" class="page on"></div>
+<div id="p-detail" class="page"></div>
+<div id="p-streams" class="page"></div>
+
+<script>
+// ═══════════════ DATA (injected by build script) ═══════════════
+const DATA = __RELEASE_DATA_PLACEHOLDER__;
+
+// ═══════════════ CONFIG ═══════════════
+const MC={movie:{i:"\uD83C\uDFAC",l:"Film",c:"#6366f1"},tv:{i:"\uD83D\uDCFA",l:"TV",c:"#a855f7"},book:{i:"\uD83D\uDCD6",l:"Book",c:"#14b8a6"},game:{i:"\uD83C\uDFAE",l:"Game",c:"#f43f5e"},anime:{i:"\uD83C\uDF8C",l:"Anime",c:"#ec4899"},music:{i:"\uD83C\uDFB5",l:"Music",c:"#eab308"}};
+const SP={none:{l:"No Spoilers",bg:"var(--el)",c:"var(--td)",b:"var(--brd)"},light:{l:"\uD83D\uDFE2 Light",bg:"var(--slb)",c:"var(--sl)",b:"var(--slr)"},medium:{l:"\uD83D\uDFE1 Medium",bg:"var(--smb)",c:"var(--sm)",b:"var(--smr)"},heavy:{l:"\uD83D\uDD34 Heavy",bg:"var(--shb)",c:"var(--sh)",b:"var(--shr)"}};
+
+const COMMENTS=[
+  {id:1,u:"stellarfan",av:"SF",cl:"#6366f1",tm:"2h ago",sl:"none",up:234,b:"Just finished this and I need to process. The performances are incredible and the whole thing is breathtaking. One of the best releases this year."},
+  {id:2,u:"cosmicreader",av:"CR",cl:"#14b8a6",tm:"1h ago",sl:"light",up:189,b:"The opening sets the tone perfectly. The way they establish the rivalry between the leads in the first twenty minutes is masterful — tension and chemistry at once."},
+  {id:3,u:"plottwister",av:"PT",cl:"#a855f7",tm:"45m ago",sl:"medium",up:156,b:"The midpoint reveal completely reframes everything. All those small details from the first half click into place. The acting in that moment is phenomenal."},
+  {id:4,u:"endgamespoils",av:"ES",cl:"#f43f5e",tm:"30m ago",sl:"heavy",up:412,b:"OK the ending. That final twist completely broke me. The last scene is going to stay with me for weeks. And the post-credits moment? This changes EVERYTHING about how you view the first half."},
+  {id:5,u:"deepdiver",av:"DD",cl:"#f59e0b",tm:"20m ago",sl:"none",up:98,b:"This is exactly the kind of thoughtful storytelling we need more of. Not everything has to be loud. Sometimes the most gripping thing is quiet tension and brilliant writing."},
+  {id:6,u:"astridwrites",av:"AW",cl:"#ec4899",tm:"15m ago",sl:"light",up:67,b:"The supporting cast really elevates this. The mentor subplot adds so much depth. You can tell the team cares about every character, not just the leads."},
+];
+
+const STREAMS=[
+  {t:"Platforms & Studios",items:[
+    {n:"A24 Releases",i:"\uD83C\uDFAC",d:"Every A24 theatrical and streaming release",f:"~8/mo",s:"24.1k",on:1},
+    {n:"HBO Originals",i:"\uD83D\uDCFA",d:"New episodes and premieres across HBO",f:"~15/mo",s:"41.8k",on:0},
+    {n:"Crunchyroll Simulcasts",i:"\uD83C\uDF8C",d:"Every new simulcast episode as it airs",f:"~40/mo",s:"38.2k",on:1},
+    {n:"Netflix Originals",i:"\uD83D\uDCFA",d:"Every Netflix original film and series",f:"~30/mo",s:"67.3k",on:0},
+    {n:"PlayStation Exclusives",i:"\uD83C\uDFAE",d:"First-party and exclusive launches on PS5",f:"~4/mo",s:"19.5k",on:0},
+    {n:"Tor Books",i:"\uD83D\uDCD6",d:"New fantasy and sci-fi from Tor",f:"~12/mo",s:"11.2k",on:0},
+    {n:"Napalm Records",i:"\uD83C\uDFB5",d:"New metal and rock releases from Napalm",f:"~10/mo",s:"8.7k",on:0},
+  ]},
+  {t:"Genres",items:[
+    {n:"Horror (All Media)",i:"\uD83D\uDD2A",d:"Horror across movies, TV, books, games, and anime",f:"~18/mo",s:"22.6k",on:1},
+    {n:"Sci-Fi (All Media)",i:"\uD83D\uDE80",d:"Science fiction across all media types",f:"~20/mo",s:"31.4k",on:0},
+    {n:"Fantasy (All Media)",i:"\u2694\uFE0F",d:"Fantasy across all media types",f:"~22/mo",s:"28.7k",on:0},
+    {n:"New Vinyl Releases",i:"\uD83C\uDFB5",d:"Latest vinyl pressings across all genres",f:"~15/mo",s:"14.3k",on:0},
+  ]},
+  {t:"Series & Franchises",items:[
+    {n:"Golden Kamuy",i:"\uD83C\uDF8C",d:"Final season episodes and manga releases",f:"Weekly",s:"15.2k",on:0},
+    {n:"My Hero Academia",i:"\uD83C\uDF8C",d:"Main series, Vigilantes, and all spin-offs",f:"Weekly+",s:"34.1k",on:0},
+    {n:"Fate Series",i:"\uD83C\uDF8C",d:"All Fate anime, movies, and game releases",f:"Varies",s:"21.8k",on:0},
+  ]}
+];
+
+// ═══════════════ STATE ═══════════════
+let cf="all",cr=null,ccf="all",rv=new Set();
+const R=DATA.releases||[];
+
+// ═══════════════ NAV ═══════════════
+function go(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  document.getElementById('p-'+p).classList.add('on');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelector(`.tab[data-p="${p==='detail'?'feed':p}"]`)?.classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════ HELPERS ═══════════════
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function meta(r){
+  const m=r.metadata||{},p=[];
+  if(r.media_type==='movie'){if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language)p.push(m.original_language.toUpperCase())}
+  if(r.media_type==='tv'&&m.networks?.length)p.push(m.networks[0]);
+  if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);
+  if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}
+  if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}
+  if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}
+  return p.join('<span class="s">\u00B7</span>');
+}
+
+function poster(r,w,h,fs){
+  const t=r.media_type,c=MC[t]||MC.movie;
+  if(r.poster_url){
+    return `<div class="pb ${t}" style="width:${w}px;height:${h}px"><img src="${esc(r.poster_url)}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='${c.i}';this.remove()"></div>`;
+  }
+  return `<div class="pb ${t}" style="width:${w}px;height:${h}px;font-size:${fs}px">${c.i}</div>`;
+}
+
+// ═══════════════ FEED ═══════════════
+function renderFeed(){
+  const cn={};R.forEach(r=>cn[r.media_type]=(cn[r.media_type]||0)+1);
+  const filtered=cf==='all'?R:R.filter(r=>r.media_type===cf);
+
+  let h=`<h1 class="hero">Today in Media</h1><p class="sub">${DATA.date||'—'} — <b>${R.length} new releases</b></p>`;
+
+  // Filters
+  h+=`<div class="fbar"><button class="fc ${cf==='all'?'on':''}" onclick="cf='all';renderFeed()">All (${R.length})</button>`;
+  for(const[t,c]of Object.entries(MC)){
+    if(cn[t]){
+      const dot=cf!==t?`<span class="dot" style="background:${c.c}"></span>`:'';
+      h+=`<button class="fc ${cf===t?'on':''}" onclick="cf='${t}';renderFeed()">${dot}${c.l} (${cn[t]})</button>`;
+    }
+  }
+  h+='</div>';
+
+  if(!filtered.length){
+    h+='<div class="empty"><h2>No releases found</h2><p>Try a different filter or check back tomorrow.</p></div>';
+  }
+
+  // Cards
+  filtered.forEach((r,i)=>{
+    const c=MC[r.media_type]||MC.movie;
+    const sp=r.spoiler_counts||{};
+    const hs=(sp.light||0)+(sp.medium||0)+(sp.heavy||0)>0;
+    let dots='';
+    if(hs){dots='<span class="sds">';if(sp.light)dots+='<i class="l"></i>';if(sp.medium)dots+='<i class="m"></i>';if(sp.heavy)dots+='<i class="h"></i>';dots+='</span> Spoilers'}
+    const gt=(r.genres||[]).slice(0,3).map(g=>`<span>${esc(g)}</span>`).join('');
+    h+=`<div class="rc" onclick="openD(${i})" style="animation-delay:${Math.min(i*0.03,0.3)}s">
+      ${poster(r,68,95,24)}
+      <div class="ri"><div class="rt"><div class="rn">${esc(r.title)}</div><span class="mb ${r.media_type}">${c.l}</span></div>
+      <div class="rm">${meta(r)}</div>
+      ${r.synopsis?`<p class="rs">${esc(r.synopsis)}</p>`:''}
+      <div class="rf"><div class="gt">${gt}</div><div class="rst"><span>\uD83D\uDCAC ${r.comment_count||0}</span>${hs?`<span>${dots}</span>`:''}</div></div></div></div>`;
+  });
+
+  document.getElementById('p-feed').innerHTML=h;
+}
+
+// ═══════════════ DETAIL ═══════════════
+function openD(i){
+  cr=R[i];rv=new Set();ccf='all';
+  const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};
+
+  let h=`<button class="dbk" onclick="go('feed')">\u2190 Back to Today's Releases</button>
+    <div class="dh">${poster(r,150,210,48)}
+    <div style="flex:1"><span class="mb ${r.media_type}">${c.l}</span>
+    <h1 class="dn">${esc(r.title)}</h1>
+    <div class="rm">${meta(r)}${r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):''}</div>
+    ${r.synopsis?`<p class="dd">${esc(r.synopsis)}</p>`:''}
+    <div class="da"><button class="p">\uD83D\uDCE1 Follow</button><button class="o">\uD83D\uDD17 Share</button><button class="o">\u2B50 Watchlist</button></div>
+    </div></div>`;
+
+  h+=`<div class="spb">
+    <div class="sps sl"><em>${sp.light||0}</em><small>Light</small></div>
+    <div class="sps sm"><em>${sp.medium||0}</em><small>Medium</small></div>
+    <div class="sps sv"><em>${sp.heavy||0}</em><small>Heavy</small></div></div>`;
+
+  h+=`<div class="st">Discussion (${r.comment_count||0})</div>`;
+
+  // Composer
+  h+=`<div class="cmp"><textarea placeholder="Share your thoughts... Tag your spoiler level below."></textarea>
+    <div class="cmpf"><div class="spp"><span>Spoiler level:</span>
+    <button class="slb" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="selSp(this)">No Spoilers</button>
+    <button class="slb" style="border:1px solid var(--slr);color:var(--sl)" onclick="selSp(this)">\uD83D\uDFE2 Light</button>
+    <button class="slb" style="border:1px solid var(--smr);color:var(--sm)" onclick="selSp(this)">\uD83D\uDFE1 Medium</button>
+    <button class="slb" style="border:1px solid var(--shr);color:var(--sh)" onclick="selSp(this)">\uD83D\uDD34 Heavy</button>
+    </div><button class="bps">Post</button></div></div>`;
+
+  // Comment filters
+  h+=`<div class="cfs"><span>Show:</span>
+    <button class="cfb on" onclick="fC('all',this)">All</button>
+    <button class="cfb" onclick="fC('none',this)">No Spoilers</button>
+    <button class="cfb" onclick="fC('light',this)">\uD83D\uDFE2 Light</button>
+    <button class="cfb" onclick="fC('medium',this)">\uD83D\uDFE1 Medium</button>
+    <button class="cfb" onclick="fC('heavy',this)">\uD83D\uDD34 Heavy</button></div>`;
+
+  h+='<div id="cml"></div>';
+  document.getElementById('p-detail').innerHTML=h;
+  renderCmts();
+  go('detail');
+}
+
+function renderCmts(){
+  const f=ccf==='all'?COMMENTS:COMMENTS.filter(c=>c.sl===ccf);
+  document.getElementById('cml').innerHTML=f.map(c=>{
+    const s=SP[c.sl],hs=c.sl!=='none',ir=rv.has(c.id),bl=hs&&!ir;
+    return`<div class="cm"><div class="cmh"><div class="cmu"><div class="av" style="background:${c.cl}">${c.av}</div><div><div class="cmn">${c.u}</div><div class="cmt">${c.tm}</div></div></div><span class="sb" style="background:${s.bg};color:${s.c};border:1px solid ${s.b}">${s.l}</span></div><div class="cmb${bl?' bl':''}">${esc(c.b)}</div>${bl?`<div class="rvb" onclick="rv.add(${c.id});renderCmts()">\uD83D\uDC41 Tap to reveal ${c.sl} spoiler</div>`:''}<div class="cmf"><span>\u25B2 ${c.up}</span><span>\u25BC</span><span>\uD83D\uDCAC Reply</span><span>\uD83D\uDD16 Save</span></div></div>`;
+  }).join('');
+}
+
+function fC(f,btn){ccf=f;document.querySelectorAll('.cfb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderCmts()}
+
+function selSp(btn){
+  const bgs={'No Spoilers':'var(--el)','\uD83D\uDFE2 Light':'var(--slb)','\uD83D\uDFE1 Medium':'var(--smb)','\uD83D\uDD34 Heavy':'var(--shb)'};
+  document.querySelectorAll('.slb').forEach(b=>b.style.background='transparent');
+  btn.style.background=bgs[btn.textContent]||'transparent';
+}
+
+// ═══════════════ STREAMS ═══════════════
+function renderStreams(){
+  let h='<div class="shd"><h1 class="hero">Your Streams</h1><p>Subscribe to genres, platforms, franchises, and series. Get a personalized daily digest.</p></div>';
+  STREAMS.forEach((s,si)=>{
+    h+=`<h3 class="sst"${si===0?' style="margin-top:0"':''}>${s.t}</h3><div class="sg">`;
+    s.items.forEach(x=>{
+      h+=`<div class="sc"><div class="sct"><div class="si">${x.i}</div><button class="ssb${x.on?' on':''}" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'\u2713 Subscribed':'Subscribe'">${x.on?'\u2713 Subscribed':'Subscribe'}</button></div><h3>${x.n}</h3><p>${x.d}</p><div class="scs"><span>\uD83D\uDCE6 ${x.f}</span><span>\uD83D\uDC65 ${x.s} subs</span></div></div>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('p-streams').innerHTML=h;
+}
+
+// ═══════════════ INIT ═══════════════
+document.addEventListener('DOMContentLoaded',()=>{renderFeed();renderStreams()});
+</script>
+</body>
+</html>
