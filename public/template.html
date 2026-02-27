@@ -7,12 +7,14 @@
 <meta name="description" content="Track daily releases across movies, TV, books, games, anime and music.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#08090c;--card:#0f1014;--el:#16171d;--hov:#1c1d25;--accent:#ff6b35;--agl:rgba(255,107,53,0.12);--text:#e8e8ec;--ts:#a0a0ae;--td:#5e5e6e;--brd:#1e1f28;--bl:#282935;--sl:#3ec98c;--slb:rgba(62,201,140,0.08);--slr:rgba(62,201,140,0.25);--sm:#f0c038;--smb:rgba(240,192,56,0.08);--smr:rgba(240,192,56,0.25);--sh:#ef4444;--shb:rgba(239,68,68,0.08);--shr:rgba(239,68,68,0.25)}
 body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--accent);color:#fff}
 button{cursor:pointer;font-family:inherit;border:none;background:none}
+input{font-family:inherit}
 .nav{position:sticky;top:0;z-index:1000;height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,9,12,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--brd)}
 .nav-l{display:flex;align-items:center;gap:20px}
 .logo{display:flex;align-items:center;gap:8px;cursor:pointer}
@@ -22,16 +24,46 @@ button{cursor:pointer;font-family:inherit;border:none;background:none}
 .tab{padding:5px 11px;font-size:12.5px;font-weight:500;color:var(--td);border-radius:6px;transition:all .15s}
 .tab:hover{color:var(--ts);background:var(--el)}
 .tab.on{color:var(--text);background:var(--el)}
-.btn-a{padding:6px 15px;background:var(--accent);border-radius:6px;color:#fff;font-size:12.5px;font-weight:600}
+.nav-r{display:flex;align-items:center;gap:8px}
+.btn-a{padding:6px 15px;background:var(--accent);border-radius:6px;color:#fff;font-size:12.5px;font-weight:600;transition:all .15s}
+.btn-a:hover{filter:brightness(1.1)}
+.user-pill{display:flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;background:var(--el);border:1px solid var(--brd);border-radius:100px;font-size:12px;color:var(--ts);cursor:pointer;transition:all .15s}
+.user-pill:hover{border-color:var(--bl);color:var(--text)}
+.user-pill .uav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.umenu{position:absolute;top:52px;right:20px;background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:6px;min-width:180px;display:none;z-index:2000;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.umenu.show{display:block}
+.umenu button{display:block;width:100%;text-align:left;padding:8px 12px;font-size:12.5px;color:var(--ts);border-radius:6px;transition:all .12s}
+.umenu button:hover{background:var(--el);color:var(--text)}
+.umenu hr{border:none;border-top:1px solid var(--brd);margin:4px 0}
 .page{display:none;max-width:920px;margin:0 auto;padding:28px 20px 60px}.page.on{display:block}
 h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spacing:-1.5px;margin-bottom:4px}
 .sub{color:var(--td);font-size:14px;margin-bottom:22px}.sub b{color:var(--accent);font-weight:600}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:32px;width:100%;max-width:400px;position:relative}
+.modal h2{font-family:'Fraunces',serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.modal p.ms{font-size:13px;color:var(--td);margin-bottom:20px}
+.modal .close{position:absolute;top:12px;right:16px;font-size:20px;color:var(--td);background:none;border:none;cursor:pointer}
+.modal .close:hover{color:var(--text)}
+.finput{width:100%;padding:10px 12px;background:var(--el);border:1px solid var(--brd);border-radius:7px;color:var(--text);font-size:13.5px;outline:none;margin-bottom:10px;transition:border-color .15s}
+.finput:focus{border-color:var(--accent)}
+.finput::placeholder{color:var(--td)}
+.fbtn{width:100%;padding:10px;background:var(--accent);border-radius:7px;color:#fff;font-size:13.5px;font-weight:600;border:none;cursor:pointer;margin-top:4px;transition:all .15s}
+.fbtn:hover{filter:brightness(1.1)}
+.fbtn:disabled{opacity:0.5;cursor:not-allowed}
+.flink{font-size:12px;color:var(--td);margin-top:12px;text-align:center}
+.flink a{color:var(--accent);cursor:pointer;text-decoration:none}
+.flink a:hover{text-decoration:underline}
+.ferr{font-size:12px;color:var(--sh);margin-bottom:8px;display:none}
+.ferr.show{display:block}
+.fok{font-size:12px;color:var(--sl);margin-bottom:8px;display:none}
+.fok.show{display:block}
 /* DATE PICKER */
 .dp{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
 .dp-btn{padding:6px 11px;background:var(--card);border:1px solid var(--brd);border-radius:7px;color:var(--td);font-size:13px;font-weight:500;transition:all .15s}
 .dp-btn:hover{border-color:var(--bl);color:var(--text)}
 .dp select{background:var(--card);border:1px solid var(--brd);border-radius:7px;color:var(--text);padding:6px 10px;font-size:13px;font-family:inherit;outline:none;cursor:pointer;max-width:220px}
-.dp select:focus{border-color:var(--accent)}
 .dp-single{font-size:13px;color:var(--ts)}
 /* FILTERS */
 .fbar{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap}
@@ -63,7 +95,12 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .dh{display:flex;gap:24px;margin-bottom:26px}
 .dn{font-family:'Fraunces',serif;font-size:28px;font-weight:700;letter-spacing:-1.2px;line-height:1.12;margin:8px 0 6px}
 .dd{font-size:14px;color:var(--ts);line-height:1.65;max-width:580px;margin:12px 0 16px}
-.da{display:flex;gap:8px;flex-wrap:wrap}.da .p{padding:8px 18px;background:var(--accent);border-radius:7px;color:#fff;font-size:13px;font-weight:600}.da .o{padding:8px 18px;border:1px solid var(--brd);border-radius:7px;color:var(--ts);font-size:13px;font-weight:500}
+.da{display:flex;gap:8px;flex-wrap:wrap}
+.da button{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;transition:all .15s}
+.da .p{background:var(--accent);color:#fff;border:none}.da .p:hover{filter:brightness(1.1)}
+.da .p.active{background:var(--sl)}
+.da .o{background:none;border:1px solid var(--brd);color:var(--ts)}.da .o:hover{border-color:var(--bl);color:var(--text)}
+.da .o.active{border-color:var(--sl);color:var(--sl)}
 .spb{display:flex;gap:10px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:24px}
 .sps{flex:1;text-align:center;padding:10px 8px;border-radius:8px}.sps em{font-size:22px;font-weight:700;font-style:normal;display:block}.sps small{font-size:10px;color:var(--td);text-transform:uppercase;letter-spacing:.8px}
 .sps.sl{background:var(--slb)}.sps.sl em{color:var(--sl)}.sps.sm{background:var(--smb)}.sps.sm em{color:var(--sm)}.sps.sv{background:var(--shb)}.sps.sv em{color:var(--sh)}
@@ -74,7 +111,8 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .cmpf{display:flex;align-items:center;justify-content:space-between;margin-top:9px;flex-wrap:wrap;gap:8px}
 .spp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.spp>span{font-size:11px;color:var(--td);margin-right:3px}
 .slb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;transition:all .15s}
-.bps{padding:6px 15px;background:var(--accent);border-radius:7px;color:#fff;font-size:12.5px;font-weight:600}
+.bps{padding:6px 15px;background:var(--accent);border-radius:7px;color:#fff;font-size:12.5px;font-weight:600;transition:opacity .15s}
+.bps:disabled{opacity:0.5;cursor:not-allowed}
 .cfs{display:flex;gap:4px;margin-bottom:16px;align-items:center;flex-wrap:wrap}.cfs>span{font-size:11px;color:var(--td);margin-right:2px}
 .cfb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;background:var(--card);border:1px solid var(--brd);color:var(--td);transition:all .15s}.cfb:hover{color:var(--ts)}.cfb.on{background:var(--el);color:var(--text);border-color:var(--bl)}
 .cm{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:7px}.cm:hover{border-color:var(--bl)}
@@ -84,28 +122,21 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .sb{padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
 .cmb{font-size:13.5px;line-height:1.6;color:var(--ts);transition:filter .3s}.cmb.bl{filter:blur(6px);user-select:none}
 .rvb{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px;margin-top:7px;background:var(--el);border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;color:var(--td)}.rvb:hover{color:var(--text);background:var(--hov)}
-.cmf{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--td)}.cmf span{cursor:pointer}.cmf span:hover{color:var(--text)}
+.cmf{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--td)}.cmf span{cursor:pointer}.cmf span:hover{color:var(--text)}.cmf span.voted{color:var(--accent)}
+.login-prompt{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px;text-align:center;font-size:13px;color:var(--td)}
+.login-prompt a{color:var(--accent);cursor:pointer}
 /* TRENDING */
-.trc{display:flex;gap:12px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:11px;margin-bottom:8px;transition:all .15s}
+.trc{display:flex;gap:12px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .15s}
 .trc:hover{border-color:var(--bl);background:var(--el)}
 .trk{width:32px;height:32px;border-radius:8px;background:var(--agl);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
-.tri{flex:1;min-width:0}
-.trt{font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin-bottom:2px}
-.trm{font-size:11.5px;color:var(--td)}
+.tri{flex:1;min-width:0}.trt{font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin-bottom:2px}.trm{font-size:11.5px;color:var(--td)}
 .trd{padding:2px 8px;background:var(--agl);border-radius:100px;font-size:10px;font-weight:700;color:var(--accent);white-space:nowrap}
 /* ARCHIVE */
 .arcs{display:flex;gap:12px;padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:20px;flex-wrap:wrap}
-.arci{flex:1;min-width:80px;text-align:center;padding:8px}
-.arci em{font-size:24px;font-weight:700;font-style:normal;display:block;color:var(--accent)}
-.arci small{font-size:10px;color:var(--td);text-transform:uppercase;letter-spacing:.7px}
+.arci{flex:1;min-width:80px;text-align:center;padding:8px}.arci em{font-size:24px;font-weight:700;font-style:normal;display:block;color:var(--accent)}.arci small{font-size:10px;color:var(--td);text-transform:uppercase;letter-spacing:.7px}
 .arcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.arcd{padding:12px;background:var(--card);border:1px solid var(--brd);border-radius:9px;cursor:pointer;transition:all .15s;text-align:center}
-.arcd:hover{border-color:var(--bl);background:var(--el);transform:translateY(-1px)}
-.arcd.now{border-color:var(--accent)}
-.arcd-dt{font-family:'Fraunces',serif;font-size:14px;font-weight:600;margin-bottom:2px}
-.arcd-n{font-size:22px;font-weight:700;color:var(--accent)}
-.arcd-l{font-size:10px;color:var(--td);margin-top:1px}
-.arcd-t{display:flex;gap:2px;justify-content:center;margin-top:5px}.arcd-t span{font-size:10px}
+.arcd{padding:12px;background:var(--card);border:1px solid var(--brd);border-radius:9px;cursor:pointer;transition:all .15s;text-align:center}.arcd:hover{border-color:var(--bl);background:var(--el);transform:translateY(-1px)}.arcd.now{border-color:var(--accent)}
+.arcd-dt{font-family:'Fraunces',serif;font-size:14px;font-weight:600;margin-bottom:2px}.arcd-n{font-size:22px;font-weight:700;color:var(--accent)}.arcd-l{font-size:10px;color:var(--td);margin-top:1px}.arcd-t{display:flex;gap:2px;justify-content:center;margin-top:5px}.arcd-t span{font-size:10px}
 .sect{font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin-bottom:12px;margin-top:28px}
 /* STREAMS */
 .shd p{color:var(--td);font-size:14px;margin-bottom:28px;max-width:460px}
@@ -113,41 +144,158 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .sc{padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;transition:all .2s}.sc:hover{border-color:var(--bl);transform:translateY(-2px)}
 .sct{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px}
 .si{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--agl)}
-.ssb{padding:4px 11px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid var(--brd);color:var(--td)}.ssb:hover{border-color:var(--accent);color:var(--accent)}.ssb.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ssb{padding:4px 11px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid var(--brd);color:var(--td);transition:all .15s}.ssb:hover{border-color:var(--accent);color:var(--accent)}.ssb.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .sc h3{font-size:13.5px;font-weight:600;margin-bottom:3px}.sc p{font-size:11.5px;color:var(--td);line-height:1.4;margin-bottom:8px}
 .scs{display:flex;gap:12px;font-size:11px;color:var(--td)}
 .empty{text-align:center;padding:60px 20px;color:var(--td)}.empty h2{font-family:'Fraunces',serif;font-size:22px;color:var(--ts);margin-bottom:8px}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;background:var(--card);border:1px solid var(--brd);border-radius:8px;font-size:13px;color:var(--text);z-index:5000;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
 @media(max-width:640px){.nav{padding:0 12px}.tabs{display:none}.page{padding:18px 12px 50px}h1.hero{font-size:26px}.dh{flex-direction:column;gap:14px}.dn{font-size:24px}.sg{grid-template-columns:1fr}.rc{gap:10px}.arcg{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}}
 </style>
 </head>
 <body>
-<nav class="nav"><div class="nav-l"><div class="logo" onclick="go('feed')"><i>U</i><span>unreeled</span></div><div class="tabs"><button class="tab on" data-p="feed" onclick="go('feed')">Releases</button><button class="tab" data-p="trending" onclick="go('trending')">Trending</button><button class="tab" data-p="archive" onclick="go('archive')">Archive</button><button class="tab" data-p="streams" onclick="go('streams')">Streams</button></div></div><div><button class="btn-a">Sign Up</button></div></nav>
+<nav class="nav">
+  <div class="nav-l">
+    <div class="logo" onclick="go('feed')"><i>U</i><span>unreeled</span></div>
+    <div class="tabs">
+      <button class="tab on" data-p="feed" onclick="go('feed')">Releases</button>
+      <button class="tab" data-p="trending" onclick="go('trending')">Trending</button>
+      <button class="tab" data-p="archive" onclick="go('archive')">Archive</button>
+      <button class="tab" data-p="streams" onclick="go('streams')">Streams</button>
+    </div>
+  </div>
+  <div class="nav-r" id="nav-r"></div>
+</nav>
+<div class="umenu" id="umenu"></div>
+<!-- AUTH MODAL -->
+<div class="modal-bg" id="auth-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="auth-box"></div>
+</div>
+<div class="toast" id="toast"></div>
 <div id="p-feed" class="page on"></div>
 <div id="p-detail" class="page"></div>
 <div id="p-trending" class="page"></div>
 <div id="p-archive" class="page"></div>
 <div id="p-streams" class="page"></div>
+<div id="p-account" class="page"></div>
+
 <script>
+// ═══════ SUPABASE ═══════
+const SB_URL='https://zqxivnhfvhgphuqmahkg.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxeGl2bmhmdmhncGh1cW1haGtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTA5OTQsImV4cCI6MjA4Nzc4Njk5NH0.GlgESEQPREYYJ5dglOLSi5NOGDEnINOJU8VpKrfSiLw';
+let sb,user=null,profile=null,userSubs=[],userWatchlist=[];
+
+// ═══════ DATA ═══════
 const D=__RELEASE_DATA_PLACEHOLDER__;
 const MC={movie:{i:"\uD83C\uDFAC",l:"Film",c:"#6366f1"},tv:{i:"\uD83D\uDCFA",l:"TV",c:"#a855f7"},book:{i:"\uD83D\uDCD6",l:"Book",c:"#14b8a6"},game:{i:"\uD83C\uDFAE",l:"Game",c:"#f43f5e"},anime:{i:"\uD83C\uDF8C",l:"Anime",c:"#ec4899"},music:{i:"\uD83C\uDFB5",l:"Music",c:"#eab308"}};
 const SP={none:{l:"No Spoilers",bg:"var(--el)",c:"var(--td)",b:"var(--brd)"},light:{l:"\uD83D\uDFE2 Light",bg:"var(--slb)",c:"var(--sl)",b:"var(--slr)"},medium:{l:"\uD83D\uDFE1 Medium",bg:"var(--smb)",c:"var(--sm)",b:"var(--smr)"},heavy:{l:"\uD83D\uDD34 Heavy",bg:"var(--shb)",c:"var(--sh)",b:"var(--shr)"}};
-const CMT=[{id:1,u:"stellarfan",av:"SF",cl:"#6366f1",tm:"2h ago",sl:"none",up:234,b:"Just finished this. The performances are incredible and the whole thing is breathtaking. One of the best this year."},{id:2,u:"cosmicreader",av:"CR",cl:"#14b8a6",tm:"1h ago",sl:"light",up:189,b:"The opening sets the tone perfectly. The way they establish the rivalry in the first twenty minutes is masterful."},{id:3,u:"plottwister",av:"PT",cl:"#a855f7",tm:"45m ago",sl:"medium",up:156,b:"The midpoint reveal completely reframes everything. All those details from the first half click into place."},{id:4,u:"endgamespoils",av:"ES",cl:"#f43f5e",tm:"30m ago",sl:"heavy",up:412,b:"That final twist broke me. The last scene will stay with me for weeks. The post-credits moment changes EVERYTHING."},{id:5,u:"deepdiver",av:"DD",cl:"#f59e0b",tm:"20m ago",sl:"none",up:98,b:"Exactly the thoughtful storytelling we need. The most gripping thing here is quiet tension and brilliant writing."},{id:6,u:"astridwrites",av:"AW",cl:"#ec4899",tm:"15m ago",sl:"light",up:67,b:"The supporting cast elevates this. The mentor subplot adds depth. The team cares about every character."}];
-const STM=[{t:"Platforms & Studios",items:[{n:"A24 Releases",i:"\uD83C\uDFAC",d:"Every A24 theatrical and streaming release",f:"~8/mo",s:"24.1k",on:1},{n:"HBO Originals",i:"\uD83D\uDCFA",d:"New episodes and premieres across HBO",f:"~15/mo",s:"41.8k",on:0},{n:"Crunchyroll Simulcasts",i:"\uD83C\uDF8C",d:"Every new simulcast episode as it airs",f:"~40/mo",s:"38.2k",on:1},{n:"Netflix Originals",i:"\uD83D\uDCFA",d:"Every Netflix original film and series",f:"~30/mo",s:"67.3k",on:0},{n:"PlayStation Exclusives",i:"\uD83C\uDFAE",d:"First-party and exclusive PS5 launches",f:"~4/mo",s:"19.5k",on:0},{n:"Tor Books",i:"\uD83D\uDCD6",d:"New fantasy and sci-fi from Tor",f:"~12/mo",s:"11.2k",on:0},{n:"Napalm Records",i:"\uD83C\uDFB5",d:"New metal and rock from Napalm",f:"~10/mo",s:"8.7k",on:0}]},{t:"Genres",items:[{n:"Horror (All Media)",i:"\uD83D\uDD2A",d:"Horror across all media types",f:"~18/mo",s:"22.6k",on:1},{n:"Sci-Fi (All Media)",i:"\uD83D\uDE80",d:"Science fiction across all media",f:"~20/mo",s:"31.4k",on:0},{n:"Fantasy (All Media)",i:"\u2694\uFE0F",d:"Fantasy across all media types",f:"~22/mo",s:"28.7k",on:0},{n:"New Vinyl",i:"\uD83C\uDFB5",d:"Latest vinyl pressings across genres",f:"~15/mo",s:"14.3k",on:0}]},{t:"Series & Franchises",items:[{n:"Golden Kamuy",i:"\uD83C\uDF8C",d:"Final season and manga releases",f:"Weekly",s:"15.2k",on:0},{n:"My Hero Academia",i:"\uD83C\uDF8C",d:"Main series, Vigilantes, spin-offs",f:"Weekly+",s:"34.1k",on:0},{n:"Fate Series",i:"\uD83C\uDF8C",d:"All Fate anime, movies, games",f:"Varies",s:"21.8k",on:0}]}];
+const STM=[{t:"Platforms & Studios",items:[{n:"A24 Releases",i:"\uD83C\uDFAC",d:"Every A24 theatrical and streaming release",f:"~8/mo"},{n:"HBO Originals",i:"\uD83D\uDCFA",d:"New episodes and premieres across HBO",f:"~15/mo"},{n:"Crunchyroll Simulcasts",i:"\uD83C\uDF8C",d:"Every new simulcast episode as it airs",f:"~40/mo"},{n:"Netflix Originals",i:"\uD83D\uDCFA",d:"Every Netflix original film and series",f:"~30/mo"},{n:"PlayStation Exclusives",i:"\uD83C\uDFAE",d:"First-party and exclusive PS5 launches",f:"~4/mo"},{n:"Tor Books",i:"\uD83D\uDCD6",d:"New fantasy and sci-fi from Tor",f:"~12/mo"},{n:"Napalm Records",i:"\uD83C\uDFB5",d:"New metal and rock from Napalm",f:"~10/mo"}]},{t:"Genres",items:[{n:"Horror (All Media)",i:"\uD83D\uDD2A",d:"Horror across all media types",f:"~18/mo"},{n:"Sci-Fi (All Media)",i:"\uD83D\uDE80",d:"Science fiction across all media",f:"~20/mo"},{n:"Fantasy (All Media)",i:"\u2694\uFE0F",d:"Fantasy across all media types",f:"~22/mo"},{n:"New Vinyl",i:"\uD83C\uDFB5",d:"Latest vinyl pressings across genres",f:"~15/mo"}]},{t:"Series & Franchises",items:[{n:"Golden Kamuy",i:"\uD83C\uDF8C",d:"Final season and manga releases",f:"Weekly"},{n:"My Hero Academia",i:"\uD83C\uDF8C",d:"Main series, Vigilantes, spin-offs",f:"Weekly+"},{n:"Fate Series",i:"\uD83C\uDF8C",d:"All Fate anime, movies, games",f:"Varies"}]}];
 
-let cf="all",cr=null,ccf="all",rv=new Set(),curPage="feed";
+let cf="all",cr=null,ccf="all",rv=new Set(),curPage="feed",selSpoiler="none";
 let vd=D.latest_date||"",R=(D.latest?D.latest.releases:D.releases)||[];
 const dates=D.dates_available||[vd];
 
-function go(p,push){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelector('.tab[data-p="'+(p==='detail'?'feed':p)+'"]')?.classList.add('on');if(push!==false&&p!==curPage){history.pushState({page:p},'','')}curPage=p;window.scrollTo({top:0,behavior:'smooth'})}
-window.addEventListener('popstate',function(e){const p=(e.state&&e.state.page)||'feed';go(p,false)})
+// ═══════ TOAST ═══════
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+// ═══════ NAV ═══════
+function go(p,push){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'?'feed':p)+'"]')?.classList.add('on');if(push!==false&&p!==curPage)history.pushState({page:p},'','');curPage=p;window.scrollTo({top:0,behavior:'smooth'});document.getElementById('umenu').classList.remove('show')}
+window.addEventListener('popstate',e=>{go((e.state&&e.state.page)||'feed',false)});
+
+function renderNav(){
+  const el=document.getElementById('nav-r');
+  if(user&&profile){
+    const init=profile.username.slice(0,2).toUpperCase();
+    el.innerHTML='<div class="user-pill" onclick="document.getElementById(\'umenu\').classList.toggle(\'show\')"><div class="uav" style="background:'+profile.avatar_color+'">'+init+'</div>'+esc(profile.username)+'</div>';
+    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="go(\'streams\')">My Streams</button><hr><button onclick="doLogout()">Log Out</button>';
+  } else {
+    el.innerHTML='<button class="btn-a" onclick="showAuth(\'signup\')">Sign Up</button><button style="font-size:12.5px;color:var(--td);padding:6px 10px" onclick="showAuth(\'login\')">Log In</button>';
+    document.getElementById('umenu').classList.remove('show');
+  }
+}
+
+// ═══════ AUTH MODAL ═══════
+function showAuth(mode){
+  const box=document.getElementById('auth-box');
+  if(mode==='signup'){
+    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Create Account</h2><p class="ms">Join Unreeled to comment, subscribe, and track releases.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20"><input class="finput" id="a-email" placeholder="Email" type="email"><input class="finput" id="a-pass" placeholder="Password (min 6 chars)" type="password"><button class="fbtn" id="a-btn" onclick="doSignup()">Create Account</button><p class="flink">Already have an account? <a onclick="showAuth(\'login\')">Log in</a></p>';
+  } else if(mode==='login'){
+    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Welcome Back</h2><p class="ms">Log in to your Unreeled account.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-email" placeholder="Email" type="email"><input class="finput" id="a-pass" placeholder="Password" type="password"><button class="fbtn" id="a-btn" onclick="doLogin()">Log In</button><p class="flink"><a onclick="showAuth(\'forgot\')">Forgot password?</a> \u00B7 <a onclick="showAuth(\'signup\')">Create account</a></p>';
+  } else if(mode==='forgot'){
+    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Reset Password</h2><p class="ms">Enter your email and we\'ll send a reset link.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><input class="finput" id="a-email" placeholder="Email" type="email"><button class="fbtn" onclick="doReset()">Send Reset Link</button><p class="flink"><a onclick="showAuth(\'login\')">Back to login</a></p>';
+  }
+  document.getElementById('auth-modal').classList.add('show');
+}
+function closeModal(){document.getElementById('auth-modal').classList.remove('show')}
+function showErr(msg){const e=document.getElementById('aerr');if(e){e.textContent=msg;e.classList.add('show')}}
+function showOk(msg){const e=document.getElementById('aok');if(e){e.textContent=msg;e.classList.add('show')}}
+
+async function doSignup(){
+  const un=document.getElementById('a-user').value.trim();
+  const em=document.getElementById('a-email').value.trim();
+  const pw=document.getElementById('a-pass').value;
+  if(!un||un.length<3)return showErr('Username must be at least 3 characters');
+  if(!/^[a-zA-Z0-9_]+$/.test(un))return showErr('Username: letters, numbers, underscores only');
+  if(!em)return showErr('Email is required');
+  if(pw.length<6)return showErr('Password must be at least 6 characters');
+  document.getElementById('a-btn').disabled=true;
+  const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{username:un,display_name:un}}});
+  document.getElementById('a-btn').disabled=false;
+  if(error)return showErr(error.message);
+  if(data.user&&!data.session){showOk('Check your email to confirm your account!');return}
+  closeModal();toast('Welcome to Unreeled, '+un+'!');await loadUser();renderNav();renderFeed();
+}
+
+async function doLogin(){
+  const em=document.getElementById('a-email').value.trim();
+  const pw=document.getElementById('a-pass').value;
+  if(!em||!pw)return showErr('Email and password required');
+  document.getElementById('a-btn').disabled=true;
+  const{error}=await sb.auth.signInWithPassword({email:em,password:pw});
+  document.getElementById('a-btn').disabled=false;
+  if(error)return showErr(error.message);
+  closeModal();toast('Welcome back!');await loadUser();renderNav();renderFeed();
+}
+
+async function doReset(){
+  const em=document.getElementById('a-email').value.trim();
+  if(!em)return showErr('Email is required');
+  const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:'https://unreeled.netlify.app'});
+  if(error)return showErr(error.message);
+  showOk('Reset link sent! Check your email.');
+}
+
+async function doLogout(){
+  await sb.auth.signOut();user=null;profile=null;userSubs=[];userWatchlist=[];
+  renderNav();renderFeed();toast('Logged out');
+}
+
+// ═══════ USER DATA ═══════
+async function loadUser(){
+  const{data}=await sb.auth.getUser();
+  user=data.user;
+  if(!user)return;
+  const{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  profile=p;
+  const{data:s}=await sb.from('subscriptions').select('*').eq('user_id',user.id);
+  userSubs=s||[];
+  const{data:w}=await sb.from('watchlist').select('*').eq('user_id',user.id);
+  userWatchlist=w||[];
+}
+
+function isSubbed(type,value){return userSubs.some(s=>s.subscription_type===type&&s.subscription_value===value)}
+function isWatchlisted(key){return userWatchlist.some(w=>w.release_key===key)}
+function releaseKey(r){return vd+':'+r.media_type+':'+(r.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,80)}
+
+// ═══════ HELPERS ═══════
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function meta(r){const m=r.metadata||{},p=[];if(r.media_type==='movie'){if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language)p.push(m.original_language.toUpperCase())}if(r.media_type==='tv'&&m.networks?.length)p.push(m.networks[0]);if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}return p.join('<span class="s">\u00B7</span>')}
 function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie;if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
 function fmtD(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}catch(e){return d}}
 function dayN(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}catch(e){return''}}
-
+function timeAgo(ts){const s=Math.floor((Date.now()-new Date(ts))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
 function loadDate(d){vd=d;R=(D.historical&&D.historical[d])?D.historical[d]:(D.latest&&D.latest.date===d)?D.latest.releases:[];cf="all";renderFeed()}
-
 function card(r,i,oc){const c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{},hs=(sp.light||0)+(sp.medium||0)+(sp.heavy||0)>0;let dots='';if(hs){dots='<span class="sds">';if(sp.light)dots+='<i class="l"></i>';if(sp.medium)dots+='<i class="m"></i>';if(sp.heavy)dots+='<i class="h"></i>';dots+='</span> Spoilers'}const gt=(r.genres||[]).slice(0,3).map(g=>'<span>'+esc(g)+'</span>').join('');return'<div class="rc" onclick="'+oc+'" style="animation-delay:'+Math.min(i*.03,.3)+'s">'+poster(r,68,95,24)+'<div class="ri"><div class="rt"><div class="rn">'+esc(r.title)+'</div><span class="mb '+r.media_type+'">'+c.l+'</span></div><div class="rm">'+meta(r)+'</div>'+(r.synopsis?'<p class="rs">'+esc(r.synopsis)+'</p>':'')+'<div class="rf"><div class="gt">'+gt+'</div><div class="rst"><span>\uD83D\uDCAC '+(r.comment_count||0)+'</span>'+(hs?'<span>'+dots+'</span>':'')+'</div></div></div></div>'}
 
 // ═══════ FEED ═══════
@@ -156,14 +304,11 @@ function renderFeed(){
   const fl=cf==='all'?R:R.filter(r=>r.media_type===cf);
   const isL=vd===D.latest_date;
   let h='<h1 class="hero">'+(isL?'Today in Media':'Releases')+'</h1>';
-  // Date picker
-  h+='<div class="dp">';
-  const ci=dates.indexOf(vd);
+  h+='<div class="dp">';const ci=dates.indexOf(vd);
   if(ci<dates.length-1)h+='<button class="dp-btn" onclick="loadDate(\''+dates[ci+1]+'\')">\u2190</button>';
   if(dates.length>1){h+='<select onchange="loadDate(this.value)">';dates.forEach(d=>{h+='<option value="'+d+'"'+(d===vd?' selected':'')+'>'+fmtD(d)+(d===D.latest_date?' (latest)':'')+'</option>'});h+='</select>'}else{h+='<span class="dp-single">'+fmtD(vd)+'</span>'}
   if(ci>0)h+='<button class="dp-btn" onclick="loadDate(\''+dates[ci-1]+'\')">\u2192</button>';
-  h+='</div>';
-  h+='<p class="sub">'+dayN(vd)+' \u2014 <b>'+R.length+' releases</b></p>';
+  h+='</div><p class="sub">'+dayN(vd)+' \u2014 <b>'+R.length+' releases</b></p>';
   h+='<div class="fbar"><button class="fc '+(cf==='all'?'on':'')+'" onclick="cf=\'all\';renderFeed()">All ('+R.length+')</button>';
   for(const[t,c]of Object.entries(MC)){if(cn[t]){const dot=cf!==t?'<span class="dot" style="background:'+c.c+'"></span>':'';h+='<button class="fc '+(cf===t?'on':'')+'" onclick="cf=\''+t+'\';renderFeed()">'+dot+c.l+' ('+cn[t]+')</button>'}}
   h+='</div>';
@@ -172,45 +317,172 @@ function renderFeed(){
   document.getElementById('p-feed').innerHTML=h}
 
 // ═══════ DETAIL ═══════
-function openD(i){cr=R[i];rv=new Set();ccf='all';const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p">\uD83D\uDCE1 Follow</button><button class="o">\uD83D\uDD17 Share</button><button class="o">\u2B50 Watchlist</button></div></div></div><div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div><div class="st">Discussion ('+(r.comment_count||0)+')</div><div class="cmp"><textarea placeholder="Share your thoughts..."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="selSp(this)">No Spoilers</button><button class="slb" style="border:1px solid var(--slr);color:var(--sl)" onclick="selSp(this)">\uD83D\uDFE2 Light</button><button class="slb" style="border:1px solid var(--smr);color:var(--sm)" onclick="selSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" style="border:1px solid var(--shr);color:var(--sh)" onclick="selSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps">Post</button></div></div><div class="cfs"><span>Show:</span><button class="cfb on" onclick="fC(\'all\',this)">All</button><button class="cfb" onclick="fC(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fC(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fC(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fC(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"></div>';document.getElementById('p-detail').innerHTML=h;rCmt();go('detail')}
-function rCmt(){const f=ccf==='all'?CMT:CMT.filter(c=>c.sl===ccf);document.getElementById('cml').innerHTML=f.map(c=>{const s=SP[c.sl],hs=c.sl!=='none',ir=rv.has(c.id),bl=hs&&!ir;return'<div class="cm"><div class="cmh"><div class="cmu"><div class="av" style="background:'+c.cl+'">'+c.av+'</div><div><div class="cmn">'+c.u+'</div><div class="cmt">'+c.tm+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div><div class="cmb'+(bl?' bl':'')+'">'+esc(c.b)+'</div>'+(bl?'<div class="rvb" onclick="rv.add('+c.id+');rCmt()">\uD83D\uDC41 Reveal '+c.sl+' spoiler</div>':'')+'<div class="cmf"><span>\u25B2 '+c.up+'</span><span>\u25BC</span><span>\uD83D\uDCAC Reply</span><span>\uD83D\uDD16 Save</span></div></div>'}).join('')}
-function fC(f,b){ccf=f;document.querySelectorAll('.cfb').forEach(x=>x.classList.remove('on'));b.classList.add('on');rCmt()}
-function selSp(b){document.querySelectorAll('.slb').forEach(x=>x.style.background='transparent');const m={'No Spoilers':'var(--el)','\uD83D\uDFE2 Light':'var(--slb)','\uD83D\uDFE1 Medium':'var(--smb)','\uD83D\uDD34 Heavy':'var(--shb)'};b.style.background=m[b.textContent]||'transparent'}
+let detailComments=[];
+async function openD(i){
+  cr=R[i];rv=new Set();ccf='all';selSpoiler='none';
+  const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};
+  const rk=releaseKey(r);
+  const wl=isWatchlisted(rk);
+  const subbed=user&&isSubbed('media_type',r.media_type);
+
+  let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+r.media_type+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o'+(wl?' active':'')+'" onclick="toggleWL()" id="wl-btn">'+(wl?'\u2705 Watchlisted':'\u2B50 Watchlist')+'</button></div></div></div>';
+  h+='<div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div>';
+  h+='<div class="st" id="cmt-count">Discussion</div>';
+
+  // Composer
+  if(user){
+    h+='<div class="cmp"><textarea id="cmt-body" placeholder="Share your thoughts... Tag your spoiler level below."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb sl-none" data-sl="none" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="pickSp(this)">No Spoilers</button><button class="slb" data-sl="light" style="border:1px solid var(--slr);color:var(--sl)" onclick="pickSp(this)">\uD83D\uDFE2 Light</button><button class="slb" data-sl="medium" style="border:1px solid var(--smr);color:var(--sm)" onclick="pickSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" data-sl="heavy" style="border:1px solid var(--shr);color:var(--sh)" onclick="pickSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps" id="post-btn" onclick="postComment()">Post</button></div></div>';
+  } else {
+    h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to join the discussion</div>';
+  }
+  h+='<div class="cfs"><span>Show:</span><button class="cfb on" onclick="fCmt(\'all\',this)">All</button><button class="cfb" onclick="fCmt(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fCmt(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fCmt(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fCmt(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"><p style="color:var(--td);font-size:13px">Loading comments...</p></div>';
+  document.getElementById('p-detail').innerHTML=h;
+  go('detail');
+  await loadComments(rk);
+}
+
+function pickSp(btn){selSpoiler=btn.dataset.sl;const bgs={none:'var(--el)',light:'var(--slb)',medium:'var(--smb)',heavy:'var(--shb)'};document.querySelectorAll('.slb').forEach(b=>b.style.background='transparent');btn.style.background=bgs[selSpoiler]||'transparent'}
+
+async function loadComments(rk){
+  const{data,error}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('release_key',rk).order('created_at',{ascending:false});
+  detailComments=data||[];
+  document.getElementById('cmt-count').textContent='Discussion ('+detailComments.length+')';
+  renderComments();
+}
+
+function renderComments(){
+  const f=ccf==='all'?detailComments:detailComments.filter(c=>c.spoiler_level===ccf);
+  if(!f.length){document.getElementById('cml').innerHTML='<p style="color:var(--td);font-size:13px;padding:20px 0;text-align:center">No comments yet. Be the first!</p>';return}
+  document.getElementById('cml').innerHTML=f.map(c=>{
+    const s=SP[c.spoiler_level]||SP.none;
+    const hs=c.spoiler_level!=='none';
+    const ir=rv.has(c.id);const bl=hs&&!ir;
+    const p=c.profiles||{};
+    const un=p.username||'anon';
+    const ac=p.avatar_color||'#ff6b35';
+    const init=un.slice(0,2).toUpperCase();
+    return'<div class="cm"><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+'">'+init+'</div><div><div class="cmn">'+esc(un)+'</div><div class="cmt">'+timeAgo(c.created_at)+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div><div class="cmb'+(bl?' bl':'')+'">'+esc(c.body)+'</div>'+(bl?'<div class="rvb" onclick="rv.add(\''+c.id+'\');renderComments()">\uD83D\uDC41 Reveal '+c.spoiler_level+' spoiler</div>':'')+'<div class="cmf"><span onclick="vote(\''+c.id+'\',\'up\')">\u25B2 '+c.upvotes+'</span><span onclick="vote(\''+c.id+'\',\'down\')">\u25BC '+c.downvotes+'</span></div></div>'
+  }).join('');
+}
+
+function fCmt(f,btn){ccf=f;document.querySelectorAll('.cfb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderComments()}
+
+async function postComment(){
+  const body=document.getElementById('cmt-body').value.trim();
+  if(!body)return toast('Write something first!');
+  if(!user)return showAuth('login');
+  const rk=releaseKey(cr);
+  document.getElementById('post-btn').disabled=true;
+  const{error}=await sb.from('comments').insert({user_id:user.id,release_key:rk,body:body,spoiler_level:selSpoiler});
+  document.getElementById('post-btn').disabled=false;
+  if(error){toast('Error: '+error.message);return}
+  document.getElementById('cmt-body').value='';
+  toast('Comment posted!');
+  await loadComments(rk);
+}
+
+async function vote(cid,type){
+  if(!user)return showAuth('login');
+  const{data:existing}=await sb.from('comment_votes').select('*').eq('user_id',user.id).eq('comment_id',cid).single();
+  if(existing){
+    if(existing.vote_type===type){await sb.from('comment_votes').delete().eq('id',existing.id)}
+    else{await sb.from('comment_votes').update({vote_type:type}).eq('id',existing.id)}
+  } else {
+    await sb.from('comment_votes').insert({user_id:user.id,comment_id:cid,vote_type:type});
+  }
+  await loadComments(releaseKey(cr));
+}
+
+// ═══════ WATCHLIST ═══════
+async function toggleWL(){
+  if(!user)return showAuth('login');
+  const rk=releaseKey(cr);
+  if(isWatchlisted(rk)){
+    await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
+    userWatchlist=userWatchlist.filter(w=>w.release_key!==rk);
+    toast('Removed from watchlist');
+  } else {
+    const{data}=await sb.from('watchlist').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,poster_url:cr.poster_url||''}).select().single();
+    if(data)userWatchlist.push(data);
+    toast('Added to watchlist!');
+  }
+  const wl=isWatchlisted(rk);
+  const btn=document.getElementById('wl-btn');
+  if(btn){btn.textContent=wl?'\u2705 Watchlisted':'\u2B50 Watchlist';btn.className=wl?'o active':'o'}
+}
+
+function shareRelease(){
+  const url=window.location.origin;
+  if(navigator.share){navigator.share({title:cr.title+' on Unreeled',url:url})}
+  else if(navigator.clipboard){navigator.clipboard.writeText(cr.title+' — check it out on '+url);toast('Link copied!')}
+  else{toast('Share: '+url)}
+}
+
+// ═══════ SUBSCRIPTIONS ═══════
+async function toggleSub(type,value){
+  if(!user)return showAuth('login');
+  if(isSubbed(type,value)){
+    await sb.from('subscriptions').delete().eq('user_id',user.id).eq('subscription_type',type).eq('subscription_value',value);
+    userSubs=userSubs.filter(s=>!(s.subscription_type===type&&s.subscription_value===value));
+    toast('Unsubscribed');
+  } else {
+    const{data}=await sb.from('subscriptions').insert({user_id:user.id,subscription_type:type,subscription_value:value,email_digest:true}).select().single();
+    if(data)userSubs.push(data);
+    toast('Subscribed! You\'ll get daily updates.');
+  }
+  renderStreams();
+  // Refresh detail page buttons if open
+  if(curPage==='detail'&&cr){const ri=R.indexOf(cr);if(ri>=0)openD(ri)}
+}
+
+async function toggleStreamSub(name){await toggleSub('stream',name)}
 
 // ═══════ TRENDING ═══════
 let TR=D.trending||[];
-function openTr(i){
-  // Load trending item directly as the detail release
-  cr=TR[i];rv=new Set();ccf='all';
-  const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};
-  let h='<button class="dbk" onclick="go(\'trending\')">\u2190 Back to Trending</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p">\uD83D\uDCE1 Follow</button><button class="o">\uD83D\uDD17 Share</button><button class="o">\u2B50 Watchlist</button></div></div></div><div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div>'+(r.first_seen?'<p style="font-size:12px;color:var(--td);margin-bottom:16px">First seen: '+fmtD(r.first_seen)+(r.days_seen>1?' \u00B7 Appeared '+r.days_seen+' days':'')+'</p>':'')+'<div class="st">Discussion ('+(r.comment_count||0)+')</div><div class="cmp"><textarea placeholder="Share your thoughts..."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="selSp(this)">No Spoilers</button><button class="slb" style="border:1px solid var(--slr);color:var(--sl)" onclick="selSp(this)">\uD83D\uDFE2 Light</button><button class="slb" style="border:1px solid var(--smr);color:var(--sm)" onclick="selSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" style="border:1px solid var(--shr);color:var(--sh)" onclick="selSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps">Post</button></div></div><div class="cfs"><span>Show:</span><button class="cfb on" onclick="fC(\'all\',this)">All</button><button class="cfb" onclick="fC(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fC(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fC(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fC(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"></div>';
-  document.getElementById('p-detail').innerHTML=h;rCmt();go('detail')}
-function renderTrending(){
-  TR=D.trending||[];
-  let h='<h1 class="hero">\uD83D\uDD25 Trending</h1><p class="sub">Titles generating buzz across multiple days</p>';
-  if(!TR.length){h+='<div class="empty"><h2>Not enough data yet</h2><p>Trending builds up as the pipeline runs daily. Check back soon!</p></div>'}
-  else{TR.forEach((t,i)=>{const c=MC[t.media_type]||MC.movie,mp=[],m=t.metadata||{};if(m.artists?.length)mp.push(m.artists[0]);if(m.authors?.length)mp.push(m.authors[0]);if(m.studios?.length)mp.push(m.studios[0]);if(m.networks?.length)mp.push(m.networks[0]);const g=(t.genres||[]).slice(0,3).join(', ');if(g)mp.push(g);
-  h+='<div class="trc" onclick="openTr('+i+')" style="cursor:pointer"><div class="trk">'+(i+1)+'</div>'+poster(t,56,78,20)+'<div class="tri"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><div class="trt">'+esc(t.title)+'</div><span class="mb '+t.media_type+'">'+c.l+'</span></div><div class="trm">'+mp.join('<span class="s">\u00B7</span>')+'</div>'+(t.synopsis?'<p class="rs" style="margin:4px 0">'+esc(t.synopsis)+'</p>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+(t.days_seen>1?'<span class="trd">\uD83D\uDD25 '+t.days_seen+' days</span>':'')+(t.comment_count?'<span style="font-size:11px;color:var(--td)">\uD83D\uDCAC '+t.comment_count+'</span>':'')+'</div></div>'})}
-  document.getElementById('p-trending').innerHTML=h}
+function openTr(i){cr=TR[i];rv=new Set();ccf='all';selSpoiler='none';const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};const rk=(r.first_seen||vd)+':'+r.media_type+':'+(r.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,80);
+let h='<button class="dbk" onclick="go(\'trending\')">\u2190 Back to Trending</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'</div></div>'+(r.first_seen?'<p style="font-size:12px;color:var(--td);margin-bottom:16px">First seen: '+fmtD(r.first_seen)+(r.days_seen>1?' \u00B7 Appeared '+r.days_seen+' days':'')+'</p>':'');
+h+='<div class="st" id="cmt-count">Discussion</div>';
+if(user){h+='<div class="cmp"><textarea id="cmt-body" placeholder="Share your thoughts..."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb" data-sl="none" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="pickSp(this)">No Spoilers</button><button class="slb" data-sl="light" style="border:1px solid var(--slr);color:var(--sl)" onclick="pickSp(this)">\uD83D\uDFE2 Light</button><button class="slb" data-sl="medium" style="border:1px solid var(--smr);color:var(--sm)" onclick="pickSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" data-sl="heavy" style="border:1px solid var(--shr);color:var(--sh)" onclick="pickSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps" id="post-btn" onclick="postComment()">Post</button></div></div>'}else{h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to comment</div>'}
+h+='<div class="cfs"><span>Show:</span><button class="cfb on" onclick="fCmt(\'all\',this)">All</button><button class="cfb" onclick="fCmt(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fCmt(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fCmt(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fCmt(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"><p style="color:var(--td);font-size:13px">Loading...</p></div>';
+document.getElementById('p-detail').innerHTML=h;go('detail');loadComments(rk)}
+function renderTrending(){TR=D.trending||[];let h='<h1 class="hero">\uD83D\uDD25 Trending</h1><p class="sub">Titles generating buzz across multiple days</p>';if(!TR.length){h+='<div class="empty"><h2>Not enough data yet</h2><p>Trending builds up as the pipeline runs daily.</p></div>'}else{TR.forEach((t,i)=>{const c=MC[t.media_type]||MC.movie,mp=[],m=t.metadata||{};if(m.artists?.length)mp.push(m.artists[0]);if(m.authors?.length)mp.push(m.authors[0]);if(m.studios?.length)mp.push(m.studios[0]);if(m.networks?.length)mp.push(m.networks[0]);const g=(t.genres||[]).slice(0,3).join(', ');if(g)mp.push(g);h+='<div class="trc" onclick="openTr('+i+')" style="cursor:pointer"><div class="trk">'+(i+1)+'</div>'+poster(t,56,78,20)+'<div class="tri"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><div class="trt">'+esc(t.title)+'</div><span class="mb '+t.media_type+'">'+c.l+'</span></div><div class="trm">'+mp.join('<span class="s">\u00B7</span>')+'</div>'+(t.synopsis?'<p class="rs" style="margin:4px 0">'+esc(t.synopsis)+'</p>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+(t.days_seen>1?'<span class="trd">\uD83D\uDD25 '+t.days_seen+' days</span>':'')+(t.comment_count?'<span style="font-size:11px;color:var(--td)">\uD83D\uDCAC '+t.comment_count+'</span>':'')+'</div></div>'})}document.getElementById('p-trending').innerHTML=h}
 
 // ═══════ ARCHIVE ═══════
-function renderArchive(){
-  const a=D.archive||{dates:[],weekly:[],monthly:[]},ds=a.dates||[],wk=a.weekly||[],mo=a.monthly||[];
-  let h='<h1 class="hero">\uD83D\uDCC5 Archive</h1><p class="sub">Browse past releases by day, week, or month</p>';
-  if(ds.length){
-    const tot=ds.reduce((s,d)=>s+d.total,0),avg=Math.round(tot/ds.length);
-    h+='<div class="arcs"><div class="arci"><em>'+ds.length+'</em><small>Days</small></div><div class="arci"><em>'+tot.toLocaleString()+'</em><small>Releases</small></div><div class="arci"><em>'+avg+'</em><small>Avg/day</small></div></div>'}
-  if(mo.length){h+='<div class="sect" style="margin-top:0">\uD83D\uDCC6 Monthly</div><div class="sg">';mo.forEach(m=>{const ti=Object.keys(m.types||{}).map(t=>(MC[t]||{}).i||'').filter(Boolean).join(' ');h+='<div class="sc"><div class="sct"><div class="si">\uD83D\uDCC6</div><span style="font-size:11px;color:var(--td)">'+m.days+' days</span></div><h3>'+m.month+'</h3><p>'+m.total.toLocaleString()+' releases</p><div class="scs">'+ti+'</div></div>'});h+='</div>'}
-  if(wk.length){h+='<div class="sect">\uD83D\uDCC5 Weekly</div><div class="sg">';wk.forEach(w=>{const ti=Object.keys(w.types||{}).map(t=>(MC[t]||{}).i||'').filter(Boolean).join(' ');h+='<div class="sc"><div class="sct"><div class="si">\uD83D\uDCC5</div><span style="font-size:11px;color:var(--td)">'+w.days+' days</span></div><h3>'+w.week+'</h3><p>'+w.total.toLocaleString()+' releases</p><div class="scs">'+ti+'</div></div>'});h+='</div>'}
-  h+='<div class="sect">\uD83D\uDCC4 Daily</div>';
-  if(!ds.length){h+='<div class="empty"><h2>No archive data yet</h2><p>Data builds as the pipeline runs daily.</p></div>'}
-  else{h+='<div class="arcg">';ds.slice().reverse().forEach(d=>{const il=d.date===D.latest_date,ti=Object.keys(d.types||{}).map(t=>'<span>'+(MC[t]||{}).i+'</span>').join('');h+='<div class="arcd'+(il?' now':'')+'" onclick="loadDate(\''+d.date+'\');go(\'feed\')"><div class="arcd-dt">'+d.date.slice(5)+'</div><div class="arcd-n">'+d.total+'</div><div class="arcd-l">releases</div><div class="arcd-t">'+ti+'</div></div>'});h+='</div>'}
-  document.getElementById('p-archive').innerHTML=h}
+function renderArchive(){const a=D.archive||{dates:[],weekly:[],monthly:[]},ds=a.dates||[],wk=a.weekly||[],mo=a.monthly||[];let h='<h1 class="hero">\uD83D\uDCC5 Archive</h1><p class="sub">Browse past releases by day, week, or month</p>';if(ds.length){const tot=ds.reduce((s,d)=>s+d.total,0),avg=Math.round(tot/ds.length);h+='<div class="arcs"><div class="arci"><em>'+ds.length+'</em><small>Days</small></div><div class="arci"><em>'+tot.toLocaleString()+'</em><small>Releases</small></div><div class="arci"><em>'+avg+'</em><small>Avg/day</small></div></div>'}if(mo.length){h+='<div class="sect" style="margin-top:0">\uD83D\uDCC6 Monthly</div><div class="sg">';mo.forEach(m=>{const ti=Object.keys(m.types||{}).map(t=>(MC[t]||{}).i||'').filter(Boolean).join(' ');h+='<div class="sc"><div class="sct"><div class="si">\uD83D\uDCC6</div><span style="font-size:11px;color:var(--td)">'+m.days+' days</span></div><h3>'+m.month+'</h3><p>'+m.total.toLocaleString()+' releases</p><div class="scs">'+ti+'</div></div>'});h+='</div>'}if(wk.length){h+='<div class="sect">\uD83D\uDCC5 Weekly</div><div class="sg">';wk.forEach(w=>{const ti=Object.keys(w.types||{}).map(t=>(MC[t]||{}).i||'').filter(Boolean).join(' ');h+='<div class="sc"><div class="sct"><div class="si">\uD83D\uDCC5</div><span style="font-size:11px;color:var(--td)">'+w.days+' days</span></div><h3>'+w.week+'</h3><p>'+w.total.toLocaleString()+' releases</p><div class="scs">'+ti+'</div></div>'});h+='</div>'}h+='<div class="sect">\uD83D\uDCC4 Daily</div>';if(!ds.length){h+='<div class="empty"><h2>No archive data yet</h2><p>Data builds as the pipeline runs daily.</p></div>'}else{h+='<div class="arcg">';ds.slice().reverse().forEach(d=>{const il=d.date===D.latest_date,ti=Object.keys(d.types||{}).map(t=>'<span>'+(MC[t]||{}).i+'</span>').join('');h+='<div class="arcd'+(il?' now':'')+'" onclick="loadDate(\''+d.date+'\');go(\'feed\')"><div class="arcd-dt">'+d.date.slice(5)+'</div><div class="arcd-n">'+d.total+'</div><div class="arcd-l">releases</div><div class="arcd-t">'+ti+'</div></div>'});h+='</div>'}document.getElementById('p-archive').innerHTML=h}
 
 // ═══════ STREAMS ═══════
-function renderStreams(){let h='<div class="shd"><h1 class="hero">Your Streams</h1><p>Subscribe to genres, platforms, franchises, and series for a daily digest.</p></div>';STM.forEach((s,si)=>{h+='<h3 class="sect"'+(si===0?' style="margin-top:0"':'')+'>'+s.t+'</h3><div class="sg">';s.items.forEach(x=>{h+='<div class="sc"><div class="sct"><div class="si">'+x.i+'</div><button class="ssb'+(x.on?' on':'')+'" onclick="this.classList.toggle(\'on\');this.textContent=this.classList.contains(\'on\')?\'\u2713 Subscribed\':\'Subscribe\'">'+(x.on?'\u2713 Subscribed':'Subscribe')+'</button></div><h3>'+x.n+'</h3><p>'+x.d+'</p><div class="scs"><span>\uD83D\uDCE6 '+x.f+'</span><span>\uD83D\uDC65 '+x.s+' subs</span></div></div>'});h+='</div>'});document.getElementById('p-streams').innerHTML=h}
+function renderStreams(){let h='<div class="shd"><h1 class="hero">Your Streams</h1><p>Subscribe to genres, platforms, franchises, and series.'+(user?'':' <a onclick="showAuth(\'signup\')" style="color:var(--accent);cursor:pointer">Sign up</a> to enable subscriptions.')+'</p></div>';
+// Media type subscriptions
+h+='<h3 class="sect" style="margin-top:0">Media Types</h3><p style="font-size:12px;color:var(--td);margin-bottom:12px">Subscribe to get daily email digests for these categories</p><div class="sg">';
+for(const[t,c]of Object.entries(MC)){const on=isSubbed('media_type',t);h+='<div class="sc"><div class="sct"><div class="si">'+c.i+'</div><button class="ssb'+(on?' on':'')+'" onclick="toggleSub(\'media_type\',\''+t+'\')">'+(on?'\u2713 Subscribed':'Subscribe')+'</button></div><h3>'+c.l+' Releases</h3><p>Daily digest of new '+c.l.toLowerCase()+' releases</p></div>'}
+h+='</div>';
+STM.forEach((s,si)=>{h+='<h3 class="sect">'+s.t+'</h3><div class="sg">';s.items.forEach(x=>{const on=isSubbed('stream',x.n);h+='<div class="sc"><div class="sct"><div class="si">'+x.i+'</div><button class="ssb'+(on?' on':'')+'" onclick="toggleStreamSub(\''+x.n.replace(/'/g,"\\'")+'\')">'+(on?'\u2713 Subscribed':'Subscribe')+'</button></div><h3>'+x.n+'</h3><p>'+x.d+'</p><div class="scs"><span>\uD83D\uDCE6 '+x.f+'</span></div></div>'});h+='</div>'});
+document.getElementById('p-streams').innerHTML=h}
 
-document.addEventListener('DOMContentLoaded',()=>{renderFeed();renderTrending();renderArchive();renderStreams()});
+// ═══════ ACCOUNT ═══════
+function renderAccount(){
+  if(!user||!profile){document.getElementById('p-account').innerHTML='<div class="empty"><h2>Not logged in</h2><p><a onclick="showAuth(\'login\')" style="color:var(--accent);cursor:pointer">Log in</a> to view your account.</p></div>';return}
+  let h='<h1 class="hero">My Account</h1>';
+  h+='<div style="padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="av" style="background:'+profile.avatar_color+';width:48px;height:48px;font-size:18px;border-radius:12px">'+profile.username.slice(0,2).toUpperCase()+'</div><div><div style="font-size:18px;font-weight:600">'+esc(profile.username)+'</div><div style="font-size:12px;color:var(--td)">'+esc(user.email)+'</div></div></div></div>';
+  // Subscriptions
+  h+='<div class="st">My Subscriptions ('+userSubs.length+')</div>';
+  if(userSubs.length){userSubs.forEach(s=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span style="font-size:13px">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><button class="ssb on" onclick="toggleSub(\''+s.subscription_type+'\',\''+s.subscription_value.replace(/'/g,"\\'")+'\')">\u2713 Subscribed</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a></p>'}
+  // Watchlist
+  h+='<div class="st" style="margin-top:24px">My Watchlist ('+userWatchlist.length+')</div>';
+  if(userWatchlist.length){userWatchlist.forEach(w=>{const c=MC[w.media_type]||MC.movie;h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span class="mb '+w.media_type+'">'+c.l+'</span><span style="font-size:13px;flex:1">'+esc(w.release_title)+'</span></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No items in watchlist yet.</p>'}
+  document.getElementById('p-account').innerHTML=h}
+
+// ═══════ INIT ═══════
+document.addEventListener('DOMContentLoaded',async()=>{
+  sb=window.supabase.createClient(SB_URL,SB_KEY);
+  await loadUser();
+  renderNav();renderFeed();renderTrending();renderArchive();renderStreams();renderAccount();
+  // Listen for auth changes
+  sb.auth.onAuthStateChange(async(event)=>{
+    if(event==='SIGNED_IN'||event==='SIGNED_OUT'){await loadUser();renderNav();renderStreams();renderAccount()}
+  });
+});
+document.addEventListener('click',e=>{const um=document.getElementById('umenu');if(um.classList.contains('show')&&!e.target.closest('.user-pill')&&!e.target.closest('.umenu'))um.classList.remove('show')});
 </script>
 </body>
 </html>
