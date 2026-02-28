@@ -208,98 +208,10 @@ class BoardGameGeekSource:
     THING_URL = "https://boardgamegeek.com/xmlapi2/thing"
 
     def fetch_boardgames(self, date: str) -> list[dict]:
-        releases = []
-
-        try:
-            import xml.etree.ElementTree as ET
-
-            resp = requests.get(self.HOT_URL, timeout=15, headers={"User-Agent": "Unreeled/1.0"})
-            rate_limit(1.0)  # BGG rate limits aggressively
-
-            if resp.status_code != 200:
-                logger.warning(f"BGG: HTTP {resp.status_code}")
-                return []
-
-            root = ET.fromstring(resp.text)
-            items = root.findall("item")
-
-            # Get details for top 20
-            ids = [item.get("id") for item in items[:20] if item.get("id")]
-            if not ids:
-                return []
-
-            detail_resp = requests.get(
-                self.THING_URL,
-                params={"id": ",".join(ids), "type": "boardgame"},
-                timeout=20,
-                headers={"User-Agent": "Unreeled/1.0"},
-            )
-            rate_limit(1.0)
-
-            if detail_resp.status_code != 200:
-                logger.warning(f"BGG details: HTTP {detail_resp.status_code}")
-                return []
-
-            detail_root = ET.fromstring(detail_resp.text)
-
-            for item in detail_root.findall("item"):
-                name_el = item.find("name[@type='primary']")
-                title = name_el.get("value", "") if name_el is not None else ""
-                if not title:
-                    continue
-
-                desc_el = item.find("description")
-                desc = safe_str(desc_el.text if desc_el is not None else "")
-                # Clean HTML from description
-                desc = desc.replace("&#10;", " ").replace("&amp;", "&")
-                if len(desc) > 500:
-                    desc = desc[:497] + "..."
-
-                img_el = item.find("image")
-                poster = safe_str(img_el.text if img_el is not None else "")
-
-                year_el = item.find("yearpublished")
-                year = year_el.get("value", "") if year_el is not None else ""
-
-                minp = item.find("minplayers")
-                maxp = item.find("maxplayers")
-                playtime = item.find("playingtime")
-
-                min_players = minp.get("value", "") if minp is not None else ""
-                max_players = maxp.get("value", "") if maxp is not None else ""
-                play_time = playtime.get("value", "") if playtime is not None else ""
-
-                players = ""
-                if min_players and max_players:
-                    players = f"{min_players}-{max_players}" if min_players != max_players else min_players
-
-                genres = []
-                for link in item.findall("link[@type='boardgamecategory']"):
-                    genres.append(link.get("value", ""))
-                genres = genres[:3]
-
-                releases.append(make_release(
-                    source="bgg",
-                    media_type="boardgame",
-                    title=title,
-                    release_date=date,
-                    synopsis=desc,
-                    genres=genres,
-                    metadata={
-                        "players": players,
-                        "playtime_minutes": play_time,
-                        "year_published": year,
-                        "popularity": 100 - len(releases),  # Hot rank
-                    },
-                    poster_url=poster,
-                    external_ids={"bgg_id": item.get("id")},
-                ))
-
-        except Exception as e:
-            logger.error(f"BoardGameGeek failed: {e}")
-
-        logger.info(f"BoardGameGeek: {len(releases)} board games for {date}")
-        return releases
+        # BGG now requires auth tokens as of July 2025
+        # Disabled until we register for an application token
+        logger.info("BoardGameGeek: Disabled (requires auth token since July 2025)")
+        return []
 
 
 # ═══════════════════════════════════════════════════════════════
