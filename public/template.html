@@ -77,13 +77,13 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .pb{flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .pb::after{content:'';position:absolute;inset:0;border:1px solid rgba(255,255,255,0.06);border-radius:inherit}
-.pb.movie{background:linear-gradient(145deg,#312e81,#4338ca)}.pb.tv{background:linear-gradient(145deg,#581c87,#7e22ce)}.pb.book{background:linear-gradient(145deg,#134e4a,#0f766e)}.pb.game{background:linear-gradient(145deg,#881337,#be123c)}.pb.anime{background:linear-gradient(145deg,#831843,#be185d)}.pb.music{background:linear-gradient(145deg,#713f12,#a16207)}
+.pb.movie{background:linear-gradient(145deg,#312e81,#4338ca)}.pb.tv{background:linear-gradient(145deg,#581c87,#7e22ce)}.pb.book{background:linear-gradient(145deg,#134e4a,#0f766e)}.pb.game{background:linear-gradient(145deg,#881337,#be123c)}.pb.anime{background:linear-gradient(145deg,#831843,#be185d)}.pb.music{background:linear-gradient(145deg,#713f12,#a16207)}.pb.podcast{background:linear-gradient(145deg,#4c1d95,#6d28d9)}.pb.boardgame{background:linear-gradient(145deg,#164e63,#0891b2)}.pb.comic{background:linear-gradient(145deg,#7c2d12,#c2410c)}.pb.news{background:linear-gradient(145deg,#1e293b,#475569)}
 .pb img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .ri{flex:1;min-width:0}
 .rt{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:3px}
 .rn{font-family:'Fraunces',serif;font-size:16px;font-weight:600;letter-spacing:-0.3px;line-height:1.25}
 .mb{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;flex-shrink:0;white-space:nowrap}
-.mb.movie{background:rgba(99,102,241,0.15);color:#6366f1}.mb.tv{background:rgba(168,85,247,0.15);color:#a855f7}.mb.book{background:rgba(20,184,166,0.15);color:#14b8a6}.mb.game{background:rgba(244,63,94,0.15);color:#f43f5e}.mb.anime{background:rgba(236,72,153,0.15);color:#ec4899}.mb.music{background:rgba(234,179,8,0.15);color:#eab308}
+.mb.movie{background:rgba(99,102,241,0.15);color:#6366f1}.mb.tv{background:rgba(168,85,247,0.15);color:#a855f7}.mb.book{background:rgba(20,184,166,0.15);color:#14b8a6}.mb.game{background:rgba(244,63,94,0.15);color:#f43f5e}.mb.anime{background:rgba(236,72,153,0.15);color:#ec4899}.mb.music{background:rgba(234,179,8,0.15);color:#eab308}.mb.podcast{background:rgba(139,92,246,0.15);color:#8b5cf6}.mb.boardgame{background:rgba(6,182,212,0.15);color:#06b6d4}.mb.comic{background:rgba(249,115,22,0.15);color:#f97316}.mb.news{background:rgba(100,116,139,0.15);color:#94a3b8}
 .rm{font-size:11.5px;color:var(--td);margin-bottom:6px}.rm .s{color:var(--bl);margin:0 4px}
 .rs{font-size:12.5px;color:var(--ts);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
 .rf{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
@@ -291,7 +291,7 @@ let sb,user=null,profile=null,userSubs=[],userWatchlist=[];
 
 // ═══════ DATA ═══════
 const D=__RELEASE_DATA_PLACEHOLDER__;
-const MC={movie:{i:"\uD83C\uDFAC",l:"Film",c:"#6366f1"},tv:{i:"\uD83D\uDCFA",l:"TV",c:"#a855f7"},book:{i:"\uD83D\uDCD6",l:"Book",c:"#14b8a6"},game:{i:"\uD83C\uDFAE",l:"Game",c:"#f43f5e"},anime:{i:"\uD83C\uDF8C",l:"Anime",c:"#ec4899"},music:{i:"\uD83C\uDFB5",l:"Music",c:"#eab308"}};
+const MC={movie:{i:"\uD83C\uDFAC",l:"Film",c:"#6366f1"},tv:{i:"\uD83D\uDCFA",l:"TV",c:"#a855f7"},book:{i:"\uD83D\uDCD6",l:"Book",c:"#14b8a6"},game:{i:"\uD83C\uDFAE",l:"Game",c:"#f43f5e"},anime:{i:"\uD83C\uDF8C",l:"Anime",c:"#ec4899"},music:{i:"\uD83C\uDFB5",l:"Music",c:"#eab308"},podcast:{i:"\uD83C\uDF99",l:"Podcast",c:"#8b5cf6"},boardgame:{i:"\uD83C\uDFB2",l:"Board Game",c:"#06b6d4"},news:{i:"\uD83D\uDCF0",l:"News",c:"#64748b"}};
 const SP={none:{l:"No Spoilers",bg:"var(--el)",c:"var(--td)",b:"var(--brd)"},light:{l:"\uD83D\uDFE2 Light",bg:"var(--slb)",c:"var(--sl)",b:"var(--slr)"},medium:{l:"\uD83D\uDFE1 Medium",bg:"var(--smb)",c:"var(--sm)",b:"var(--smr)"},heavy:{l:"\uD83D\uDD34 Heavy",bg:"var(--shb)",c:"var(--sh)",b:"var(--shr)"}};
 const STM=[{t:"Platforms & Studios",items:[{n:"A24 Releases",i:"\uD83C\uDFAC",d:"Every A24 theatrical and streaming release",f:"~8/mo"},{n:"HBO Originals",i:"\uD83D\uDCFA",d:"New episodes and premieres across HBO",f:"~15/mo"},{n:"Crunchyroll Simulcasts",i:"\uD83C\uDF8C",d:"Every new simulcast episode as it airs",f:"~40/mo"},{n:"Netflix Originals",i:"\uD83D\uDCFA",d:"Every Netflix original film and series",f:"~30/mo"},{n:"PlayStation Exclusives",i:"\uD83C\uDFAE",d:"First-party and exclusive PS5 launches",f:"~4/mo"},{n:"Tor Books",i:"\uD83D\uDCD6",d:"New fantasy and sci-fi from Tor",f:"~12/mo"},{n:"Napalm Records",i:"\uD83C\uDFB5",d:"New metal and rock from Napalm",f:"~10/mo"}]},{t:"Genres",items:[{n:"Horror (All Media)",i:"\uD83D\uDD2A",d:"Horror across all media types",f:"~18/mo"},{n:"Sci-Fi (All Media)",i:"\uD83D\uDE80",d:"Science fiction across all media",f:"~20/mo"},{n:"Fantasy (All Media)",i:"\u2694\uFE0F",d:"Fantasy across all media types",f:"~22/mo"},{n:"New Vinyl",i:"\uD83C\uDFB5",d:"Latest vinyl pressings across genres",f:"~15/mo"}]},{t:"Series & Franchises",items:[{n:"Golden Kamuy",i:"\uD83C\uDF8C",d:"Final season and manga releases",f:"Weekly"},{n:"My Hero Academia",i:"\uD83C\uDF8C",d:"Main series, Vigilantes, spin-offs",f:"Weekly+"},{n:"Fate Series",i:"\uD83C\uDF8C",d:"All Fate anime, movies, games",f:"Varies"}]}];
 
@@ -394,7 +394,7 @@ function isAdmin(){return profile&&(profile.role==='admin'||profile.role==='mode
 
 // ═══════ HELPERS ═══════
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function meta(r){const m=r.metadata||{},p=[];if(r.media_type==='movie'){if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language)p.push(m.original_language.toUpperCase())}if(r.media_type==='tv'&&m.networks?.length)p.push(m.networks[0]);if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}return p.join('<span class="s">\u00B7</span>')}
+function meta(r){const m=r.metadata||{},p=[];if(r.media_type==='movie'){if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language)p.push(m.original_language.toUpperCase());if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes);if(m.ratings?.metacritic)p.push('MC: '+m.ratings.metacritic)}if(r.media_type==='tv'){if(m.networks?.length)p.push(m.networks[0]);if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes)}if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}if(r.media_type==='podcast'){if(m.author)p.push(m.author);if(m.episode_count)p.push(m.episode_count+' eps')}if(r.media_type==='boardgame'){if(m.players)p.push(m.players+' players');if(m.playtime_minutes)p.push(m.playtime_minutes+' min')}if(r.media_type==='comic'){if(m.volume)p.push(m.volume);if(m.publisher)p.push(m.publisher)}if(r.media_type==='news'){if(m.source_name)p.push(m.source_name)}if(m.streaming){const sn=Object.keys(m.streaming).slice(0,3);if(sn.length)p.push('\uD83D\uDCFA '+sn.join(', '))}return p.join('<span class="s">\u00B7</span>')}
 function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie;if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
 function fmtD(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}catch(e){return d}}
 function dayN(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}catch(e){return''}}
@@ -431,6 +431,28 @@ async function openD(i){
 
   let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+r.media_type+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o'+(wl?' active':'')+'" onclick="toggleWL()" id="wl-btn">'+(wl?'\u2705 Watchlisted':'\u2B50 Watchlist')+'</button></div></div></div>';
   h+='<div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div>';
+
+  // Streaming availability
+  const strm=(r.metadata||{}).streaming;
+  if(strm&&Object.keys(strm).length){
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">\uD83D\uDCFA Where to Watch</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
+    for(const[name,info]of Object.entries(strm)){
+      const badge=info.type==='sub'?'var(--slb)':info.type==='rent'?'var(--smb)':'var(--el)';
+      const lbl=info.type==='sub'?'Stream':info.type==='rent'?'Rent':info.type==='buy'?'Buy':'Watch';
+      h+='<a '+(info.url?'href="'+esc(info.url)+'" target="_blank"':'')+'style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:'+badge+';border:1px solid var(--brd);border-radius:6px;font-size:11.5px;color:var(--text);text-decoration:none;transition:all .15s"><span style="font-size:10px;color:var(--td)">'+lbl+'</span> '+esc(name)+'</a>'}
+    h+='</div></div>'}
+
+  // Recommendations
+  const recs=(r.metadata||{}).recommendations;
+  if(recs&&recs.length){
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">\u2728 If you liked this</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
+    recs.forEach(t=>{h+='<span style="padding:4px 10px;background:var(--el);border:1px solid var(--brd);border-radius:6px;font-size:12px;color:var(--ts)">'+esc(t)+'</span>'});
+    h+='</div></div>'}
+
+  // News link
+  if(r.media_type==='news'&&(r.metadata||{}).link){
+    h+='<div style="margin-bottom:16px"><a href="'+esc(r.metadata.link)+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--accent);font-size:13px;font-weight:600;text-decoration:none">\uD83D\uDD17 Read Full Article \u2192</a></div>'}
+
   h+='<div class="st" id="cmt-count">Discussion</div>';
 
   // Composer
