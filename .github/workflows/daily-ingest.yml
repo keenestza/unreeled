@@ -27,9 +27,16 @@ jobs:
 
       - name: Run ingestion script
         env:
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
-          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
+          env:
+        TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
+        IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
+        PODCAST_INDEX_KEY: ${{ secrets.PODCAST_INDEX_KEY }}
+        PODCAST_INDEX_SECRET: ${{ secrets.PODCAST_INDEX_SECRET }}
+        RAWG_KEY: ${{ secrets.RAWG_KEY }}
+        OMDB_KEY: ${{ secrets.OMDB_KEY }}
+        WATCHMODE_KEY: ${{ secrets.WATCHMODE_KEY }}
+        NEWSDATA_KEY: ${{ secrets.NEWSDATA_KEY }}
         run: |
           cd scripts
           python unreeled_ingest.py --date $(date -u +%Y-%m-%d)
