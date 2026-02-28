@@ -362,7 +362,7 @@ async function openD(i){
   await loadComments(rk);
 }
 
-function pickSp(btn){selSpoiler=btn.dataset.sl;const bgs={none:'var(--el)',light:'var(--slb)',medium:'var(--smb)',heavy:'var(--shb)'};document.querySelectorAll('.slb').forEach(b=>b.style.background='transparent');btn.style.background=bgs[selSpoiler]||'transparent'}
+function pickSp(btn){selSpoiler=btn.dataset.sl;document.querySelectorAll('.slb').forEach(b=>{b.style.background='transparent';b.style.fontWeight='600';b.style.transform='none';b.style.boxShadow='none'});const bgs={none:'var(--el)',light:'var(--slb)',medium:'var(--smb)',heavy:'var(--shb)'};const rings={none:'var(--brd)',light:'var(--sl)',medium:'var(--sm)',heavy:'var(--sh)'};btn.style.background=bgs[selSpoiler]||'transparent';btn.style.boxShadow='0 0 0 2px '+(rings[selSpoiler]||'transparent');btn.style.transform='scale(1.05)'}
 
 async function loadComments(rk){
   try{
@@ -413,7 +413,7 @@ function renderComments(){
       html+='<div class="mod-bar">';
       if(!isHidden)html+='<button class="mod-btn hide" onclick="modHide(\''+c.id+'\')">Hide</button>';
       else html+='<button class="mod-btn ok" onclick="modUnhide(\''+c.id+'\')">Unhide</button>';
-      html+='<button class="mod-btn ban" onclick="modBan(\''+c.user_id+'\',\''+esc(un)+'\')">Ban User</button>';
+      if(c.user_id!==user.id)html+='<button class="mod-btn ban" onclick="modBan(\''+c.user_id+'\',\''+esc(un)+'\')">Ban User</button>';
       if(c.report_count>0)html+='<button class="mod-btn ok" onclick="modDismissReports(\''+c.id+'\')">Dismiss Reports</button>';
       html+='</div>';
     }
@@ -576,6 +576,21 @@ STM.forEach((s,si)=>{h+='<h3 class="sect">'+s.t+'</h3><div class="sg">';s.items.
 document.getElementById('p-streams').innerHTML=h}
 
 // ═══════ ACCOUNT ═══════
+function openWatchlistItem(rk,title,mtype){
+  // Parse the release key to find the date and search for the release
+  const parts=rk.split(':');
+  const dateStr=parts[0];
+  // Try loading that date's releases
+  if(D.historical&&D.historical[dateStr]){
+    const releases=D.historical[dateStr];
+    const idx=releases.findIndex(r=>releaseKey(r)===rk||(r.title||'').toLowerCase()===title.toLowerCase());
+    if(idx>=0){vd=dateStr;R=releases;openD(idx);return}
+  }
+  // Fallback: search current releases
+  const idx=R.findIndex(r=>releaseKey(r)===rk||(r.title||'').toLowerCase()===title.toLowerCase());
+  if(idx>=0){openD(idx);return}
+  toast('Release not found in current data');
+}
 function renderAccount(){
   if(!user||!profile){document.getElementById('p-account').innerHTML='<div class="empty"><h2>Not logged in</h2><p><a onclick="showAuth(\'login\')" style="color:var(--accent);cursor:pointer">Log in</a> to view your account.</p></div>';return}
   let h='<h1 class="hero">My Account</h1>';
@@ -585,7 +600,7 @@ function renderAccount(){
   if(userSubs.length){userSubs.forEach(s=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span style="font-size:13px">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><button class="ssb on" onclick="toggleSub(\''+s.subscription_type+'\',\''+s.subscription_value.replace(/'/g,"\\'")+'\')">\u2713 Subscribed</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a></p>'}
   // Watchlist
   h+='<div class="st" style="margin-top:24px">My Watchlist ('+userWatchlist.length+')</div>';
-  if(userWatchlist.length){userWatchlist.forEach(w=>{const c=MC[w.media_type]||MC.movie;h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span class="mb '+w.media_type+'">'+c.l+'</span><span style="font-size:13px;flex:1">'+esc(w.release_title)+'</span></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No items in watchlist yet.</p>'}
+  if(userWatchlist.length){userWatchlist.forEach(w=>{const c=MC[w.media_type]||MC.movie;h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'" onclick="openWatchlistItem(\''+esc(w.release_key)+'\',\''+esc(w.release_title)+'\',\''+w.media_type+'\')"><span class="mb '+w.media_type+'">'+c.l+'</span><span style="font-size:13px;flex:1">'+esc(w.release_title)+'</span><span style="font-size:11px;color:var(--td)">\u2192</span></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No items in watchlist yet.</p>'}
   document.getElementById('p-account').innerHTML=h}
 
 // ═══════ INIT ═══════
