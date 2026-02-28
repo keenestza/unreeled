@@ -366,10 +366,23 @@ function pickSp(btn){selSpoiler=btn.dataset.sl;const bgs={none:'var(--el)',light
 
 async function loadComments(rk){
   try{
-    const{data,error}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('release_key',rk).order('created_at',{ascending:false});
-    if(error)console.error('Load comments error:',error);
+    // Try join first
+    let{data,error}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('release_key',rk).order('created_at',{ascending:false});
+    if(error){
+      console.warn('Join query failed, fetching separately:',error);
+      // Fallback: fetch comments then profiles
+      const res=await sb.from('comments').select('*').eq('release_key',rk).order('created_at',{ascending:false});
+      data=res.data||[];
+      if(data.length){
+        const uids=[...new Set(data.map(c=>c.user_id))];
+        const{data:profs}=await sb.from('profiles').select('id,username,avatar_color').in('id',uids);
+        const profMap={};(profs||[]).forEach(p=>profMap[p.id]=p);
+        data.forEach(c=>c.profiles=profMap[c.user_id]||{username:'anon',avatar_color:'#ff6b35'});
+      }
+    }
     detailComments=data||[];
-    document.getElementById('cmt-count').textContent='Discussion ('+detailComments.length+')';
+    const el=document.getElementById('cmt-count');
+    if(el)el.textContent='Discussion ('+detailComments.length+')';
     renderComments();
   }catch(e){console.error('Load comments exception:',e);detailComments=[];renderComments()}
 }
