@@ -365,10 +365,13 @@ async function openD(i){
 function pickSp(btn){selSpoiler=btn.dataset.sl;const bgs={none:'var(--el)',light:'var(--slb)',medium:'var(--smb)',heavy:'var(--shb)'};document.querySelectorAll('.slb').forEach(b=>b.style.background='transparent');btn.style.background=bgs[selSpoiler]||'transparent'}
 
 async function loadComments(rk){
-  const{data,error}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('release_key',rk).order('created_at',{ascending:false});
-  detailComments=data||[];
-  document.getElementById('cmt-count').textContent='Discussion ('+detailComments.length+')';
-  renderComments();
+  try{
+    const{data,error}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('release_key',rk).order('created_at',{ascending:false});
+    if(error)console.error('Load comments error:',error);
+    detailComments=data||[];
+    document.getElementById('cmt-count').textContent='Discussion ('+detailComments.length+')';
+    renderComments();
+  }catch(e){console.error('Load comments exception:',e);detailComments=[];renderComments()}
 }
 
 function renderComments(){
@@ -413,13 +416,16 @@ async function postComment(){
   if(!body)return toast('Write something first!');
   if(!user)return showAuth('login');
   const rk=releaseKey(cr);
-  document.getElementById('post-btn').disabled=true;
-  const{error}=await sb.from('comments').insert({user_id:user.id,release_key:rk,body:body,spoiler_level:selSpoiler});
-  document.getElementById('post-btn').disabled=false;
-  if(error){toast('Error: '+error.message);return}
-  document.getElementById('cmt-body').value='';
-  toast('Comment posted!');
-  await loadComments(rk);
+  const btn=document.getElementById('post-btn');
+  try{
+    btn.disabled=true;
+    const{data,error}=await sb.from('comments').insert({user_id:user.id,release_key:rk,body:body,spoiler_level:selSpoiler}).select();
+    btn.disabled=false;
+    if(error){console.error('Post error:',error);toast('Error: '+error.message);return}
+    document.getElementById('cmt-body').value='';
+    toast('Comment posted!');
+    await loadComments(rk);
+  }catch(e){btn.disabled=false;console.error('Post exception:',e);toast('Error posting comment')}
 }
 
 async function vote(cid,type){
