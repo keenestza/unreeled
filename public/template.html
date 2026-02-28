@@ -167,7 +167,82 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .mod-btn.ok{background:rgba(62,201,140,0.1);color:var(--sl);border:1px solid rgba(62,201,140,0.2)}
 .mod-btn.ok:hover{background:rgba(62,201,140,0.2)}
 .hidden-tag{display:inline-block;padding:2px 7px;background:rgba(239,68,68,0.1);color:var(--sh);border-radius:4px;font-size:10px;font-weight:600;margin-left:6px}
-@media(max-width:640px){.nav{padding:0 12px}.tabs{display:none}.page{padding:18px 12px 50px}h1.hero{font-size:26px}.dh{flex-direction:column;gap:14px}.dn{font-size:24px}.sg{grid-template-columns:1fr}.rc{gap:10px}.arcg{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}}
+/* MOBILE BOTTOM NAV */
+.bnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:1000;height:60px;background:rgba(8,9,12,0.96);backdrop-filter:blur(24px);border-top:1px solid var(--brd);padding:0 8px;justify-content:space-around;align-items:center}
+.bnav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 12px;background:none;border:none;color:var(--td);font-size:9.5px;font-weight:500;transition:all .15s;border-radius:8px}
+.bnav button .bi{font-size:18px;line-height:1}
+.bnav button.on{color:var(--accent)}
+.bnav button.on .bi{transform:scale(1.1)}
+/* DESIGN POLISH */
+.rc{background:var(--card);border:1px solid var(--brd);border-radius:12px;overflow:hidden;transition:all .25s ease}
+.rc:hover{border-color:var(--bl);background:var(--el);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+.pb{border-radius:9px;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+.rn{font-size:15.5px;line-height:1.3}
+.fc{backdrop-filter:blur(8px)}
+.fc.on{box-shadow:0 2px 8px rgba(255,107,53,0.25)}
+.cm{border-radius:12px;transition:all .2s}
+.trc{border-radius:12px}
+.sc{border-radius:12px}
+.modal{border-radius:16px;box-shadow:0 24px 48px rgba(0,0,0,0.4)}
+.toast{border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
+.dp select{border-radius:8px}
+.dp-btn{border-radius:8px}
+/* POSTER HOVER */
+.rc .pb img{transition:transform .3s ease}
+.rc:hover .pb img{transform:scale(1.04)}
+/* ACCENT GLOW */
+.btn-a{box-shadow:0 2px 8px rgba(255,107,53,0.2)}
+.btn-a:hover{box-shadow:0 4px 16px rgba(255,107,53,0.35)}
+/* DETAIL PAGE POLISH */
+.dh{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:20px;margin-bottom:22px}
+.da button{border-radius:8px}
+.spb{border-radius:12px}
+/* SCROLL BAR */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bl);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--td)}
+/* RESPONSIVE */
+@media(max-width:640px){
+  .nav{padding:0 12px;height:50px}
+  .tabs{display:none}
+  .bnav{display:flex}
+  .page{padding:14px 12px 80px}
+  h1.hero{font-size:24px}
+  .sub{font-size:13px;margin-bottom:16px}
+  .dh{flex-direction:column;gap:14px;padding:14px}
+  .dh .pb{align-self:center}
+  .dn{font-size:22px}
+  .dd{font-size:13px}
+  .sg{grid-template-columns:1fr}
+  .rc{gap:10px;padding:12px;border-radius:10px}
+  .rn{font-size:14.5px}
+  .rs{font-size:12px}
+  .rm{font-size:11px}
+  .arcg{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}
+  .fbar{gap:5px;margin-bottom:16px}
+  .fc{padding:4px 10px;font-size:11.5px}
+  .dp{gap:6px}
+  .dp select{font-size:12px;padding:5px 8px}
+  .modal{margin:12px;padding:24px}
+  .cmp{padding:12px}
+  .cm{padding:12px}
+  .da{gap:6px}
+  .da button{padding:7px 14px;font-size:12px}
+  .spb{gap:6px;padding:10px}
+  .sps{padding:8px 4px}
+  .sps em{font-size:18px}
+  .arcs{gap:6px;padding:12px}
+  .arci em{font-size:20px}
+  .trc{gap:10px;padding:12px}
+  .trk{width:28px;height:28px;font-size:12px}
+  .user-pill{font-size:11px;padding:3px 10px 3px 3px}
+  .user-pill .uav{width:22px;height:22px;font-size:9px}
+}
+@media(max-width:380px){
+  .da{flex-direction:column}
+  .da button{width:100%;text-align:center}
+}
 </style>
 </head>
 <body>
@@ -199,6 +274,14 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 <div id="p-archive" class="page"></div>
 <div id="p-streams" class="page"></div>
 <div id="p-account" class="page"></div>
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bnav" id="bnav">
+  <button class="on" data-p="feed" onclick="go('feed')"><span class="bi">&#127916;</span>Releases</button>
+  <button data-p="trending" onclick="go('trending')"><span class="bi">&#128293;</span>Trending</button>
+  <button data-p="archive" onclick="go('archive')"><span class="bi">&#128197;</span>Archive</button>
+  <button data-p="streams" onclick="go('streams')"><span class="bi">&#128225;</span>Streams</button>
+  <button data-p="account" onclick="user?go('account'):showAuth('login')"><span class="bi">&#128100;</span>Account</button>
+</nav>
 
 <script>
 // ═══════ SUPABASE ═══════
@@ -220,7 +303,7 @@ const dates=D.dates_available||[vd];
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
 
 // ═══════ NAV ═══════
-function go(p,push){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'?'feed':p)+'"]')?.classList.add('on');if(push!==false&&p!==curPage)history.pushState({page:p},'','');curPage=p;window.scrollTo({top:0,behavior:'smooth'});document.getElementById('umenu').classList.remove('show')}
+function go(p,push){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'?'feed':p)+'"]')?.classList.add('on');document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));const bp=p==='detail'?'feed':p;document.querySelector('.bnav button[data-p="'+bp+'"]')?.classList.add('on');if(push!==false&&p!==curPage)history.pushState({page:p},'','');curPage=p;window.scrollTo({top:0,behavior:'smooth'});document.getElementById('umenu').classList.remove('show')}
 window.addEventListener('popstate',e=>{go((e.state&&e.state.page)||'feed',false)});
 
 function renderNav(){
