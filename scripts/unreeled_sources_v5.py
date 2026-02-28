@@ -388,7 +388,7 @@ class NewsDataSource:
     Free: 200 requests/day from https://newsdata.io/
     """
 
-    BASE = "https://newsdata.io/api/1/latest"
+    BASE = "https://newsdata.io/api/1/news"
 
     def __init__(self, api_key: str = ""):
         self.api_key = api_key
@@ -407,7 +407,7 @@ class NewsDataSource:
                     "apikey": self.api_key,
                     "category": "entertainment",
                     "language": "en",
-                    "size": 20,
+                    "size": 10,
                 },
                 timeout=15,
             )
