@@ -151,6 +151,22 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;background:var(--card);border:1px solid var(--brd);border-radius:8px;font-size:13px;color:var(--text);z-index:5000;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
+/* REPORT */
+.rpt-reasons{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.rpt-reasons label{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--el);border:1px solid var(--brd);border-radius:7px;font-size:13px;color:var(--ts);cursor:pointer;transition:all .15s}
+.rpt-reasons label:hover{border-color:var(--bl)}
+.rpt-reasons input[type=radio]{accent-color:var(--accent)}
+.rpt-reasons input[type=radio]:checked+span{color:var(--text)}
+/* MOD PANEL */
+.mod-bar{display:flex;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--brd)}
+.mod-btn{padding:3px 9px;border-radius:5px;font-size:10.5px;font-weight:600;transition:all .15s}
+.mod-btn.hide{background:rgba(239,68,68,0.1);color:var(--sh);border:1px solid rgba(239,68,68,0.2)}
+.mod-btn.hide:hover{background:rgba(239,68,68,0.2)}
+.mod-btn.ban{background:rgba(239,68,68,0.15);color:#ff6b6b;border:1px solid rgba(239,68,68,0.3)}
+.mod-btn.ban:hover{background:rgba(239,68,68,0.25)}
+.mod-btn.ok{background:rgba(62,201,140,0.1);color:var(--sl);border:1px solid rgba(62,201,140,0.2)}
+.mod-btn.ok:hover{background:rgba(62,201,140,0.2)}
+.hidden-tag{display:inline-block;padding:2px 7px;background:rgba(239,68,68,0.1);color:var(--sh);border-radius:4px;font-size:10px;font-weight:600;margin-left:6px}
 @media(max-width:640px){.nav{padding:0 12px}.tabs{display:none}.page{padding:18px 12px 50px}h1.hero{font-size:26px}.dh{flex-direction:column;gap:14px}.dn{font-size:24px}.sg{grid-template-columns:1fr}.rc{gap:10px}.arcg{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}}
 </style>
 </head>
@@ -173,6 +189,10 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
   <div class="modal" id="auth-box"></div>
 </div>
 <div class="toast" id="toast"></div>
+<!-- REPORT MODAL -->
+<div class="modal-bg" id="report-modal" onclick="if(event.target===this)document.getElementById('report-modal').classList.remove('show')">
+  <div class="modal" id="report-box"></div>
+</div>
 <div id="p-feed" class="page on"></div>
 <div id="p-detail" class="page"></div>
 <div id="p-trending" class="page"></div>
@@ -287,6 +307,7 @@ async function loadUser(){
 function isSubbed(type,value){return userSubs.some(s=>s.subscription_type===type&&s.subscription_value===value)}
 function isWatchlisted(key){return userWatchlist.some(w=>w.release_key===key)}
 function releaseKey(r){return vd+':'+r.media_type+':'+(r.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,80)}
+function isAdmin(){return profile&&(profile.role==='admin'||profile.role==='moderator')}
 
 // ═══════ HELPERS ═══════
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -353,6 +374,7 @@ async function loadComments(rk){
 function renderComments(){
   const f=ccf==='all'?detailComments:detailComments.filter(c=>c.spoiler_level===ccf);
   if(!f.length){document.getElementById('cml').innerHTML='<p style="color:var(--td);font-size:13px;padding:20px 0;text-align:center">No comments yet. Be the first!</p>';return}
+  const adm=isAdmin();
   document.getElementById('cml').innerHTML=f.map(c=>{
     const s=SP[c.spoiler_level]||SP.none;
     const hs=c.spoiler_level!=='none';
@@ -361,7 +383,26 @@ function renderComments(){
     const un=p.username||'anon';
     const ac=p.avatar_color||'#ff6b35';
     const init=un.slice(0,2).toUpperCase();
-    return'<div class="cm"><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+'">'+init+'</div><div><div class="cmn">'+esc(un)+'</div><div class="cmt">'+timeAgo(c.created_at)+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div><div class="cmb'+(bl?' bl':'')+'">'+esc(c.body)+'</div>'+(bl?'<div class="rvb" onclick="rv.add(\''+c.id+'\');renderComments()">\uD83D\uDC41 Reveal '+c.spoiler_level+' spoiler</div>':'')+'<div class="cmf"><span onclick="vote(\''+c.id+'\',\'up\')">\u25B2 '+c.upvotes+'</span><span onclick="vote(\''+c.id+'\',\'down\')">\u25BC '+c.downvotes+'</span></div></div>'
+    const isOwn=user&&c.user_id===user.id;
+    const isHidden=c.hidden;
+    let html='<div class="cm"'+(isHidden&&adm?' style="opacity:0.5;border-color:var(--sh)"':'')+'><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+'">'+init+'</div><div><div class="cmn">'+esc(un)+(isHidden&&adm?'<span class="hidden-tag">HIDDEN</span>':'')+'</div><div class="cmt">'+timeAgo(c.created_at)+(c.report_count&&adm?' \u00B7 '+c.report_count+' reports':'')+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div>';
+    html+='<div class="cmb'+(bl?' bl':'')+'">'+esc(c.body)+'</div>';
+    if(bl)html+='<div class="rvb" onclick="rv.add(\''+c.id+'\');renderComments()">\uD83D\uDC41 Reveal '+c.spoiler_level+' spoiler</div>';
+    html+='<div class="cmf"><span onclick="vote(\''+c.id+'\',\'up\')">\u25B2 '+c.upvotes+'</span><span onclick="vote(\''+c.id+'\',\'down\')">\u25BC '+c.downvotes+'</span>';
+    if(user&&!isOwn)html+='<span onclick="showReport(\''+c.id+'\')">\uD83D\uDEA9 Report</span>';
+    if(isOwn)html+='<span onclick="deleteOwnComment(\''+c.id+'\')">\uD83D\uDDD1 Delete</span>';
+    html+='</div>';
+    // Mod tools
+    if(adm){
+      html+='<div class="mod-bar">';
+      if(!isHidden)html+='<button class="mod-btn hide" onclick="modHide(\''+c.id+'\')">Hide</button>';
+      else html+='<button class="mod-btn ok" onclick="modUnhide(\''+c.id+'\')">Unhide</button>';
+      html+='<button class="mod-btn ban" onclick="modBan(\''+c.user_id+'\',\''+esc(un)+'\')">Ban User</button>';
+      if(c.report_count>0)html+='<button class="mod-btn ok" onclick="modDismissReports(\''+c.id+'\')">Dismiss Reports</button>';
+      html+='</div>';
+    }
+    html+='</div>';
+    return html;
   }).join('');
 }
 
@@ -390,6 +431,62 @@ async function vote(cid,type){
   } else {
     await sb.from('comment_votes').insert({user_id:user.id,comment_id:cid,vote_type:type});
   }
+  await loadComments(releaseKey(cr));
+}
+
+// ═══════ REPORTS & MODERATION ═══════
+function showReport(cid){
+  if(!user)return showAuth('login');
+  const box=document.getElementById('report-box');
+  box.innerHTML='<button class="close" onclick="document.getElementById(\'report-modal\').classList.remove(\'show\')">\u2715</button><h2>Report Comment</h2><p class="ms">Why are you reporting this comment?</p><div class="ferr" id="rerr"></div><div class="rpt-reasons"><label><input type="radio" name="rpt" value="spam"><span>Spam or advertising</span></label><label><input type="radio" name="rpt" value="offensive"><span>Offensive or abusive content</span></label><label><input type="radio" name="rpt" value="harassment"><span>Harassment or bullying</span></label><label><input type="radio" name="rpt" value="spoiler_misuse"><span>Spoiler level is wrong</span></label><label><input type="radio" name="rpt" value="other"><span>Other</span></label></div><textarea class="finput" id="rpt-details" placeholder="Additional details (optional)" style="min-height:60px;resize:vertical"></textarea><button class="fbtn" onclick="submitReport(\''+cid+'\')">Submit Report</button>';
+  document.getElementById('report-modal').classList.add('show');
+}
+
+async function submitReport(cid){
+  const reason=document.querySelector('input[name=rpt]:checked');
+  if(!reason){const e=document.getElementById('rerr');e.textContent='Please select a reason';e.classList.add('show');return}
+  const details=document.getElementById('rpt-details').value.trim();
+  const{error}=await sb.from('reports').insert({reporter_id:user.id,comment_id:cid,reason:reason.value,details:details});
+  document.getElementById('report-modal').classList.remove('show');
+  if(error){if(error.code==='23505')toast('You already reported this comment');else toast('Error: '+error.message);return}
+  toast('Report submitted. Thank you.');
+}
+
+async function deleteOwnComment(cid){
+  if(!confirm('Delete this comment?'))return;
+  await sb.from('comments').delete().eq('id',cid).eq('user_id',user.id);
+  toast('Comment deleted');
+  await loadComments(releaseKey(cr));
+}
+
+async function modHide(cid){
+  if(!confirm('Hide this comment from all users?'))return;
+  await sb.from('comments').update({hidden:true,hidden_reason:'Hidden by moderator'}).eq('id',cid);
+  await sb.from('mod_log').insert({moderator_id:user.id,action:'hide_comment',target_comment_id:cid,reason:'Manual hide'});
+  toast('Comment hidden');
+  await loadComments(releaseKey(cr));
+}
+
+async function modUnhide(cid){
+  await sb.from('comments').update({hidden:false,hidden_reason:null}).eq('id',cid);
+  await sb.from('mod_log').insert({moderator_id:user.id,action:'unhide_comment',target_comment_id:cid});
+  toast('Comment restored');
+  await loadComments(releaseKey(cr));
+}
+
+async function modBan(uid,username){
+  if(!confirm('Ban user "'+username+'"? They will not be able to post comments.'))return;
+  const reason=prompt('Ban reason (optional):');
+  await sb.from('profiles').update({banned:true,banned_at:new Date().toISOString(),ban_reason:reason||'Banned by moderator'}).eq('id',uid);
+  await sb.from('mod_log').insert({moderator_id:user.id,action:'ban_user',target_user_id:uid,reason:reason||'Banned by moderator'});
+  toast('User banned');
+}
+
+async function modDismissReports(cid){
+  await sb.from('reports').update({status:'dismissed',reviewed_by:user.id,reviewed_at:new Date().toISOString()}).eq('comment_id',cid).eq('status','pending');
+  await sb.from('comments').update({report_count:0}).eq('id',cid);
+  await sb.from('mod_log').insert({moderator_id:user.id,action:'dismiss_report',target_comment_id:cid});
+  toast('Reports dismissed');
   await loadComments(releaseKey(cr));
 }
 
@@ -486,4 +583,3 @@ document.addEventListener('click',e=>{const um=document.getElementById('umenu');
 </script>
 </body>
 </html>
-  
