@@ -660,19 +660,32 @@ document.getElementById('p-streams').innerHTML=h}
 
 // ═══════ ACCOUNT ═══════
 function openWatchlistItem(rk,title,mtype){
-  // Parse the release key to find the date and search for the release
   const parts=rk.split(':');
   const dateStr=parts[0];
-  // Try loading that date's releases
+  const tl=title.toLowerCase();
+  // Try the original date
   if(D.historical&&D.historical[dateStr]){
-    const releases=D.historical[dateStr];
-    const idx=releases.findIndex(r=>releaseKey(r)===rk||(r.title||'').toLowerCase()===title.toLowerCase());
-    if(idx>=0){vd=dateStr;R=releases;openD(idx);return}
+    const rel=D.historical[dateStr];
+    const idx=rel.findIndex(r=>(r.title||'').toLowerCase()===tl&&r.media_type===mtype);
+    if(idx>=0){vd=dateStr;R=rel;openD(idx);return}
   }
-  // Fallback: search current releases
-  const idx=R.findIndex(r=>releaseKey(r)===rk||(r.title||'').toLowerCase()===title.toLowerCase());
-  if(idx>=0){openD(idx);return}
-  toast('Release not found in current data');
+  // Search all dates
+  for(const d of dates){
+    if(D.historical&&D.historical[d]){
+      const rel=D.historical[d];
+      const idx=rel.findIndex(r=>(r.title||'').toLowerCase()===tl&&r.media_type===mtype);
+      if(idx>=0){vd=d;R=rel;openD(idx);return}
+    }
+  }
+  // Not in processed data — show minimal detail with comments
+  const c=MC[mtype]||MC.movie;
+  cr={title:title,media_type:mtype,poster_url:'',synopsis:'',genres:[],metadata:{},spoiler_counts:{},comment_count:0};
+  rv=new Set();ccf='all';selSpoiler='none';
+  let h='<button class="dbk" onclick="go(\'account\')">\u2190 Back</button><div class="dh"><div style="flex:1"><span class="mb '+mtype+'">'+c.l+'</span><h1 class="dn">'+esc(title)+'</h1><p class="dd" style="color:var(--td)">Added from '+fmtD(dateStr)+'. Full details not in current data.</p><div class="da"><button class="o active" onclick="toggleWL()" id="wl-btn">\u2705 Watchlisted</button></div></div></div>';
+  h+='<div class="st" id="cmt-count">Discussion</div>';
+  if(user){h+='<div class="cmp"><textarea id="cmt-body" placeholder="Share your thoughts..."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb" data-sl="none" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="pickSp(this)">No Spoilers</button><button class="slb" data-sl="light" style="border:1px solid var(--slr);color:var(--sl)" onclick="pickSp(this)">\uD83D\uDFE2 Light</button><button class="slb" data-sl="medium" style="border:1px solid var(--smr);color:var(--sm)" onclick="pickSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" data-sl="heavy" style="border:1px solid var(--shr);color:var(--sh)" onclick="pickSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps" id="post-btn" onclick="postComment()">Post</button></div></div>'}else{h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to comment</div>'}
+  h+='<div class="cfs"><span>Show:</span><button class="cfb on" onclick="fCmt(\'all\',this)">All</button><button class="cfb" onclick="fCmt(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fCmt(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fCmt(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fCmt(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"><p style="color:var(--td);font-size:13px">Loading...</p></div>';
+  document.getElementById('p-detail').innerHTML=h;go('detail');loadComments(rk);
 }
 function renderAccount(){
   if(!user||!profile){document.getElementById('p-account').innerHTML='<div class="empty"><h2>Not logged in</h2><p><a onclick="showAuth(\'login\')" style="color:var(--accent);cursor:pointer">Log in</a> to view your account.</p></div>';return}
