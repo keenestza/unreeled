@@ -1,58 +1,43 @@
 name: Daily Media Ingestion
-
 on:
-  # Run daily at 6:00 AM UTC
   schedule:
     - cron: '0 6 * * *'
-
-  # Allow manual trigger from GitHub Actions tab
   workflow_dispatch:
-
 jobs:
   ingest:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Install dependencies
         run: pip install requests python-dotenv
-
       - name: Run ingestion script
         env:
-          env:
-        TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-        IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
-        IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
-        PODCAST_INDEX_KEY: ${{ secrets.PODCAST_INDEX_KEY }}
-        PODCAST_INDEX_SECRET: ${{ secrets.PODCAST_INDEX_SECRET }}
-        RAWG_KEY: ${{ secrets.RAWG_KEY }}
-        OMDB_KEY: ${{ secrets.OMDB_KEY }}
-        WATCHMODE_KEY: ${{ secrets.WATCHMODE_KEY }}
-        NEWSDATA_KEY: ${{ secrets.NEWSDATA_KEY }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
+          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
+          PODCAST_INDEX_KEY: ${{ secrets.PODCAST_INDEX_KEY }}
+          PODCAST_INDEX_SECRET: ${{ secrets.PODCAST_INDEX_SECRET }}
+          RAWG_KEY: ${{ secrets.RAWG_KEY }}
+          OMDB_KEY: ${{ secrets.OMDB_KEY }}
+          WATCHMODE_KEY: ${{ secrets.WATCHMODE_KEY }}
+          NEWSDATA_KEY: ${{ secrets.NEWSDATA_KEY }}
         run: |
           cd scripts
           python unreeled_ingest.py --date $(date -u +%Y-%m-%d)
-
       - name: Copy output to public data folder
         run: |
           mkdir -p public/data
-          # Copy today's release file
           cp scripts/output/releases_*.json public/data/
-          # Also create a 'latest.json' symlink/copy for the site to always find
           LATEST=$(ls -t scripts/output/releases_*.json | head -1)
           cp "$LATEST" public/data/latest.json
-
       - name: Build site
         run: python scripts/build_site.py
-
       - name: Commit and push updated data
         run: |
           git config user.name "Unreeled Bot"
