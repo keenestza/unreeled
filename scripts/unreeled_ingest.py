@@ -59,6 +59,14 @@ TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 IGDB_CLIENT_ID = os.getenv("IGDB_CLIENT_ID", "")
 IGDB_CLIENT_SECRET = os.getenv("IGDB_CLIENT_SECRET", "")
 
+# New API keys (v5)
+PODCAST_INDEX_KEY = os.getenv("PODCAST_INDEX_KEY", "")
+PODCAST_INDEX_SECRET = os.getenv("PODCAST_INDEX_SECRET", "")
+RAWG_KEY = os.getenv("RAWG_KEY", "")
+OMDB_KEY = os.getenv("OMDB_KEY", "")
+WATCHMODE_KEY = os.getenv("WATCHMODE_KEY", "")
+NEWSDATA_KEY = os.getenv("NEWSDATA_KEY", "")
+
 OUTPUT_DIR = Path("./output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -1193,6 +1201,28 @@ class UnreeledPipeline:
             "musicbrainz": MusicBrainzSource(),
         }
 
+        # Import v5 sources
+        try:
+            from unreeled_sources_v5 import (
+                PodcastIndexSource, BoardGameGeekSource,
+                RawgSource, NewsDataSource,
+                OMDbEnricher, WatchmodeEnricher,
+            )
+            self.v5_sources = {
+                "podcast_index": PodcastIndexSource(PODCAST_INDEX_KEY, PODCAST_INDEX_SECRET),
+                "bgg": BoardGameGeekSource(),
+                "rawg": RawgSource(RAWG_KEY),
+                "newsdata": NewsDataSource(NEWSDATA_KEY),
+            }
+            self.enrichers = {
+                "omdb": OMDbEnricher(OMDB_KEY),
+                "watchmode": WatchmodeEnricher(WATCHMODE_KEY),
+            }
+        except ImportError as e:
+            logger.warning(f"V5 sources not available: {e}")
+            self.v5_sources = {}
+            self.enrichers = {}
+
     def ingest_date(self, date: str) -> dict:
         logger.info(f"{'=' * 60}")
         logger.info(f"Starting ingestion for {date}")
@@ -1261,6 +1291,73 @@ class UnreeledPipeline:
             logger.error(f"MusicBrainz music failed: {e}")
             source_stats["musicbrainz_music"] = 0
             errors["musicbrainz_music"] = str(e)
+
+        # ═══════ V5 NEW SOURCES ═══════
+
+        # Podcast Index: Podcasts
+        if "podcast_index" in self.v5_sources:
+            try:
+                podcasts = self.v5_sources["podcast_index"].fetch_podcasts(date)
+                all_releases.extend(podcasts)
+                source_stats["podcast_index"] = len(podcasts)
+            except Exception as e:
+                logger.error(f"Podcast Index failed: {e}")
+                source_stats["podcast_index"] = 0
+                errors["podcast_index"] = str(e)
+
+        # Board Game Geek: Board Games
+        if "bgg" in self.v5_sources:
+            try:
+                boardgames = self.v5_sources["bgg"].fetch_boardgames(date)
+                all_releases.extend(boardgames)
+                source_stats["bgg_boardgames"] = len(boardgames)
+            except Exception as e:
+                logger.error(f"BoardGameGeek failed: {e}")
+                source_stats["bgg_boardgames"] = 0
+                errors["bgg_boardgames"] = str(e)
+
+        # RAWG: Additional Games
+        if "rawg" in self.v5_sources:
+            try:
+                rawg_games = self.v5_sources["rawg"].fetch_games(date)
+                # Only add games not already from IGDB
+                existing_titles = {r["title"].lower() for r in all_releases if r["media_type"] == "game"}
+                new_games = [g for g in rawg_games if g["title"].lower() not in existing_titles]
+                all_releases.extend(new_games)
+                source_stats["rawg_games"] = len(new_games)
+            except Exception as e:
+                logger.error(f"RAWG failed: {e}")
+                source_stats["rawg_games"] = 0
+                errors["rawg_games"] = str(e)
+
+        # NewsData: Entertainment News
+        if "newsdata" in self.v5_sources:
+            try:
+                news = self.v5_sources["newsdata"].fetch_news(date)
+                all_releases.extend(news)
+                source_stats["newsdata"] = len(news)
+            except Exception as e:
+                logger.error(f"NewsData failed: {e}")
+                source_stats["newsdata"] = 0
+                errors["newsdata"] = str(e)
+
+        # ═══════ ENRICHMENT ═══════
+        logger.info(f"{'─' * 40}")
+        logger.info("Running enrichment passes...")
+
+        # OMDb: Add Rotten Tomatoes / Metacritic scores
+        if "omdb" in self.enrichers:
+            try:
+                self.enrichers["omdb"].enrich(all_releases, max_lookups=40)
+            except Exception as e:
+                logger.error(f"OMDb enrichment failed: {e}")
+
+        # Watchmode: Add streaming availability
+        if "watchmode" in self.enrichers:
+            try:
+                self.enrichers["watchmode"].enrich(all_releases, max_lookups=20)
+            except Exception as e:
+                logger.error(f"Watchmode enrichment failed: {e}")
 
         # Sort by popularity
         all_releases.sort(
