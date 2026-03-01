@@ -45,3 +45,10 @@ jobs:
           git add docs/
           git diff --staged --quiet || git commit -m "📦 Daily release update: $(date -u +%Y-%m-%d)"
           git push
+      - name: Send email digest
+        if: success()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: python scripts/send_digest.py
