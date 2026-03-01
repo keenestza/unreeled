@@ -156,9 +156,9 @@ def compute_archive(all_data):
 
 def build():
     project_root = Path(__file__).parent.parent
-    data_dir = project_root / "public" / "data"
-    template_file = project_root / "public" / "template.html"
-    output_file = project_root / "public" / "index.html"
+    data_dir = project_root / "docs" / "data"
+    template_file = project_root / "docs" / "template.html"
+    output_file = project_root / "docs" / "index.html"
 
     # Load all release files
     all_data = {}
