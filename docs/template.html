@@ -20,7 +20,8 @@
 <meta name="theme-color" content="#ff6b35">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/unreeled/manifest.json">
+<link rel="alternate" type="application/rss+xml" title="UNREELED Daily Releases" href="/unreeled/feed.xml">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23ff6b35'/><text x='45' y='135' font-size='120' font-weight='bold' fill='white'>U</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -46,6 +47,7 @@
 /* NEW TODAY BADGE */
 .new-badge{display:inline-block;padding:2px 6px;background:var(--accent);color:#fff;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-left:6px;vertical-align:middle;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 /* EMPTY STATES */
 .empty{text-align:center;padding:48px 20px}
 .empty-icon{font-size:48px;margin-bottom:12px;display:block}
@@ -703,11 +705,18 @@ async function loadComments(rk){
   }catch(e){console.error('Load comments exception:',e);detailComments=[];renderComments()}
 }
 
+let replyTo=null;
 function renderComments(){
   const f=ccf==='all'?detailComments:detailComments.filter(c=>c.spoiler_level===ccf);
-  if(!f.length){document.getElementById('cml').innerHTML='<p style="color:var(--td);font-size:13px;padding:20px 0;text-align:center">No comments yet. Be the first!</p>';return}
+  // Separate top-level and replies
+  const topLevel=f.filter(c=>!c.parent_id);
+  const replies={};
+  f.filter(c=>c.parent_id).forEach(c=>{if(!replies[c.parent_id])replies[c.parent_id]=[];replies[c.parent_id].push(c)});
+
+  if(!topLevel.length&&!f.length){document.getElementById('cml').innerHTML='<p style="color:var(--td);font-size:13px;padding:20px 0;text-align:center">No comments yet. Be the first!</p>';return}
   const adm=isAdmin();
-  document.getElementById('cml').innerHTML=f.map(c=>{
+
+  function renderOne(c,isReply){
     const s=SP[c.spoiler_level]||SP.none;
     const hs=c.spoiler_level!=='none';
     const ir=rv.has(c.id);const bl=hs&&!ir;
@@ -717,14 +726,16 @@ function renderComments(){
     const init=un.slice(0,2).toUpperCase();
     const isOwn=user&&c.user_id===user.id;
     const isHidden=c.hidden;
-    let html='<div class="cm"'+(isHidden&&adm?' style="opacity:0.5;border-color:var(--sh)"':'')+'><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+'">'+init+'</div><div><div class="cmn">'+esc(un)+(isHidden&&adm?'<span class="hidden-tag">HIDDEN</span>':'')+'</div><div class="cmt">'+timeAgo(c.created_at)+(c.report_count&&adm?' \u00B7 '+c.report_count+' reports':'')+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div>';
+    let html='<div class="cm" style="'+(isReply?'margin-left:32px;border-left:2px solid var(--brd);padding-left:12px;':'')+'"'+(isHidden&&adm?' style="opacity:0.5;border-color:var(--sh)"':'')+'><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+';'+(isReply?'width:28px;height:28px;font-size:10px':'')+'">'+init+'</div><div><div class="cmn">'+esc(un)+(isHidden&&adm?'<span class="hidden-tag">HIDDEN</span>':'')+'</div><div class="cmt">'+timeAgo(c.created_at)+(c.report_count&&adm?' \u00B7 '+c.report_count+' reports':'')+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div>';
     html+='<div class="cmb'+(bl?' bl':'')+'">'+esc(c.body)+'</div>';
     if(bl)html+='<div class="rvb" onclick="rv.add(\''+c.id+'\');renderComments()">\uD83D\uDC41 Reveal '+c.spoiler_level+' spoiler</div>';
     html+='<div class="cmf"><span onclick="vote(\''+c.id+'\',\'up\')">\u25B2 '+c.upvotes+'</span><span onclick="vote(\''+c.id+'\',\'down\')">\u25BC '+c.downvotes+'</span>';
+    if(user&&!isReply)html+='<span onclick="startReply(\''+c.id+'\',\''+esc(un).replace(/'/g,"\\'")+'\')">\u21A9 Reply</span>';
     if(user&&!isOwn)html+='<span onclick="showReport(\''+c.id+'\')">\uD83D\uDEA9 Report</span>';
     if(isOwn)html+='<span onclick="deleteOwnComment(\''+c.id+'\')">\uD83D\uDDD1 Delete</span>';
     html+='</div>';
-    // Mod tools
+    // Reply composer
+    if(replyTo===c.id)html+='<div style="margin:8px 0 8px 32px;display:flex;gap:6px"><input class="finput" id="reply-body" placeholder="Reply to '+esc(un)+'..." style="margin:0;flex:1;font-size:12px"><button class="bps" style="font-size:11px;padding:6px 12px" onclick="postReply(\''+c.id+'\')">Reply</button><button style="font-size:11px;color:var(--td);padding:6px" onclick="replyTo=null;renderComments()">Cancel</button></div>';
     if(adm){
       html+='<div class="mod-bar">';
       if(!isHidden)html+='<button class="mod-btn hide" onclick="modHide(\''+c.id+'\')">Hide</button>';
@@ -735,7 +746,32 @@ function renderComments(){
     }
     html+='</div>';
     return html;
-  }).join('');
+  }
+
+  let html='';
+  topLevel.forEach(c=>{
+    html+=renderOne(c,false);
+    const reps=replies[c.id]||[];
+    reps.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    reps.forEach(r=>html+=renderOne(r,true));
+  });
+  document.getElementById('cml').innerHTML=html;
+}
+
+function startReply(cid,username){replyTo=cid;renderComments();setTimeout(()=>{const el=document.getElementById('reply-body');if(el)el.focus()},50)}
+
+async function postReply(parentId){
+  const body=document.getElementById('reply-body').value.trim();
+  if(!body)return toast('Write something first!');
+  if(!user)return showAuth('login');
+  const rk=releaseKey(cr);
+  try{
+    const{error}=await sb.from('comments').insert({user_id:user.id,release_key:rk,body:body,spoiler_level:selSpoiler,parent_id:parentId});
+    if(error){console.error('Reply error:',error);toast('Error: '+error.message);return}
+    replyTo=null;
+    toast('Reply posted!');
+    await loadComments(rk);
+  }catch(e){console.error('Reply exception:',e);toast('Error posting reply')}
 }
 
 function fCmt(f,btn){ccf=f;document.querySelectorAll('.cfb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderComments()}
@@ -855,10 +891,27 @@ async function removeFromWL(rk){
 }
 
 function shareRelease(){
-  const url=window.location.origin;
-  if(navigator.share){navigator.share({title:cr.title+' on Unreeled',url:url})}
-  else if(navigator.clipboard){navigator.clipboard.writeText(cr.title+' — check it out on '+url);toast('Link copied!')}
-  else{toast('Share: '+url)}
+  const siteUrl=window.location.origin+window.location.pathname;
+  const text=cr.title+' — check it out on Unreeled';
+  const c=MC[cr.media_type]||MC.movie;
+  const shareData={title:cr.title+' on Unreeled',text:text,url:siteUrl};
+
+  // Show share menu
+  const el=document.getElementById('share-menu');
+  if(el){el.remove()}
+  const menu=document.createElement('div');
+  menu.id='share-menu';
+  menu.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:4000;background:var(--card);border-top:1px solid var(--brd);border-radius:16px 16px 0 0;padding:20px;animation:slideUp .2s ease';
+  menu.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-weight:600;font-size:15px">Share '+esc(cr.title)+'</span><button onclick="document.getElementById(\'share-menu\').remove()" style="font-size:18px;color:var(--td)">\u2715</button></div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center">'
+    +'<div onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(text+' '+siteUrl)+'\',\'_blank\');document.getElementById(\'share-menu\').remove()" style="cursor:pointer;padding:12px;background:var(--el);border-radius:12px"><div style="font-size:24px;margin-bottom:4px">\uD83D\uDCAC</div><div style="font-size:10px;color:var(--td)">WhatsApp</div></div>'
+    +'<div onclick="window.open(\'https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'\&url='+encodeURIComponent(siteUrl)+'\',\'_blank\');document.getElementById(\'share-menu\').remove()" style="cursor:pointer;padding:12px;background:var(--el);border-radius:12px"><div style="font-size:24px;margin-bottom:4px">\uD835\uDD4F</div><div style="font-size:10px;color:var(--td)">X / Twitter</div></div>'
+    +'<div onclick="window.open(\'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(siteUrl)+'\',\'_blank\');document.getElementById(\'share-menu\').remove()" style="cursor:pointer;padding:12px;background:var(--el);border-radius:12px"><div style="font-size:24px;margin-bottom:4px">\uD83D\uDCD8</div><div style="font-size:10px;color:var(--td)">Facebook</div></div>'
+    +'<div onclick="navigator.clipboard.writeText(\''+text.replace(/'/g,"\\'")+' '+siteUrl+'\');toast(\'Link copied!\');document.getElementById(\'share-menu\').remove()" style="cursor:pointer;padding:12px;background:var(--el);border-radius:12px"><div style="font-size:24px;margin-bottom:4px">\uD83D\uDD17</div><div style="font-size:10px;color:var(--td)">Copy link</div></div>'
+    +'</div>';
+  document.body.appendChild(menu);
+  // Close on backdrop tap
+  setTimeout(()=>{document.addEventListener('click',function cl(e){if(!menu.contains(e.target)){menu.remove();document.removeEventListener('click',cl)}},{once:false})},100);
 }
 
 // ═══════ SUBSCRIPTIONS ═══════
