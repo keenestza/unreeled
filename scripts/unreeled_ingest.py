@@ -186,6 +186,27 @@ class TMDBSource:
         genre_map = self._movie_genres if media_type == "movie" else self._tv_genres
         return [genre_map.get(gid, "Unknown") for gid in genre_ids]
 
+    def _get_watch_providers(self, tmdb_id: int, media_type: str) -> dict:
+        """Fetch streaming/rent/buy providers from TMDB (free, no extra key)."""
+        endpoint = f"/{media_type}/{tmdb_id}/watch/providers"
+        data = self._get(endpoint)
+        if not data or "results" not in data:
+            return {}
+        for region in ["US", "GB", "ZA"]:
+            if region in data["results"]:
+                providers = data["results"][region]
+                streaming = {}
+                for p in providers.get("flatrate", []):
+                    streaming[p["provider_name"]] = {"type": "sub", "url": providers.get("link", "")}
+                for p in providers.get("rent", []):
+                    if p["provider_name"] not in streaming:
+                        streaming[p["provider_name"]] = {"type": "rent", "url": providers.get("link", "")}
+                for p in providers.get("buy", []):
+                    if p["provider_name"] not in streaming:
+                        streaming[p["provider_name"]] = {"type": "buy", "url": providers.get("link", "")}
+                return streaming
+        return {}
+
     def fetch_movies(self, date: str) -> list[dict]:
         if not self.api_key:
             logger.warning("TMDB_API_KEY not set — skipping movies")
@@ -252,6 +273,20 @@ class TMDBSource:
             page += 1
 
         logger.info(f"TMDB: {len(releases)} movies for {date} (after filtering)")
+
+        # Enrich top movies with streaming providers
+        wp_count = 0
+        for r in releases[:20]:
+            tmdb_id = r.get("external_ids", {}).get("tmdb_id")
+            if not tmdb_id:
+                continue
+            streaming = self._get_watch_providers(tmdb_id, "movie")
+            if streaming:
+                r["metadata"]["streaming"] = streaming
+                wp_count += 1
+        if wp_count:
+            logger.info(f"TMDB: Added streaming info to {wp_count} movies")
+
         return releases
 
     def fetch_tv(self, date: str) -> list[dict]:
@@ -326,6 +361,20 @@ class TMDBSource:
             page += 1
 
         logger.info(f"TMDB: {len(releases)} TV shows for {date} (after filtering)")
+
+        # Enrich top shows with streaming providers
+        wp_count = 0
+        for r in releases[:20]:
+            tmdb_id = r.get("external_ids", {}).get("tmdb_id")
+            if not tmdb_id:
+                continue
+            streaming = self._get_watch_providers(tmdb_id, "tv")
+            if streaming:
+                r["metadata"]["streaming"] = streaming
+                wp_count += 1
+        if wp_count:
+            logger.info(f"TMDB: Added streaming info to {wp_count} TV shows")
+
         return releases
 
 
