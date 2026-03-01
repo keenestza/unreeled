@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 RESEND_KEY = os.environ.get("RESEND_API_KEY", "")
 SB_URL = os.environ.get("SUPABASE_URL", "")
 SB_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
-FROM_EMAIL = "Unreeled <digest@unreeled.app>"
+FROM_EMAIL = "Unreeled <onboarding@resend.dev>"
 SITE_URL = "https://keenestza.github.io/unreeled/"
 
 MC = {
