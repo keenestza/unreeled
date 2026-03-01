@@ -225,7 +225,59 @@ def build():
 
     file_size = output_file.stat().st_size / 1024
     print(f"Built {output_file} ({file_size:.0f} KB)")
+
+    # Generate RSS feed
+    rss_file = project_root / "docs" / "feed.xml"
+    build_rss(latest_releases, latest_date, rss_file)
+
     return True
+
+
+def build_rss(releases, date, output_path):
+    """Generate RSS 2.0 feed from latest releases."""
+    from xml.sax.saxutils import escape
+
+    site_url = "https://keenestza.github.io/unreeled/"
+    items = []
+    for r in releases[:50]:
+        title = escape(r.get("title", "Unknown"))
+        media_type = r.get("media_type", "")
+        mc = {"movie": "Film", "tv": "TV", "book": "Book", "game": "Game",
+              "anime": "Anime", "music": "Music", "podcast": "Podcast", "news": "News"}
+        category = mc.get(media_type, media_type)
+        synopsis = escape((r.get("synopsis", "") or "")[:300])
+        genres = ", ".join(r.get("genres", [])[:3])
+        poster = r.get("poster_url", "")
+
+        desc = f"[{category}] {synopsis}"
+        if genres:
+            desc += f" — Genres: {genres}"
+
+        items.append(f"""    <item>
+      <title>{title}</title>
+      <description>{escape(desc)}</description>
+      <category>{category}</category>
+      <pubDate>{date}</pubDate>
+      <guid>{site_url}#{media_type}-{escape(title).replace(' ', '-').lower()}</guid>
+      <link>{site_url}</link>
+    </item>""")
+
+    rss = f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>UNREELED — Daily Media Releases</title>
+    <link>{site_url}</link>
+    <description>Daily releases across movies, TV, books, games, anime, music and podcasts.</description>
+    <language>en</language>
+    <lastBuildDate>{date}</lastBuildDate>
+    <atom:link href="{site_url}feed.xml" rel="self" type="application/rss+xml"/>
+{chr(10).join(items)}
+  </channel>
+</rss>"""
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(rss)
+    print(f"RSS feed: {len(items)} items → {output_path}")
 
 
 if __name__ == "__main__":
