@@ -18,7 +18,7 @@
 <meta name="twitter:image" content="https://unreeled.netlify.app/og-image.png">
 <!-- PWA -->
 <meta name="theme-color" content="#ff6b35">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23ff6b35'/><text x='45' y='135' font-size='120' font-weight='bold' fill='white'>U</text></svg>">
@@ -830,18 +830,28 @@ async function toggleWL(){
   if(!user)return showAuth('login');
   const rk=releaseKey(cr);
   if(isWatchlisted(rk)){
-    await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
+    const{error}=await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
+    if(error){console.error('Watchlist remove error:',error);toast('Error removing — try again');return}
     userWatchlist=userWatchlist.filter(w=>w.release_key!==rk);
     toast('Removed from watchlist');
   } else {
     const rd={synopsis:cr.synopsis||'',genres:cr.genres||[],metadata:cr.metadata||{},spoiler_counts:cr.spoiler_counts||{}};
-    const{data}=await sb.from('watchlist').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,poster_url:cr.poster_url||'',release_data:rd}).select().single();
+    const{data,error}=await sb.from('watchlist').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,poster_url:cr.poster_url||'',release_data:rd}).select().single();
+    if(error){console.error('Watchlist add error:',error);toast('Error adding — try again');return}
     if(data)userWatchlist.push(data);
     toast('Added to watchlist!');
   }
   const wl=isWatchlisted(rk);
   const btn=document.getElementById('wl-btn');
   if(btn){btn.textContent=wl?'\u2705 Watchlisted':'\u2B50 Watchlist';btn.className=wl?'o active':'o'}
+}
+
+async function removeFromWL(rk){
+  const{error}=await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
+  if(error){console.error('Watchlist remove error:',error);toast('Error removing');return}
+  userWatchlist=userWatchlist.filter(w=>w.release_key!==rk);
+  toast('Removed from watchlist');
+  renderAccount();
 }
 
 function shareRelease(){
@@ -1025,7 +1035,7 @@ function renderAccount(){
   if(userSubs.length){userSubs.forEach(s=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span style="font-size:13px">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><button class="ssb on" onclick="toggleSub(\''+s.subscription_type+'\',\''+s.subscription_value.replace(/'/g,"\\'")+'\')">\u2713 Subscribed</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a></p>'}
   // Watchlist
   h+='<div class="st" style="margin-top:24px">My Watchlist ('+userWatchlist.length+')</div>';
-  if(userWatchlist.length){userWatchlist.forEach(w=>{const c=MC[w.media_type]||MC.movie;h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'" onclick="openWatchlistItem(\''+esc(w.release_key)+'\',\''+esc(w.release_title)+'\',\''+w.media_type+'\')"><span class="mb '+w.media_type+'">'+c.l+'</span><span style="font-size:13px;flex:1">'+esc(w.release_title)+'</span><span style="font-size:11px;color:var(--td)">\u2192</span></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No items in watchlist yet.</p>'}
+  if(userWatchlist.length){userWatchlist.forEach(w=>{const c=MC[w.media_type]||MC.movie;h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'"><span class="mb '+w.media_type+'">'+c.l+'</span><span style="font-size:13px;flex:1;cursor:pointer" onclick="openWatchlistItem(\''+esc(w.release_key)+'\',\''+esc(w.release_title)+'\',\''+w.media_type+'\')">'+esc(w.release_title)+'</span><button onclick="event.stopPropagation();removeFromWL(\''+esc(w.release_key)+'\')" style="padding:4px 10px;font-size:11px;color:var(--sh);background:var(--shb);border:1px solid var(--shr);border-radius:6px;cursor:pointer;white-space:nowrap">\u2715 Remove</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No items in watchlist yet.</p>'}
   document.getElementById('p-account').innerHTML=h}
 
 // ═══════ INIT ═══════
