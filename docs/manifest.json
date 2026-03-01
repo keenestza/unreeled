@@ -2,7 +2,7 @@
   "name": "UNREELED — Daily Media Releases",
   "short_name": "Unreeled",
   "description": "Track daily releases across movies, TV, books, games, anime, music and podcasts.",
-  "start_url": "/",
+  "start_url": "/unreeled/",
   "display": "standalone",
   "background_color": "#08090c",
   "theme_color": "#ff6b35",
