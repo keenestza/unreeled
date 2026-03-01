@@ -33,17 +33,10 @@ def load_release_file(filepath):
         return None
 
 
-def safe_str(val):
-    """Safely convert any value to string, returning empty string for None."""
-    if val is None:
-        return ""
-    return str(val)
-
-
 def process_releases(releases, max_per_type=15, max_total=200):
     """Select top releases ensuring all media types are represented."""
     for r in releases:
-        syn = safe_str(r.get("synopsis"))
+        syn = r.get("synopsis", "")
         if len(syn) > 500:
             r["synopsis"] = syn[:497] + "..."
 
@@ -52,8 +45,7 @@ def process_releases(releases, max_per_type=15, max_total=200):
         by_type.setdefault(r.get("media_type", "other"), []).append(r)
 
     def sort_key(r):
-        meta = r.get("metadata") or {}
-        score = meta.get("popularity", 0) or 0
+        score = r.get("metadata", {}).get("popularity", 0) or 0
         if r.get("synopsis"):
             score += 50
         if r.get("poster_url"):
@@ -87,20 +79,20 @@ def compute_trending(all_data):
 
     for date_str, data in all_data.items():
         for r in data.get("releases", []):
-            key = (safe_str(r.get("title")).lower().strip(), r.get("media_type", ""))
+            key = (r.get("title", "").lower().strip(), r.get("media_type", ""))
             title_appearances[key] += 1
 
             if key not in title_info or date_str > title_info[key]["first_seen"]:
                 title_info[key] = {
-                    "title": safe_str(r.get("title")),
+                    "title": r.get("title", ""),
                     "media_type": r.get("media_type", ""),
-                    "genres": (r.get("genres") or [])[:3],
-                    "synopsis": safe_str(r.get("synopsis"))[:200],
-                    "poster_url": safe_str(r.get("poster_url")),
-                    "comment_count": r.get("comment_count", 0) or 0,
-                    "spoiler_counts": r.get("spoiler_counts") or {},
+                    "genres": r.get("genres", [])[:3],
+                    "synopsis": (r.get("synopsis", "") or "")[:200],
+                    "poster_url": r.get("poster_url", ""),
+                    "comment_count": r.get("comment_count", 0),
+                    "spoiler_counts": r.get("spoiler_counts", {}),
                     "metadata": {
-                        k: v for k, v in (r.get("metadata") or {}).items()
+                        k: v for k, v in (r.get("metadata", {}) or {}).items()
                         if k in ("artists", "authors", "studios", "networks",
                                  "runtime_minutes", "score", "platforms",
                                  "publisher", "formats", "labels")
@@ -125,7 +117,7 @@ def compute_archive(all_data):
 
     for date_str in sorted(all_data.keys()):
         data = all_data[date_str]
-        releases = data.get("releases") or []
+        releases = data.get("releases", [])
 
         type_counts = {}
         for r in releases:
@@ -190,9 +182,9 @@ def build():
     historical = {}
     for date_str, data in all_data.items():
         historical[date_str] = process_releases(
-            data.get("releases") or [],
-            max_per_type=12 if date_str != latest_date else 15,
-            max_total=120 if date_str != latest_date else 200,
+            data.get("releases", []),
+            max_per_type=25 if date_str != latest_date else 30,
+            max_total=250 if date_str != latest_date else 400,
         )
 
     latest_releases = historical[latest_date]
@@ -209,7 +201,7 @@ def build():
         "latest": {
             "date": latest_date,
             "total_releases": len(latest_releases),
-            "source_stats": latest_data.get("source_stats") or {},
+            "source_stats": latest_data.get("source_stats", {}),
             "releases": latest_releases,
         },
         "historical": historical,
