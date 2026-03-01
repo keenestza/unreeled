@@ -470,7 +470,7 @@ async function doLogin(){
 async function doReset(){
   const em=document.getElementById('a-email').value.trim();
   if(!em)return showErr('Email is required');
-  const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:'https://unreeled.netlify.app'});
+  const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:'https://keenestza.github.io/unreeled/'});
   if(error)return showErr(error.message);
   showOk('Reset link sent! Check your email.');
 }
