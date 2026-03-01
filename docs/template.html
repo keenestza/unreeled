@@ -57,6 +57,17 @@
 /* STAR RATING */
 .stars{display:inline-flex;gap:2px}.stars span{cursor:pointer;font-size:18px;color:var(--brd);transition:all .12s}.stars span:hover,.stars span.on{color:#f0c038}
 .avg-rating{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--td)}.avg-rating em{font-style:normal;font-weight:700;color:var(--sm)}
+/* PWA INSTALL BANNER */
+.pwa-banner{position:fixed;bottom:68px;left:12px;right:12px;z-index:2500;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;display:none;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(0,0,0,0.4);animation:slideUp .3s ease}
+.pwa-banner.show{display:flex}
+.pwa-banner .pwa-icon{width:42px;height:42px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0}
+.pwa-banner .pwa-text{flex:1}
+.pwa-banner .pwa-text h4{font-size:13px;font-weight:700;margin-bottom:2px}
+.pwa-banner .pwa-text p{font-size:11px;color:var(--td)}
+.pwa-banner .pwa-btns{display:flex;gap:6px;flex-shrink:0}
+.pwa-banner .pwa-btns button{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600}
+.pwa-banner .pwa-install{background:var(--accent);color:#fff}
+.pwa-banner .pwa-dismiss{background:var(--el);color:var(--td);border:1px solid var(--brd)}
 body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--accent);color:#fff}
 button{cursor:pointer;font-family:inherit;border:none;background:none}
@@ -1092,19 +1103,46 @@ function renderAccount(){
   document.getElementById('p-account').innerHTML=h}
 
 // ═══════ INIT ═══════
+let deferredInstallPrompt=null;
 document.addEventListener('DOMContentLoaded',async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY);
   await loadUser();
   renderNav();renderFeed();renderTrending();renderArchive();renderCalendar();renderStreams();renderAccount();
-  // Listen for auth changes
   sb.auth.onAuthStateChange(async(event)=>{
     if(event==='SIGNED_IN'||event==='SIGNED_OUT'){await loadUser();renderNav();renderStreams();renderAccount()}
   });
   // Register service worker for PWA
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    navigator.serviceWorker.register('/unreeled/sw.js').catch(()=>{});
   }
 });
+
+// ═══════ PWA INSTALL PROMPT ═══════
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  // Don't show if dismissed before
+  if(localStorage.getItem('unreeled-pwa-dismissed'))return;
+  setTimeout(()=>{
+    const banner=document.getElementById('pwa-banner');
+    if(banner)banner.classList.add('show');
+  },3000);
+});
+
+function pwaInstall(){
+  if(!deferredInstallPrompt)return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(c=>{
+    if(c.outcome==='accepted')toast('App installed!');
+    deferredInstallPrompt=null;
+    document.getElementById('pwa-banner').classList.remove('show');
+  });
+}
+
+function pwaDismiss(){
+  document.getElementById('pwa-banner').classList.remove('show');
+  localStorage.setItem('unreeled-pwa-dismissed','1');
+}
 
 // ═══════ NOTIFICATIONS ═══════
 async function requestNotifications(){
@@ -1116,5 +1154,11 @@ async function requestNotifications(){
 
 document.addEventListener('click',e=>{const um=document.getElementById('umenu');if(um.classList.contains('show')&&!e.target.closest('.user-pill')&&!e.target.closest('.umenu'))um.classList.remove('show')});
 </script>
+<!-- PWA Install Banner -->
+<div class="pwa-banner" id="pwa-banner">
+  <div class="pwa-icon">U</div>
+  <div class="pwa-text"><h4>Install Unreeled</h4><p>Add to your home screen for quick access</p></div>
+  <div class="pwa-btns"><button class="pwa-dismiss" onclick="pwaDismiss()">Later</button><button class="pwa-install" onclick="pwaInstall()">Install</button></div>
+</div>
 </body>
 </html>
