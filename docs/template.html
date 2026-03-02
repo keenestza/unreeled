@@ -330,6 +330,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
     <div class="tabs">
       <button class="tab on" data-p="feed" onclick="go('feed')">Releases</button>
       <button class="tab" data-p="trending" onclick="go('trending')">Trending</button>
+      <button class="tab" data-p="genres" onclick="go('genres')">Genres</button>
       <button class="tab" data-p="archive" onclick="go('archive')">Archive</button>
       <button class="tab" data-p="calendar" onclick="go('calendar')">Calendar</button>
       <button class="tab" data-p="streams" onclick="go('streams')">Streams</button>
@@ -352,8 +353,11 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 <div id="p-trending" class="page"></div>
 <div id="p-archive" class="page"></div>
 <div id="p-calendar" class="page"></div>
+<div id="p-genres" class="page"></div>
+<div id="p-profile" class="page"></div>
 <div id="p-streams" class="page"></div>
 <div id="p-account" class="page"></div>
+<div id="p-admin" class="page"></div>
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bnav" id="bnav">
   <button class="on" data-p="feed" onclick="go('feed')"><span class="bi">&#127916;</span>Releases</button>
@@ -422,7 +426,21 @@ async function loadRating(rk){
 }
 
 // ═══════ NAV ═══════
-function go(p,push){document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));document.getElementById('p-'+p).classList.add('on');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'?'feed':p)+'"]')?.classList.add('on');document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));const bp=p==='detail'?'feed':p;document.querySelector('.bnav button[data-p="'+bp+'"]')?.classList.add('on');if(push!==false&&p!==curPage)history.pushState({page:p},'','');curPage=p;window.scrollTo({top:0,behavior:'smooth'});document.getElementById('umenu').classList.remove('show')}
+function go(p,push){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  const pg=document.getElementById('p-'+p);
+  pg.classList.add('on');
+  // Show skeleton while async pages load
+  if(p==='detail'||p==='profile')showSkeleton(pg,4);
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'?'feed':p)+'"]')?.classList.add('on');
+  document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));
+  const bp=p==='detail'||p==='profile'||p==='admin'?'feed':p;
+  document.querySelector('.bnav button[data-p="'+bp+'"]')?.classList.add('on');
+  if(push!==false&&p!==curPage)history.pushState({page:p},'','');
+  curPage=p;window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('umenu').classList.remove('show');
+}
 window.addEventListener('popstate',e=>{go((e.state&&e.state.page)||'feed',false)});
 
 function renderNav(){
@@ -430,7 +448,7 @@ function renderNav(){
   if(user&&profile){
     const init=profile.username.slice(0,2).toUpperCase();
     el.innerHTML='<div class="user-pill" onclick="document.getElementById(\'umenu\').classList.toggle(\'show\')"><div class="uav" style="background:'+profile.avatar_color+'">'+init+'</div>'+esc(profile.username)+'</div>';
-    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="go(\'streams\')">My Streams</button><hr><button onclick="doLogout()">Log Out</button>';
+    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="openProfile(\''+user.id+'\',\''+esc(profile.username).replace(/'/g,"\\'")+'\')">My Profile</button><button onclick="go(\'streams\')">My Streams</button>'+(isAdmin()?'<button onclick="go(\'admin\');renderAdmin()">Admin Dashboard</button>':'')+'<hr><button onclick="doLogout()">Log Out</button>';
   } else {
     el.innerHTML='<button class="btn-a" onclick="showAuth(\'signup\')">Sign Up</button><button style="font-size:12.5px;color:var(--td);padding:6px 10px" onclick="showAuth(\'login\')">Log In</button>';
     document.getElementById('umenu').classList.remove('show');
@@ -737,7 +755,7 @@ function renderComments(){
     const init=un.slice(0,2).toUpperCase();
     const isOwn=user&&c.user_id===user.id;
     const isHidden=c.hidden;
-    let html='<div class="cm" style="'+(isReply?'margin-left:32px;border-left:2px solid var(--brd);padding-left:12px;':'')+'"'+(isHidden&&adm?' style="opacity:0.5;border-color:var(--sh)"':'')+'><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+';'+(isReply?'width:28px;height:28px;font-size:10px':'')+'">'+init+'</div><div><div class="cmn">'+esc(un)+(isHidden&&adm?'<span class="hidden-tag">HIDDEN</span>':'')+'</div><div class="cmt">'+timeAgo(c.created_at)+(c.report_count&&adm?' \u00B7 '+c.report_count+' reports':'')+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div>';
+    let html='<div class="cm" style="'+(isReply?'margin-left:32px;border-left:2px solid var(--brd);padding-left:12px;':'')+'"'+(isHidden&&adm?' style="opacity:0.5;border-color:var(--sh)"':'')+'><div class="cmh"><div class="cmu"><div class="av" style="background:'+ac+';'+(isReply?'width:28px;height:28px;font-size:10px':'')+'">'+init+'</div><div><div class="cmn"><a onclick="openProfile(\''+c.user_id+'\',\''+esc(un).replace(/'/g,"\\'")+'\')" style="cursor:pointer;color:var(--text)">'+esc(un)+'</a>'+(isHidden&&adm?'<span class="hidden-tag">HIDDEN</span>':'')+'</div><div class="cmt">'+timeAgo(c.created_at)+(c.report_count&&adm?' \u00B7 '+c.report_count+' reports':'')+'</div></div></div><span class="sb" style="background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div>';
     html+='<div class="cmb'+(bl?' bl':'')+'">'+esc(c.body)+'</div>';
     if(bl)html+='<div class="rvb" onclick="rv.add(\''+c.id+'\');renderComments()">\uD83D\uDC41 Reveal '+c.spoiler_level+' spoiler</div>';
     html+='<div class="cmf"><span onclick="vote(\''+c.id+'\',\'up\')">\u25B2 '+c.upvotes+'</span><span onclick="vote(\''+c.id+'\',\'down\')">\u25BC '+c.downvotes+'</span>';
@@ -954,6 +972,209 @@ h+='<div class="cfs"><span>Show:</span><button class="cfb on" onclick="fCmt(\'al
 document.getElementById('p-detail').innerHTML=h;go('detail');loadComments(rk)}
 function renderTrending(){TR=D.trending||[];let h='<h1 class="hero">\uD83D\uDD25 Trending</h1><p class="sub">Titles generating buzz across multiple days</p>';if(!TR.length){h+='<div class="empty"><h2>Not enough data yet</h2><p>Trending builds up as the pipeline runs daily.</p></div>'}else{TR.forEach((t,i)=>{const c=MC[t.media_type]||MC.movie,mp=[],m=t.metadata||{};if(m.artists?.length)mp.push(m.artists[0]);if(m.authors?.length)mp.push(m.authors[0]);if(m.studios?.length)mp.push(m.studios[0]);if(m.networks?.length)mp.push(m.networks[0]);const g=(t.genres||[]).slice(0,3).join(', ');if(g)mp.push(g);h+='<div class="trc" onclick="openTr('+i+')" style="cursor:pointer"><div class="trk">'+(i+1)+'</div>'+poster(t,56,78,20)+'<div class="tri"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><div class="trt">'+esc(t.title)+'</div><span class="mb '+t.media_type+'">'+c.l+'</span></div><div class="trm">'+mp.join('<span class="s">\u00B7</span>')+'</div>'+(t.synopsis?'<p class="rs" style="margin:4px 0">'+esc(t.synopsis)+'</p>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+(t.days_seen>1?'<span class="trd">\uD83D\uDD25 '+t.days_seen+' days</span>':'')+(t.comment_count?'<span style="font-size:11px;color:var(--td)">\uD83D\uDCAC '+t.comment_count+'</span>':'')+'</div></div>'})}document.getElementById('p-trending').innerHTML=h}
 
+// ═══════ GENRES ═══════
+let genreFilter=null;
+function renderGenres(){
+  // Collect all genres across all releases
+  const genreMap={};
+  R.forEach(r=>{
+    (r.genres||[]).forEach(g=>{
+      if(!genreMap[g])genreMap[g]={count:0,types:{}};
+      genreMap[g].count++;
+      genreMap[g].types[r.media_type]=(genreMap[g].types[r.media_type]||0)+1;
+    });
+  });
+  const sorted=Object.entries(genreMap).sort((a,b)=>b[1].count-a[1].count);
+
+  let h='<h1 class="hero">\uD83C\uDFAD Genres</h1><p class="sub">Browse today\'s releases by genre</p>';
+
+  if(!genreFilter){
+    // Grid of genre cards
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:16px">';
+    sorted.forEach(([name,info])=>{
+      const icons=Object.keys(info.types).map(t=>(MC[t]||{}).i||'').join(' ');
+      h+='<div onclick="genreFilter=\''+esc(name).replace(/'/g,"\\'")+'\';renderGenres()" style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'">';
+      h+='<div style="font-size:14px;font-weight:600;margin-bottom:4px">'+esc(name)+'</div>';
+      h+='<div style="font-size:11px;color:var(--td)">'+info.count+' release'+(info.count!==1?'s':'')+'</div>';
+      h+='<div style="font-size:12px;margin-top:4px">'+icons+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  } else {
+    // Filtered genre view
+    const filtered=R.filter(r=>(r.genres||[]).includes(genreFilter));
+    h+='<button onclick="genreFilter=null;renderGenres()" style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;margin-bottom:16px">\u2190 All Genres</button>';
+    h+='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;margin-bottom:4px">'+esc(genreFilter)+'</h2>';
+    h+='<p class="sub" style="margin-bottom:16px">'+filtered.length+' release'+(filtered.length!==1?'s':'')+' today</p>';
+    filtered.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,'openD('+ri+')')});
+    if(!filtered.length)h+='<div class="empty"><span class="empty-icon">\uD83C\uDFAD</span><h2>No releases</h2><p>No releases in this genre today.</p></div>';
+  }
+  document.getElementById('p-genres').innerHTML=h;
+}
+
+// ═══════ USER PROFILE ═══════
+async function openProfile(userId,username){
+  go('profile');
+  const pg=document.getElementById('p-profile');
+  showSkeleton(pg,5);
+
+  try{
+    // Fetch user's profile
+    const{data:prof}=await sb.from('profiles').select('*').eq('id',userId).single();
+    if(!prof){pg.innerHTML='<div class="empty"><span class="empty-icon">\uD83D\uDC64</span><h2>User not found</h2></div>';return}
+
+    // Fetch user's comments
+    const{data:comments}=await sb.from('comments').select('*').eq('user_id',userId).eq('hidden',false).order('created_at',{ascending:false}).limit(20);
+
+    // Fetch user's ratings
+    const{data:ratings}=await sb.from('ratings').select('*').eq('user_id',userId).order('created_at',{ascending:false}).limit(20);
+
+    const init=prof.username.slice(0,2).toUpperCase();
+    const joined=new Date(prof.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long'});
+
+    let h='<button class="dbk" onclick="history.back()">\u2190 Back</button>';
+    // Profile header
+    h+='<div style="text-align:center;padding:24px 0 16px"><div class="av" style="background:'+prof.avatar_color+';width:64px;height:64px;font-size:24px;border-radius:16px;margin:0 auto 12px">'+init+'</div>';
+    h+='<h1 style="font-family:\'Fraunces\',serif;font-size:24px">'+esc(prof.username)+'</h1>';
+    h+='<p style="font-size:12px;color:var(--td);margin-top:4px">Joined '+joined+'</p></div>';
+
+    // Stats
+    const commentCount=(comments||[]).length;
+    const ratingCount=(ratings||[]).length;
+    const avgRating=ratingCount?((ratings||[]).reduce((s,r)=>s+r.rating,0)/ratingCount).toFixed(1):'—';
+    h+='<div style="display:flex;gap:12px;justify-content:center;margin-bottom:24px">';
+    h+='<div style="text-align:center;padding:12px 20px;background:var(--card);border:1px solid var(--brd);border-radius:10px"><div style="font-size:20px;font-weight:700">'+commentCount+'</div><div style="font-size:10px;color:var(--td)">Comments</div></div>';
+    h+='<div style="text-align:center;padding:12px 20px;background:var(--card);border:1px solid var(--brd);border-radius:10px"><div style="font-size:20px;font-weight:700">'+ratingCount+'</div><div style="font-size:10px;color:var(--td)">Ratings</div></div>';
+    h+='<div style="text-align:center;padding:12px 20px;background:var(--card);border:1px solid var(--brd);border-radius:10px"><div style="font-size:20px;font-weight:700">\u2605 '+avgRating+'</div><div style="font-size:10px;color:var(--td)">Avg Rating</div></div>';
+    h+='</div>';
+
+    // Recent comments
+    h+='<div class="st">\uD83D\uDCAC Recent Comments</div>';
+    if(commentCount){
+      (comments||[]).slice(0,10).forEach(c=>{
+        const s=SP[c.spoiler_level]||SP.none;
+        h+='<div style="padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;color:var(--td)">'+c.release_key.split(':').pop()+'</span><span class="sb" style="font-size:10px;background:'+s.bg+';color:'+s.c+';border:1px solid '+s.b+'">'+s.l+'</span></div>';
+        h+='<div style="font-size:13px">'+esc((c.body||'').slice(0,150))+'</div>';
+        h+='<div style="font-size:10px;color:var(--td);margin-top:4px">'+timeAgo(c.created_at)+'</div>';
+        h+='</div>';
+      });
+    } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No comments yet.</p>'}
+
+    // Recent ratings
+    h+='<div class="st" style="margin-top:16px">\u2B50 Recent Ratings</div>';
+    if(ratingCount){
+      (ratings||[]).slice(0,10).forEach(r=>{
+        const stars='\u2605'.repeat(r.rating)+'\u2606'.repeat(5-r.rating);
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:4px">';
+        h+='<span style="font-size:12px">'+r.release_key.split(':').pop()+'</span>';
+        h+='<span style="color:#f0c038;font-size:14px">'+stars+'</span>';
+        h+='</div>';
+      });
+    } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No ratings yet.</p>'}
+
+    pg.innerHTML=h;
+  }catch(e){console.error('Profile error:',e);pg.innerHTML='<div class="empty"><span class="empty-icon">\uD83D\uDC64</span><h2>Error loading profile</h2><p>'+e.message+'</p></div>'}
+}
+
+// ═══════ ADMIN DASHBOARD ═══════
+async function renderAdmin(){
+  const pg=document.getElementById('p-admin');
+  if(!user||!isAdmin()){pg.innerHTML='<div class="empty"><span class="empty-icon">\uD83D\uDD12</span><h2>Access Denied</h2><p>Admin only.</p></div>';return}
+  showSkeleton(pg,6);
+
+  try{
+    // Fetch stats
+    const[commentsRes,ratingsRes,usersRes,reportsRes,hiddenRes]=await Promise.all([
+      sb.from('comments').select('id',{count:'exact',head:true}),
+      sb.from('ratings').select('id',{count:'exact',head:true}),
+      sb.from('profiles').select('id',{count:'exact',head:true}),
+      sb.from('comments').select('id',{count:'exact',head:true}).gt('report_count',0),
+      sb.from('comments').select('id',{count:'exact',head:true}).eq('hidden',true),
+    ]);
+
+    const totalComments=commentsRes.count||0;
+    const totalRatings=ratingsRes.count||0;
+    const totalUsers=usersRes.count||0;
+    const reportedCount=reportsRes.count||0;
+    const hiddenCount=hiddenRes.count||0;
+
+    // Fetch recent reported comments
+    const{data:reported}=await sb.from('comments').select('*,profiles(username,avatar_color)').gt('report_count',0).order('report_count',{ascending:false}).limit(20);
+
+    // Fetch recent hidden comments
+    const{data:hidden}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('hidden',true).order('created_at',{ascending:false}).limit(10);
+
+    let h='<h1 class="hero">\uD83D\uDEE1 Admin Dashboard</h1><p class="sub">Site moderation and statistics</p>';
+
+    // Stats grid
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:20px 0">';
+    const stats=[
+      {n:totalUsers,l:'Users',i:'\uD83D\uDC65',c:'var(--accent)'},
+      {n:totalComments,l:'Comments',i:'\uD83D\uDCAC',c:'#6366f1'},
+      {n:totalRatings,l:'Ratings',i:'\u2B50',c:'#f0c038'},
+      {n:R.length,l:'Releases Today',i:'\uD83C\uDFAC',c:'#14b8a6'},
+      {n:reportedCount,l:'Reported',i:'\uD83D\uDEA9',c:'var(--sm)'},
+      {n:hiddenCount,l:'Hidden',i:'\uD83D\uDEAB',c:'var(--sh)'},
+    ];
+    stats.forEach(s=>{
+      h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;text-align:center">';
+      h+='<div style="font-size:24px;margin-bottom:4px">'+s.i+'</div>';
+      h+='<div style="font-size:22px;font-weight:700;color:'+s.c+'">'+s.n+'</div>';
+      h+='<div style="font-size:11px;color:var(--td)">'+s.l+'</div></div>';
+    });
+    h+='</div>';
+
+    // Reported comments
+    h+='<div class="st">\uD83D\uDEA9 Reported Comments ('+reportedCount+')</div>';
+    if((reported||[]).length){
+      reported.forEach(c=>{
+        const p=c.profiles||{};
+        const un=p.username||'anon';
+        h+='<div style="padding:12px;background:var(--card);border:1px solid var(--shr);border-radius:8px;margin-bottom:8px">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:600">'+esc(un)+'</span><span style="font-size:11px;color:var(--sh)">\uD83D\uDEA9 '+c.report_count+' reports</span></div>';
+        h+='<div style="font-size:13px;margin-bottom:8px">'+esc((c.body||'').slice(0,200))+'</div>';
+        h+='<div style="display:flex;gap:6px">';
+        if(!c.hidden)h+='<button onclick="modHide(\''+c.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--shb);color:var(--sh);border:1px solid var(--shr);border-radius:6px">Hide</button>';
+        else h+='<button onclick="modUnhide(\''+c.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--slb);color:var(--sl);border:1px solid var(--slr);border-radius:6px">Unhide</button>';
+        h+='<button onclick="modDismissReports(\''+c.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--el);color:var(--td);border:1px solid var(--brd);border-radius:6px">Dismiss</button>';
+        h+='</div></div>';
+      });
+    } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">\u2705 No reported comments. All clear!</p>'}
+
+    // Hidden comments
+    h+='<div class="st" style="margin-top:16px">\uD83D\uDEAB Hidden Comments ('+hiddenCount+')</div>';
+    if((hidden||[]).length){
+      hidden.forEach(c=>{
+        const p=c.profiles||{};
+        h+='<div style="padding:10px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;opacity:0.7">';
+        h+='<div style="font-size:12px;color:var(--td);margin-bottom:4px">'+(p.username||'anon')+' \u00B7 '+timeAgo(c.created_at)+'</div>';
+        h+='<div style="font-size:13px">'+esc((c.body||'').slice(0,150))+'</div>';
+        h+='<button onclick="modUnhide(\''+c.id+'\');setTimeout(renderAdmin,500)" style="margin-top:6px;padding:4px 10px;font-size:11px;background:var(--slb);color:var(--sl);border:1px solid var(--slr);border-radius:6px">Unhide</button>';
+        h+='</div>';
+      });
+    } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No hidden comments.</p>'}
+
+    // Media type breakdown for today
+    h+='<div class="st" style="margin-top:16px">\uD83D\uDCCA Today\'s Breakdown</div>';
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px">';
+    const cn={};R.forEach(r=>cn[r.media_type]=(cn[r.media_type]||0)+1);
+    for(const[t,count]of Object.entries(cn).sort((a,b)=>b[1]-a[1])){
+      const c=MC[t]||{i:'?',l:t,c:'#666'};
+      const pct=Math.round(count/R.length*100);
+      h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+      h+='<span style="width:28px;text-align:center">'+c.i+'</span>';
+      h+='<span style="width:70px;font-size:12px;font-weight:600">'+c.l+'</span>';
+      h+='<div style="flex:1;height:8px;background:var(--el);border-radius:4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+c.c+';border-radius:4px"></div></div>';
+      h+='<span style="width:50px;text-align:right;font-size:12px;color:var(--td)">'+count+' ('+pct+'%)</span>';
+      h+='</div>';
+    }
+    h+='</div>';
+
+    pg.innerHTML=h;
+  }catch(e){console.error('Admin error:',e);pg.innerHTML='<div class="empty"><span class="empty-icon">\u26A0\uFE0F</span><h2>Error</h2><p>'+e.message+'</p></div>'}
+}
+
 // ═══════ ARCHIVE ═══════
 function renderArchive(){const a=D.archive||{dates:[],weekly:[],monthly:[]},ds=a.dates||[],wk=a.weekly||[],mo=a.monthly||[];let h='<h1 class="hero">\uD83D\uDCC5 Archive</h1><p class="sub">Browse past releases by day, week, or month</p>';if(ds.length){const tot=ds.reduce((s,d)=>s+d.total,0),avg=Math.round(tot/ds.length);h+='<div class="arcs"><div class="arci"><em>'+ds.length+'</em><small>Days</small></div><div class="arci"><em>'+tot.toLocaleString()+'</em><small>Releases</small></div><div class="arci"><em>'+avg+'</em><small>Avg/day</small></div></div>'}if(mo.length){h+='<div class="sect" style="margin-top:0">\uD83D\uDCC6 Monthly</div><div class="sg">';mo.forEach(m=>{const ti=Object.keys(m.types||{}).map(t=>(MC[t]||{}).i||'').filter(Boolean).join(' ');h+='<div class="sc"><div class="sct"><div class="si">\uD83D\uDCC6</div><span style="font-size:11px;color:var(--td)">'+m.days+' days</span></div><h3>'+m.month+'</h3><p>'+m.total.toLocaleString()+' releases</p><div class="scs">'+ti+'</div></div>'});h+='</div>'}if(wk.length){h+='<div class="sect">\uD83D\uDCC5 Weekly</div><div class="sg">';wk.forEach(w=>{const ti=Object.keys(w.types||{}).map(t=>(MC[t]||{}).i||'').filter(Boolean).join(' ');h+='<div class="sc"><div class="sct"><div class="si">\uD83D\uDCC5</div><span style="font-size:11px;color:var(--td)">'+w.days+' days</span></div><h3>'+w.week+'</h3><p>'+w.total.toLocaleString()+' releases</p><div class="scs">'+ti+'</div></div>'});h+='</div>'}h+='<div class="sect">\uD83D\uDCC4 Daily</div>';if(!ds.length){h+='<div class="empty"><h2>No archive data yet</h2><p>Data builds as the pipeline runs daily.</p></div>'}else{h+='<div class="arcg">';ds.slice().reverse().forEach(d=>{const il=d.date===D.latest_date,ti=Object.keys(d.types||{}).map(t=>'<span>'+(MC[t]||{}).i+'</span>').join('');h+='<div class="arcd'+(il?' now':'')+'" onclick="loadDate(\''+d.date+'\');go(\'feed\')"><div class="arcd-dt">'+d.date.slice(5)+'</div><div class="arcd-n">'+d.total+'</div><div class="arcd-l">releases</div><div class="arcd-t">'+ti+'</div></div>'});h+='</div>'}document.getElementById('p-archive').innerHTML=h}
 
@@ -1107,7 +1328,7 @@ let deferredInstallPrompt=null;
 document.addEventListener('DOMContentLoaded',async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY);
   await loadUser();
-  renderNav();renderFeed();renderTrending();renderArchive();renderCalendar();renderStreams();renderAccount();
+  renderNav();renderFeed();renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount();
   sb.auth.onAuthStateChange(async(event)=>{
     if(event==='SIGNED_IN'||event==='SIGNED_OUT'){await loadUser();renderNav();renderStreams();renderAccount()}
   });
