@@ -740,6 +740,7 @@ async function loadComments(rk){
 
 let replyTo=null;
 function renderComments(){
+  if(!document.getElementById('cml'))return;
   const f=ccf==='all'?detailComments:detailComments.filter(c=>c.spoiler_level===ccf);
   // Separate top-level and replies
   const topLevel=f.filter(c=>!c.parent_id);
