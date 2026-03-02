@@ -507,8 +507,12 @@ async function doReset(){
 }
 
 async function doLogout(){
-  await sb.auth.signOut();user=null;profile=null;userSubs=[];userWatchlist=[];
-  renderNav();renderFeed();toast('Logged out');
+  document.getElementById('umenu').classList.remove('show');
+  try{await sb.auth.signOut()}catch(e){console.error('Logout error:',e)}
+  user=null;profile=null;userSubs=[];userWatchlist=[];
+  renderNav();renderFeed();renderStreams();renderAccount();
+  go('feed');
+  toast('Logged out');
 }
 
 // ═══════ USER DATA ═══════
