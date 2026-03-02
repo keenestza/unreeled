@@ -36,7 +36,7 @@ def load_release_file(filepath):
 def process_releases(releases, max_per_type=15, max_total=200):
     """Select top releases ensuring all media types are represented."""
     for r in releases:
-        syn = r.get("synopsis", "")
+        syn = r.get("synopsis") or ""
         if len(syn) > 500:
             r["synopsis"] = syn[:497] + "..."
 
