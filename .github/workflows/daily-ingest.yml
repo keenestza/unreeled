@@ -33,6 +33,10 @@ jobs:
       - name: Copy output to docs data folder
         run: |
           mkdir -p docs/data
+          # Migrate any old data from public/data if it exists
+          if [ -d "public/data" ]; then
+            cp -n public/data/releases_*.json docs/data/ 2>/dev/null || true
+          fi
           cp scripts/output/releases_*.json docs/data/
           LATEST=$(ls -t scripts/output/releases_*.json | head -1)
           cp "$LATEST" docs/data/latest.json
