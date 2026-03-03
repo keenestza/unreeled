@@ -431,7 +431,7 @@ function go(p,push){
   const pg=document.getElementById('p-'+p);
   pg.classList.add('on');
   // Show skeleton while async pages load
-  if(p==='detail'||p==='profile')showSkeleton(pg,4);
+  if(p==='profile')showSkeleton(pg,4);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'?'feed':p)+'"]')?.classList.add('on');
   document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));
