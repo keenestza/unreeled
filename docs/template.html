@@ -1407,6 +1407,21 @@ function renderStreams(){let h='<div class="shd"><h1 class="hero">Your Streams</
 h+='<h3 class="sect" style="margin-top:0">Media Types</h3><p style="font-size:12px;color:var(--td);margin-bottom:12px">Subscribe to get daily email digests for these categories</p><div class="sg">';
 for(const[t,c]of Object.entries(MC)){const on=isSubbed('media_type',t);h+='<div class="sc"><div class="sct"><div class="si">'+c.i+'</div><button class="ssb'+(on?' on':'')+'" onclick="toggleSub(\'media_type\',\''+t+'\')">'+(on?'\u2713 Subscribed':'Subscribe')+'</button></div><h3>'+c.l+' Releases</h3><p>Daily digest of new '+c.l.toLowerCase()+' releases</p></div>'}
 h+='</div>';
+// Genre subscriptions
+const genreMap=getAllGenreData();
+const topGenres=Object.entries(genreMap).sort((a,b)=>b[1].count-a[1].count).slice(0,30);
+h+='<h3 class="sect">Genres</h3><p style="font-size:12px;color:var(--td);margin-bottom:12px">Subscribe to specific genres across all media types</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">';
+topGenres.forEach(([name,info])=>{
+  const icon=getGenreIcon(name);
+  const on=isSubbed('genre',name);
+  h+='<div style="padding:12px;background:var(--card);border:1px solid '+(on?'var(--accent)':'var(--brd)')+';border-radius:10px;transition:all .15s">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:18px">'+icon+'</span><button class="ssb'+(on?' on':'')+'" onclick="toggleSub(\'genre\',\''+esc(name).replace(/'/g,"\\'")+'\');setTimeout(renderStreams,300)" style="font-size:10px;padding:3px 10px">'+(on?'\u2713':'Subscribe')+'</button></div>';
+  h+='<div style="font-size:13px;font-weight:600">'+esc(name)+'</div>';
+  h+='<div style="font-size:10px;color:var(--td)">'+info.count+' releases</div>';
+  h+='</div>';
+});
+h+='</div>';
+h+='<p style="font-size:11px;color:var(--td);margin-top:8px;text-align:center"><a onclick="go(\'genres\')" style="color:var(--accent);cursor:pointer">View all genres \u2192</a></p>';
 STM.forEach((s,si)=>{h+='<h3 class="sect">'+s.t+'</h3><div class="sg">';s.items.forEach(x=>{const on=isSubbed('stream',x.n);h+='<div class="sc"><div class="sct"><div class="si">'+x.i+'</div><button class="ssb'+(on?' on':'')+'" onclick="toggleStreamSub(\''+x.n.replace(/'/g,"\\'")+'\')">'+(on?'\u2713 Subscribed':'Subscribe')+'</button></div><h3>'+x.n+'</h3><p>'+x.d+'</p><div class="scs"><span>\uD83D\uDCE6 '+x.f+'</span></div></div>'});h+='</div>'});
 document.getElementById('p-streams').innerHTML=h}
 
