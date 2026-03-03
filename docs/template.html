@@ -978,41 +978,179 @@ document.getElementById('p-detail').innerHTML=h;go('detail');loadComments(rk)}
 function renderTrending(){TR=D.trending||[];let h='<h1 class="hero">\uD83D\uDD25 Trending</h1><p class="sub">Titles generating buzz across multiple days</p>';if(!TR.length){h+='<div class="empty"><h2>Not enough data yet</h2><p>Trending builds up as the pipeline runs daily.</p></div>'}else{TR.forEach((t,i)=>{const c=MC[t.media_type]||MC.movie,mp=[],m=t.metadata||{};if(m.artists?.length)mp.push(m.artists[0]);if(m.authors?.length)mp.push(m.authors[0]);if(m.studios?.length)mp.push(m.studios[0]);if(m.networks?.length)mp.push(m.networks[0]);const g=(t.genres||[]).slice(0,3).join(', ');if(g)mp.push(g);h+='<div class="trc" onclick="openTr('+i+')" style="cursor:pointer"><div class="trk">'+(i+1)+'</div>'+poster(t,56,78,20)+'<div class="tri"><div style="display:flex;align-items:center;gap:8px;margin-bottom:2px"><div class="trt">'+esc(t.title)+'</div><span class="mb '+t.media_type+'">'+c.l+'</span></div><div class="trm">'+mp.join('<span class="s">\u00B7</span>')+'</div>'+(t.synopsis?'<p class="rs" style="margin:4px 0">'+esc(t.synopsis)+'</p>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+(t.days_seen>1?'<span class="trd">\uD83D\uDD25 '+t.days_seen+' days</span>':'')+(t.comment_count?'<span style="font-size:11px;color:var(--td)">\uD83D\uDCAC '+t.comment_count+'</span>':'')+'</div></div>'})}document.getElementById('p-trending').innerHTML=h}
 
 // ═══════ GENRES ═══════
-let genreFilter=null;
-function renderGenres(){
-  // Collect all genres across all releases
-  const genreMap={};
-  R.forEach(r=>{
-    (r.genres||[]).forEach(g=>{
-      if(!genreMap[g])genreMap[g]={count:0,types:{}};
-      genreMap[g].count++;
-      genreMap[g].types[r.media_type]=(genreMap[g].types[r.media_type]||0)+1;
-    });
-  });
-  const sorted=Object.entries(genreMap).sort((a,b)=>b[1].count-a[1].count);
+let genreFilter=null,genreSort='count';
+const GI={'Action':'\u2694\uFE0F','Adventure':'\uD83C\uDFD4','Animation':'\uD83C\uDFA8','Comedy':'\uD83D\uDE02','Crime':'\uD83D\uDD75','Documentary':'\uD83C\uDFA5','Drama':'\uD83C\uDFAD','Family':'\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67','Fantasy':'\uD83E\uDDD9','History':'\uD83C\uDFDB','Horror':'\uD83D\uDD2A','Music':'\uD83C\uDFB5','Mystery':'\uD83D\uDD0D','Romance':'\uD83D\uDC95','Science Fiction':'\uD83D\uDE80','Sci-Fi':'\uD83D\uDE80','Thriller':'\uD83D\uDE31','War':'\uD83C\uDF96','Western':'\uD83E\uDD20','Biography':'\uD83D\uDCD6','Cooking':'\uD83C\uDF73','Travel':'\uD83C\uDF0D','Health':'\uD83D\uDC9A','Sports':'\u26BD','Business':'\uD83D\uDCBC','Technology':'\uD83D\uDCBB','Politics':'\uD83C\uDFDB','Education':'\uD83C\uDF93','Self-help':'\uD83C\uDF1F','Children':'\uD83E\uDDF8','Young Adult':'\uD83D\uDCDA','Literary Fiction':'\uD83D\uDCD6','Non-fiction':'\uD83D\uDCD8','Graphic Novel':'\uD83D\uDCDD','RPG':'\u2694\uFE0F','Shooter':'\uD83C\uDFAF','Platformer':'\uD83D\uDD79','Puzzle':'\uD83E\uDDE9','Strategy':'\u265F\uFE0F','Simulation':'\uD83C\uDFAE','Racing':'\uD83C\uDFCE','Indie':'\uD83C\uDFB8','Rock':'\uD83C\uDFB8','Pop':'\uD83C\uDFA4','Hip-Hop':'\uD83C\uDFA4','R&B':'\uD83C\uDFB6','Jazz':'\uD83C\uDFB7','Classical':'\uD83C\uDFBB','Electronic':'\uD83C\uDFA7','Metal':'\uD83E\uDD18','Country':'\uD83E\uDE95','Folk':'\uD83C\uDFBB','Soul':'\uD83D\uDC9C','Reggae':'\uD83C\uDFB6','Latin':'\uD83D\uDC83','K-Pop':'\uD83C\uDF1F','Punk':'\uD83E\uDD18','Alternative':'\uD83C\uDFB5','Blues':'\uD83C\uDFB5','Shonen':'\u2694\uFE0F','Shojo':'\uD83C\uDF38','Seinen':'\uD83D\uDDE1','Isekai':'\u2728','Mecha':'\uD83E\uDD16','Slice of Life':'\uD83C\uDF38','Supernatural':'\uD83D\uDC7B','Ecchi':'\uD83D\uDD25','Harem':'\uD83D\uDC95','Martial Arts':'\uD83E\uDD4B','Psychological':'\uD83E\uDDE0','Sports':'\u26BD','Dementia':'\uD83C\uDF00','Magic':'\u2728','Military':'\uD83C\uDF96','Space':'\uD83D\uDE80','Vampire':'\uD83E\uDDDB','Samurai':'\u2694\uFE0F','School':'\uD83C\uDFEB','Parody':'\uD83E\uDD21','Police':'\uD83D\uDE94','Super Power':'\uD83D\uDCAA','Josei':'\uD83C\uDF3A','Demons':'\uD83D\uDE08'};
+function getGenreIcon(name){return GI[name]||'\uD83C\uDFAD'}
 
-  let h='<h1 class="hero">\uD83C\uDFAD Genres</h1><p class="sub">Browse today\'s releases by genre</p>';
+function getAllGenreData(){
+  // Collect genres from today + all historical dates
+  const genreMap={};
+  function addReleases(releases,date){
+    (releases||[]).forEach(r=>{
+      (r.genres||[]).forEach(g=>{
+        if(!genreMap[g])genreMap[g]={count:0,types:{},dates:{},releases:[]};
+        genreMap[g].count++;
+        genreMap[g].types[r.media_type]=(genreMap[g].types[r.media_type]||0)+1;
+        genreMap[g].dates[date]=(genreMap[g].dates[date]||0)+1;
+        if(genreMap[g].releases.length<50)genreMap[g].releases.push(r);
+      });
+    });
+  }
+  addReleases(R,vd);
+  if(D.historical){
+    for(const[date,releases]of Object.entries(D.historical)){
+      if(date!==vd)addReleases(releases,date);
+    }
+  }
+  return genreMap;
+}
+
+function renderGenres(){
+  const genreMap=getAllGenreData();
+  let sorted=Object.entries(genreMap);
+
+  // Sort
+  if(genreSort==='count')sorted.sort((a,b)=>b[1].count-a[1].count);
+  else if(genreSort==='az')sorted.sort((a,b)=>a[0].localeCompare(b[0]));
+  else if(genreSort==='za')sorted.sort((a,b)=>b[0].localeCompare(a[0]));
+  else if(genreSort==='variety')sorted.sort((a,b)=>Object.keys(b[1].types).length-Object.keys(a[1].types).length);
+
+  let h='<h1 class="hero">\uD83C\uDFAD Genres</h1><p class="sub">Browse releases by genre across all dates</p>';
 
   if(!genreFilter){
-    // Grid of genre cards
-    h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:16px">';
+    // Sort bar
+    h+='<div style="display:flex;gap:6px;margin:12px 0 16px;flex-wrap:wrap">';
+    [{k:'count',l:'\uD83D\uDD25 Most releases'},{k:'az',l:'A \u2192 Z'},{k:'za',l:'Z \u2192 A'},{k:'variety',l:'\uD83C\uDF10 Most variety'}].forEach(s=>{
+      h+='<button onclick="genreSort=\''+s.k+'\';renderGenres()" style="padding:5px 12px;font-size:11px;border-radius:6px;font-weight:600;'+(genreSort===s.k?'background:var(--accent);color:#fff;border:1px solid var(--accent)':'background:var(--el);color:var(--td);border:1px solid var(--brd)')+'">'+s.l+'</button>';
+    });
+    h+='</div>';
+
+    // Subscribed genres banner
+    const subbedGenres=sorted.filter(([g])=>isSubbed('genre',g));
+    if(subbedGenres.length){
+      h+='<div style="padding:12px 14px;background:var(--agl);border:1px solid var(--accent);border-radius:10px;margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">\uD83D\uDD14 Your subscribed genres</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
+      subbedGenres.forEach(([g])=>{h+='<span onclick="genreFilter=\''+esc(g).replace(/'/g,"\\'")+'\';renderGenres()" style="padding:4px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">'+getGenreIcon(g)+' '+esc(g)+'</span>'});
+      h+='</div></div>';
+    }
+
+    // Stats
+    h+='<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap"><div style="padding:10px 16px;background:var(--card);border:1px solid var(--brd);border-radius:8px;text-align:center"><div style="font-size:18px;font-weight:700">'+sorted.length+'</div><div style="font-size:10px;color:var(--td)">Genres</div></div>';
+    const totalReleases=sorted.reduce((s,e)=>s+e[1].count,0);
+    const totalDates=new Set(sorted.flatMap(([,info])=>Object.keys(info.dates))).size;
+    h+='<div style="padding:10px 16px;background:var(--card);border:1px solid var(--brd);border-radius:8px;text-align:center"><div style="font-size:18px;font-weight:700">'+totalReleases.toLocaleString()+'</div><div style="font-size:10px;color:var(--td)">Total</div></div>';
+    h+='<div style="padding:10px 16px;background:var(--card);border:1px solid var(--brd);border-radius:8px;text-align:center"><div style="font-size:18px;font-weight:700">'+totalDates+'</div><div style="font-size:10px;color:var(--td)">Days</div></div></div>';
+
+    // Genre grid
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">';
     sorted.forEach(([name,info])=>{
-      const icons=Object.keys(info.types).map(t=>(MC[t]||{}).i||'').join(' ');
-      h+='<div onclick="genreFilter=\''+esc(name).replace(/'/g,"\\'")+'\';renderGenres()" style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'">';
-      h+='<div style="font-size:14px;font-weight:600;margin-bottom:4px">'+esc(name)+'</div>';
-      h+='<div style="font-size:11px;color:var(--td)">'+info.count+' release'+(info.count!==1?'s':'')+'</div>';
-      h+='<div style="font-size:12px;margin-top:4px">'+icons+'</div>';
+      const icon=getGenreIcon(name);
+      const typeIcons=Object.keys(info.types).map(t=>(MC[t]||{}).i||'').join(' ');
+      const maxType=Object.entries(info.types).sort((a,b)=>b[1]-a[1])[0];
+      const maxColor=maxType?(MC[maxType[0]]||{}).c||'#666':'#666';
+      const subbed=isSubbed('genre',name);
+      h+='<div onclick="genreFilter=\''+esc(name).replace(/'/g,"\\'")+'\';renderGenres()" style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;cursor:pointer;transition:all .15s;position:relative" onmouseover="this.style.borderColor=\''+maxColor+'\'" onmouseout="this.style.borderColor=\'var(--brd)\'">';
+      if(subbed)h+='<div style="position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--accent);border-radius:50%"></div>';
+      h+='<div style="font-size:20px;margin-bottom:6px">'+icon+'</div>';
+      h+='<div style="font-size:13px;font-weight:600;margin-bottom:2px">'+esc(name)+'</div>';
+      h+='<div style="font-size:11px;color:var(--td);margin-bottom:6px">'+info.count.toLocaleString()+' release'+(info.count!==1?'s':'')+'</div>';
+      // Mini type bar
+      const total=info.count;
+      h+='<div style="display:flex;height:4px;border-radius:2px;overflow:hidden;gap:1px">';
+      for(const[t,cnt]of Object.entries(info.types).sort((a,b)=>b[1]-a[1])){
+        const pct=Math.max(cnt/total*100,3);
+        h+='<div style="width:'+pct+'%;background:'+(MC[t]||{}).c+';min-width:3px" title="'+(MC[t]||{}).l+': '+cnt+'"></div>';
+      }
+      h+='</div>';
+      h+='<div style="font-size:10px;margin-top:6px">'+typeIcons+'</div>';
       h+='</div>';
     });
     h+='</div>';
   } else {
-    // Filtered genre view
-    const filtered=R.filter(r=>(r.genres||[]).includes(genreFilter));
+    // ═══════ GENRE DETAIL PAGE ═══════
+    const info=genreMap[genreFilter];
+    if(!info){genreFilter=null;renderGenres();return}
+    const icon=getGenreIcon(genreFilter);
+    const subbed=isSubbed('genre',genreFilter);
+
     h+='<button onclick="genreFilter=null;renderGenres()" style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;margin-bottom:16px">\u2190 All Genres</button>';
-    h+='<h2 style="font-family:\'Fraunces\',serif;font-size:22px;margin-bottom:4px">'+esc(genreFilter)+'</h2>';
-    h+='<p class="sub" style="margin-bottom:16px">'+filtered.length+' release'+(filtered.length!==1?'s':'')+' today</p>';
-    filtered.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,'openD('+ri+')')});
-    if(!filtered.length)h+='<div class="empty"><span class="empty-icon">\uD83C\uDFAD</span><h2>No releases</h2><p>No releases in this genre today.</p></div>';
+
+    // Header
+    h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px"><span style="font-size:32px">'+icon+'</span><h2 style="font-family:\'Fraunces\',serif;font-size:26px">'+esc(genreFilter)+'</h2></div>';
+    h+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px"><p style="font-size:13px;color:var(--td)">'+info.count.toLocaleString()+' releases across '+Object.keys(info.dates).length+' days</p>';
+    h+='<button onclick="toggleSub(\'genre\',\''+esc(genreFilter).replace(/'/g,"\\'")+'\');setTimeout(renderGenres,300)" style="padding:5px 14px;font-size:11px;border-radius:6px;font-weight:600;'+(subbed?'background:var(--accent);color:#fff;border:1px solid var(--accent)':'background:var(--el);color:var(--td);border:1px solid var(--brd)')+'">'+(subbed?'\u2713 Subscribed':'\uD83D\uDD14 Subscribe')+'</button></div>';
+
+    // Media type breakdown chart
+    h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px">';
+    h+='<div style="font-size:13px;font-weight:600;margin-bottom:12px">\uD83D\uDCCA Media Type Breakdown</div>';
+    const typeEntries=Object.entries(info.types).sort((a,b)=>b[1]-a[1]);
+    typeEntries.forEach(([t,cnt])=>{
+      const mc=MC[t]||{i:'?',l:t,c:'#666'};
+      const pct=Math.round(cnt/info.count*100);
+      h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+      h+='<span style="width:28px;text-align:center">'+mc.i+'</span>';
+      h+='<span style="width:70px;font-size:12px;font-weight:600">'+mc.l+'</span>';
+      h+='<div style="flex:1;height:10px;background:var(--el);border-radius:5px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+mc.c+';border-radius:5px;transition:width .3s"></div></div>';
+      h+='<span style="width:65px;text-align:right;font-size:12px;color:var(--td)">'+cnt+' ('+pct+'%)</span>';
+      h+='</div>';
+    });
+    h+='</div>';
+
+    // Daily activity chart
+    const dateEntries=Object.entries(info.dates).sort((a,b)=>a[0].localeCompare(b[0]));
+    if(dateEntries.length>1){
+      h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px">';
+      h+='<div style="font-size:13px;font-weight:600;margin-bottom:12px">\uD83D\uDCC8 Daily Activity</div>';
+      const maxDay=Math.max(...dateEntries.map(e=>e[1]));
+      h+='<div style="display:flex;align-items:flex-end;gap:2px;height:80px">';
+      dateEntries.forEach(([date,cnt])=>{
+        const pct=Math.round(cnt/maxDay*100);
+        h+='<div style="flex:1;min-width:6px;max-width:24px" title="'+date+': '+cnt+'"><div style="height:'+pct+'%;min-height:3px;background:var(--accent);border-radius:2px 2px 0 0;transition:height .3s"></div></div>';
+      });
+      h+='</div>';
+      h+='<div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:9px;color:var(--td)">'+dateEntries[0][0].slice(5)+'</span><span style="font-size:9px;color:var(--td)">'+dateEntries[dateEntries.length-1][0].slice(5)+'</span></div>';
+      h+='</div>';
+    }
+
+    // Related genres
+    const relatedGenres=[];
+    const myReleases=new Set(info.releases.map(r=>r.title));
+    for(const[g,gInfo]of Object.entries(genreMap)){
+      if(g===genreFilter)continue;
+      const overlap=gInfo.releases.filter(r=>myReleases.has(r.title)).length;
+      if(overlap>0)relatedGenres.push({name:g,overlap,count:gInfo.count});
+    }
+    relatedGenres.sort((a,b)=>b.overlap-a.overlap);
+    if(relatedGenres.length){
+      h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px">';
+      h+='<div style="font-size:13px;font-weight:600;margin-bottom:10px">\uD83C\uDF10 Related Genres</div>';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+      relatedGenres.slice(0,12).forEach(rg=>{
+        h+='<span onclick="genreFilter=\''+esc(rg.name).replace(/'/g,"\\'")+'\';renderGenres()" style="padding:5px 12px;background:var(--el);border:1px solid var(--brd);border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'">'+getGenreIcon(rg.name)+' '+esc(rg.name)+' <span style="color:var(--td)">('+rg.overlap+' shared)</span></span>';
+      });
+      h+='</div></div>';
+    }
+
+    // Releases list
+    h+='<div class="st">Releases ('+info.count+')</div>';
+    const todayFiltered=R.filter(r=>(r.genres||[]).includes(genreFilter));
+    if(todayFiltered.length){
+      h+='<div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">\uD83D\uDFE0 Today ('+todayFiltered.length+')</div>';
+      todayFiltered.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,'openD('+ri+')')});
+    }
+    // Historical releases
+    if(D.historical){
+      const histDates=Object.keys(D.historical).filter(d=>d!==vd).sort().reverse();
+      let shown=0;
+      histDates.forEach(date=>{
+        if(shown>=30)return;
+        const dayReleases=(D.historical[date]||[]).filter(r=>(r.genres||[]).includes(genreFilter));
+        if(!dayReleases.length)return;
+        h+='<div style="font-size:12px;font-weight:600;color:var(--td);margin:12px 0 8px">'+fmtD(date)+' ('+dayReleases.length+')</div>';
+        dayReleases.slice(0,10).forEach((r,i)=>{h+=card(r,i,'')});
+        shown+=dayReleases.length;
+      });
+    }
+    if(!info.count)h+='<div class="empty"><span class="empty-icon">\uD83C\uDFAD</span><h2>No releases</h2><p>No releases in this genre.</p></div>';
   }
   document.getElementById('p-genres').innerHTML=h;
 }
