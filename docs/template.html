@@ -628,7 +628,7 @@ function renderFeed(){
   // Render first page
   const page=fl.slice(0,FEED_PAGE_SIZE);
   h+='<div id="feed-cards">';
-  page.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,'openD('+ri+')')});
+  page.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,ri>=0?'openD('+ri+')':'openD(feedFiltered['+i+'])')});
   h+='</div>';
   if(fl.length>FEED_PAGE_SIZE){
     h+='<div id="feed-sentinel" style="padding:24px;text-align:center"><div style="display:inline-block;width:24px;height:24px;border:2px solid var(--brd);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite"></div><p style="font-size:12px;color:var(--td);margin-top:8px">Loading more...</p></div>';
@@ -650,7 +650,7 @@ function loadMoreFeed(){
   const container=document.getElementById('feed-cards');
   if(!container)return;
   let h='';
-  page.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,start+i,'openD('+ri+')')});
+  page.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,start+i,ri>=0?'openD('+ri+')':'openD(feedFiltered['+(start+i)+'])')});
   container.insertAdjacentHTML('beforeend',h);
   feedPage++;
   // Remove sentinel if no more pages
@@ -674,7 +674,9 @@ function setupFeedObserver(){
 // ═══════ DETAIL ═══════
 let detailComments=[];
 async function openD(i){
-  cr=R[i];rv=new Set();ccf='all';selSpoiler='none';
+  cr=typeof i==='object'?i:R[i];
+  if(!cr){toast('Release not found');return}
+  rv=new Set();ccf='all';selSpoiler='none';
   const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};
   const rk=releaseKey(r);
   const wl=isWatchlisted(rk);
@@ -1183,7 +1185,7 @@ function renderGenres(){
     const todayFiltered=R.filter(r=>(r.genres||[]).includes(genreFilter));
     if(todayFiltered.length){
       h+='<div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">\uD83D\uDFE0 Today ('+todayFiltered.length+')</div>';
-      todayFiltered.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,'openD('+ri+')')});
+      todayFiltered.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,ri>=0?'openD('+ri+')':'')});
     }
     // Historical releases
     if(D.historical){
@@ -1650,6 +1652,10 @@ function buildWeeklyRecap(){
 let deferredInstallPrompt=null;
 document.addEventListener('DOMContentLoaded',async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+  // Clean auth tokens from URL hash
+  if(window.location.hash&&(window.location.hash.includes('access_token')||window.location.hash.includes('type=recovery'))){
+    setTimeout(()=>{history.replaceState(null,'',window.location.pathname)},100);
+  }
   await loadUser();
   if(user)await loadFollowing();
   renderNav();renderFeed();renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount();
