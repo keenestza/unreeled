@@ -1484,7 +1484,7 @@ function renderAccount(){
 // ═══════ INIT ═══════
 let deferredInstallPrompt=null;
 document.addEventListener('DOMContentLoaded',async()=>{
-  sb=window.supabase.createClient(SB_URL,SB_KEY);
+  sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
   await loadUser();
   renderNav();renderFeed();renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount();
   sb.auth.onAuthStateChange(async(event)=>{
