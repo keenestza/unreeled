@@ -316,11 +316,27 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
   .trk{width:28px;height:28px;font-size:12px}
   .user-pill{font-size:11px;padding:3px 10px 3px 3px}
   .user-pill .uav{width:22px;height:22px;font-size:9px}
+  .pwa-banner{bottom:68px;left:8px;right:8px}
+  .cal-grid{gap:2px}
+  .cal-day{font-size:10px;padding:4px 2px;min-height:36px}
+  .cal-legend{flex-wrap:wrap}
+  .dbk{font-size:12px;padding:6px 12px}
+  .finput{font-size:14px}
 }
 @media(max-width:380px){
   .da{flex-direction:column}
   .da button{width:100%;text-align:center}
+  h1.hero{font-size:20px}
+  .dn{font-size:18px}
 }
+/* ONBOARDING */
+.onboard-overlay{position:fixed;inset:0;z-index:5000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center}
+.onboard-card{background:var(--card);border:1px solid var(--brd);border-radius:16px;max-width:420px;width:90%;padding:32px;text-align:center;animation:slideUp .3s ease}
+.onboard-card h2{font-family:'Fraunces',serif;font-size:24px;margin-bottom:8px}
+.onboard-card p{font-size:13px;color:var(--td);margin-bottom:20px}
+.onboard-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
+.onboard-steps span{width:8px;height:8px;border-radius:50%;background:var(--brd)}
+.onboard-steps span.on{background:var(--accent)}
 </style>
 </head>
 <body>
@@ -1194,7 +1210,13 @@ async function openProfile(userId,username){
     // Profile header
     h+='<div style="text-align:center;padding:24px 0 16px"><div class="av" style="background:'+prof.avatar_color+';width:64px;height:64px;font-size:24px;border-radius:16px;margin:0 auto 12px">'+init+'</div>';
     h+='<h1 style="font-family:\'Fraunces\',serif;font-size:24px">'+esc(prof.username)+'</h1>';
-    h+='<p style="font-size:12px;color:var(--td);margin-top:4px">Joined '+joined+'</p></div>';
+    h+='<p style="font-size:12px;color:var(--td);margin-top:4px">Joined '+joined+'</p>';
+    // Follow button (not on own profile)
+    if(user&&userId!==user.id){
+      const flw=isFollowing(userId);
+      h+='<div style="margin-top:10px"><button onclick="toggleFollow(\''+userId+'\',\''+esc(prof.username).replace(/'/g,"\\\'")+'\');setTimeout(()=>openProfile(\''+userId+'\',\''+esc(prof.username).replace(/'/g,"\\\'")+'\'),300)" style="padding:6px 20px;border-radius:8px;font-size:12px;font-weight:600;'+(flw?'background:var(--accent);color:#fff;border:1px solid var(--accent)':'background:var(--el);color:var(--td);border:1px solid var(--brd)')+'">'+(flw?'\u2713 Following':'+ Follow')+'</button></div>';
+    }
+    h+='</div>';
 
     // Stats
     const commentCount=(comments||[]).length;
@@ -1612,9 +1634,16 @@ let deferredInstallPrompt=null;
 document.addEventListener('DOMContentLoaded',async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
   await loadUser();
+  if(user)await loadFollowing();
   renderNav();renderFeed();renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount();
+  // Onboarding for new visitors
+  if(!localStorage.getItem('unreeled-onboarded')){
+    setTimeout(showOnboarding,500);
+  }
+  // Check if any watchlisted items are trending
+  if(user)setTimeout(checkTrendingWatchlist,2000);
   sb.auth.onAuthStateChange(async(event)=>{
-    if(event==='SIGNED_IN'||event==='SIGNED_OUT'){await loadUser();renderNav();renderStreams();renderAccount()}
+    if(event==='SIGNED_IN'||event==='SIGNED_OUT'){await loadUser();if(user)await loadFollowing();renderNav();renderStreams();renderAccount()}
   });
   // Register service worker for PWA
   if('serviceWorker' in navigator){
@@ -1649,6 +1678,99 @@ function pwaDismiss(){
   localStorage.setItem('unreeled-pwa-dismissed','1');
 }
 
+// ═══════ ONBOARDING ═══════
+let onboardStep=0;
+const onboardSteps=[
+  {icon:'\uD83C\uDF89',title:'Welcome to Unreeled!',body:'Your daily tracker for movies, TV, books, games, anime, music and podcasts. Let\'s get you set up in 30 seconds.'},
+  {icon:'\uD83D\uDCE1',title:'Subscribe to Streams',body:'Pick your favorite media types to get personalized daily digests. Head to the Streams tab to subscribe.'},
+  {icon:'\uD83C\uDFAD',title:'Explore Genres',body:'Browse the Genres tab to discover releases by category. Subscribe to genres you love!'},
+  {icon:'\u2B50',title:'Build Your Watchlist',body:'Tap any release to see details, then hit Watchlist to save it. Rate and comment too!'},
+  {icon:'\uD83D\uDE80',title:'You\'re All Set!',body:'Enjoy Unreeled! New releases are added every morning at 6 AM UTC.'},
+];
+
+function showOnboarding(){
+  onboardStep=0;
+  renderOnboardStep();
+}
+
+function renderOnboardStep(){
+  const s=onboardSteps[onboardStep];
+  const isLast=onboardStep===onboardSteps.length-1;
+  let dots='<div class="onboard-steps">';
+  onboardSteps.forEach((_,i)=>{dots+='<span class="'+(i===onboardStep?'on':'')+'"></span>'});
+  dots+='</div>';
+
+  const el=document.getElementById('onboard-overlay');
+  el.innerHTML='<div class="onboard-card"><div style="font-size:48px;margin-bottom:12px">'+s.icon+'</div><h2>'+s.title+'</h2><p>'+s.body+'</p>'+dots+'<div style="display:flex;gap:8px;justify-content:center">'+(onboardStep>0?'<button onclick="onboardStep--;renderOnboardStep()" style="padding:8px 20px;background:var(--el);border:1px solid var(--brd);border-radius:8px;font-size:13px;color:var(--td)">Back</button>':'')+'<button onclick="'+(isLast?'finishOnboarding()':'onboardStep++;renderOnboardStep()')+'" style="padding:8px 24px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600">'+(isLast?'Get Started!':'Next')+'</button></div><button onclick="finishOnboarding()" style="margin-top:12px;font-size:11px;color:var(--td);background:none;border:none;cursor:pointer">Skip</button></div>';
+  el.style.display='flex';
+}
+
+async function finishOnboarding(){
+  document.getElementById('onboard-overlay').style.display='none';
+  localStorage.setItem('unreeled-onboarded','1');
+  if(user){
+    await sb.from('profiles').update({onboarding_complete:true}).eq('id',user.id);
+  }
+}
+
+// ═══════ SOCIAL: FOLLOW/UNFOLLOW ═══════
+let userFollowing=[];
+
+async function loadFollowing(){
+  if(!user)return;
+  const{data}=await sb.from('follows').select('following_id').eq('follower_id',user.id);
+  userFollowing=(data||[]).map(f=>f.following_id);
+}
+
+function isFollowing(userId){return userFollowing.includes(userId)}
+
+async function toggleFollow(userId,username){
+  if(!user)return showAuth('login');
+  if(isFollowing(userId)){
+    await sb.from('follows').delete().eq('follower_id',user.id).eq('following_id',userId);
+    userFollowing=userFollowing.filter(id=>id!==userId);
+    toast('Unfollowed '+username);
+  } else {
+    await sb.from('follows').insert({follower_id:user.id,following_id:userId});
+    userFollowing.push(userId);
+    toast('Following '+username);
+  }
+}
+
+// ═══════ TRENDING NOTIFICATIONS ═══════
+function checkTrendingWatchlist(){
+  if(!user||!userWatchlist.length)return;
+  const TR=D.trending||[];
+  if(!TR.length)return;
+  const notified=JSON.parse(localStorage.getItem('unreeled-trend-notified')||'[]');
+  const newTrending=[];
+
+  userWatchlist.forEach(w=>{
+    const title=(w.release_title||'').toLowerCase();
+    TR.forEach(t=>{
+      const tTitle=(t.title||'').toLowerCase();
+      if(title===tTitle&&!notified.includes(tTitle)){
+        newTrending.push(t.title);
+        notified.push(tTitle);
+      }
+    });
+  });
+
+  if(newTrending.length){
+    localStorage.setItem('unreeled-trend-notified',JSON.stringify(notified.slice(-50)));
+    // Show toast for each
+    if(newTrending.length===1){
+      toast('\uD83D\uDD25 "'+newTrending[0]+'" from your watchlist is trending!');
+    } else {
+      toast('\uD83D\uDD25 '+newTrending.length+' watchlist items are trending!');
+    }
+    // Browser notification if permitted
+    if('Notification' in window&&Notification.permission==='granted'){
+      new Notification('Unreeled - Trending Alert',{body:newTrending.join(', ')+' from your watchlist '+(newTrending.length===1?'is':'are')+' trending!',icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%23ff6b35"/><text x="8" y="24" font-size="22" font-weight="bold" fill="white">U</text></svg>'});
+    }
+  }
+}
+
 // ═══════ NOTIFICATIONS ═══════
 async function requestNotifications(){
   if(!('Notification' in window)){toast('Notifications not supported');return}
@@ -1665,5 +1787,7 @@ document.addEventListener('click',e=>{const um=document.getElementById('umenu');
   <div class="pwa-text"><h4>Install Unreeled</h4><p>Add to your home screen for quick access</p></div>
   <div class="pwa-btns"><button class="pwa-dismiss" onclick="pwaDismiss()">Later</button><button class="pwa-install" onclick="pwaInstall()">Install</button></div>
 </div>
+<!-- Onboarding Overlay -->
+<div class="onboard-overlay" id="onboard-overlay" style="display:none"></div>
 </body>
 </html>
