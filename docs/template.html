@@ -28,7 +28,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#08090c;--card:#0f1014;--el:#16171d;--hov:#1c1d25;--accent:#ff6b35;--agl:rgba(255,107,53,0.12);--text:#e8e8ec;--ts:#a0a0ae;--td:#5e5e6e;--brd:#1e1f28;--bl:#282935;--sl:#3ec98c;--slb:rgba(62,201,140,0.08);--slr:rgba(62,201,140,0.25);--sm:#f0c038;--smb:rgba(240,192,56,0.08);--smr:rgba(240,192,56,0.25);--sh:#ef4444;--shb:rgba(239,68,68,0.08);--shr:rgba(239,68,68,0.25)}
+:root{--bg:#08090c;--card:#0f1014;--el:#16171d;--hov:#1c1d25;--accent:#ff6b35;--agl:rgba(255,107,53,0.12);--text:#e8e8ec;--ts:#a0a0ae;--td:#8888a0;--brd:#1e1f28;--bl:#282935;--sl:#3ec98c;--slb:rgba(62,201,140,0.08);--slr:rgba(62,201,140,0.25);--sm:#f0c038;--smb:rgba(240,192,56,0.08);--smr:rgba(240,192,56,0.25);--sh:#ef4444;--shb:rgba(239,68,68,0.08);--shr:rgba(239,68,68,0.25)}
 /* LIGHT MODE */
 [data-theme="light"]{--bg:#f5f5f7;--card:#ffffff;--el:#f0f0f3;--hov:#e8e8ec;--accent:#e85d2a;--agl:rgba(232,93,42,0.1);--text:#1a1a2e;--ts:#4a4a5e;--td:#8a8a9e;--brd:#dddde5;--bl:#c8c8d4;--sl:#2aa66e;--slb:rgba(42,166,110,0.08);--slr:rgba(42,166,110,0.2);--sm:#c8960a;--smb:rgba(200,150,10,0.08);--smr:rgba(200,150,10,0.2);--sh:#dc2626;--shb:rgba(220,38,38,0.06);--shr:rgba(220,38,38,0.2)}
 [data-theme="light"] .nav{background:rgba(245,245,247,0.92)}
@@ -52,7 +52,7 @@
 .empty{text-align:center;padding:48px 20px}
 .empty-icon{font-size:48px;margin-bottom:12px;display:block}
 .empty h2{font-family:'Fraunces',serif;font-size:20px;margin-bottom:6px}
-.empty p{color:var(--td);font-size:14px;max-width:320px;margin:0 auto}
+.empty p{color:var(--ts);font-size:14px;max-width:320px;margin:0 auto}
 .empty a{color:var(--accent);cursor:pointer}
 /* STAR RATING */
 .stars{display:inline-flex;gap:2px}.stars span{cursor:pointer;font-size:18px;color:var(--brd);transition:all .12s}.stars span:hover,.stars span.on{color:#f0c038}
@@ -89,7 +89,7 @@ input{font-family:inherit}
 .user-pill .uav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
 .umenu{position:absolute;top:52px;right:20px;background:var(--card);border:1px solid var(--brd);border-radius:10px;padding:6px;min-width:180px;display:none;z-index:2000;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
 .umenu.show{display:block}
-.umenu button{display:block;width:100%;text-align:left;padding:8px 12px;font-size:12.5px;color:var(--ts);border-radius:6px;transition:all .12s}
+.umenu button{display:block;width:100%;text-align:left;padding:8px 12px;font-size:12.5px;color:var(--text);border-radius:6px;transition:all .12s}
 .umenu button:hover{background:var(--el);color:var(--text)}
 .umenu hr{border:none;border-top:1px solid var(--brd);margin:4px 0}
 .page{display:none;max-width:920px;margin:0 auto;padding:28px 20px 60px;animation:pageIn .25s ease}.page.on{display:block}
@@ -107,7 +107,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .modal .close:hover{color:var(--text)}
 .finput{width:100%;padding:10px 12px;background:var(--el);border:1px solid var(--brd);border-radius:7px;color:var(--text);font-size:13.5px;outline:none;margin-bottom:10px;transition:border-color .15s}
 .finput:focus{border-color:var(--accent)}
-.finput::placeholder{color:var(--td)}
+.finput::placeholder{color:var(--ts)}
 .fbtn{width:100%;padding:10px;background:var(--accent);border-radius:7px;color:#fff;font-size:13.5px;font-weight:600;border:none;cursor:pointer;margin-top:4px;transition:all .15s}
 .fbtn:hover{filter:brightness(1.1)}
 .fbtn:disabled{opacity:0.5;cursor:not-allowed}
@@ -120,7 +120,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .fok.show{display:block}
 /* DATE PICKER */
 .dp{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
-.dp-btn{padding:6px 11px;background:var(--card);border:1px solid var(--brd);border-radius:7px;color:var(--td);font-size:13px;font-weight:500;transition:all .15s}
+.dp-btn{padding:6px 11px;background:var(--card);border:1px solid var(--brd);border-radius:7px;color:var(--ts);font-size:13px;font-weight:500;transition:all .15s}
 .dp-btn:hover{border-color:var(--bl);color:var(--text)}
 .dp select{background:var(--card);border:1px solid var(--brd);border-radius:7px;color:var(--text);padding:6px 10px;font-size:13px;font-family:inherit;outline:none;cursor:pointer;max-width:220px}
 .dp-single{font-size:13px;color:var(--ts)}
@@ -144,11 +144,11 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .rn{font-family:'Fraunces',serif;font-size:16px;font-weight:600;letter-spacing:-0.3px;line-height:1.25;color:var(--text)}
 .mb{padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;flex-shrink:0;white-space:nowrap;transition:all .15s}
 .mb.movie{background:rgba(99,102,241,0.15);color:#6366f1}.mb.tv{background:rgba(168,85,247,0.15);color:#a855f7}.mb.book{background:rgba(20,184,166,0.15);color:#14b8a6}.mb.game{background:rgba(244,63,94,0.15);color:#f43f5e}.mb.anime{background:rgba(236,72,153,0.15);color:#ec4899}.mb.music{background:rgba(234,179,8,0.15);color:#eab308}.mb.podcast{background:rgba(139,92,246,0.15);color:#8b5cf6}.mb.boardgame{background:rgba(6,182,212,0.15);color:#06b6d4}.mb.comic{background:rgba(249,115,22,0.15);color:#f97316}.mb.news{background:rgba(100,116,139,0.15);color:#94a3b8}
-.rm{font-size:11.5px;color:var(--td);margin-bottom:6px}.rm .s{color:var(--bl);margin:0 4px}
+.rm{font-size:11.5px;color:var(--ts);margin-bottom:6px}.rm .s{color:var(--bl);margin:0 4px}
 .rs{font-size:12.5px;color:var(--ts);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
 .rf{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px}
-.gt{display:flex;gap:4px;flex-wrap:wrap}.gt span{padding:2px 7px;background:var(--el);border:1px solid var(--brd);border-radius:5px;font-size:10.5px;color:var(--ts);transition:all .15s}
-.rst{font-size:11px;color:var(--td);display:flex;align-items:center;gap:10px}
+.gt{display:flex;gap:4px;flex-wrap:wrap}.gt span{padding:2px 7px;background:var(--el);border:1px solid var(--brd);border-radius:5px;font-size:10.5px;color:var(--text);transition:all .15s}
+.rst{font-size:11px;color:var(--ts);display:flex;align-items:center;gap:10px}
 .sds{display:inline-flex;gap:2px;align-items:center}.sds i{width:6px;height:6px;border-radius:50%;font-style:normal;display:inline-block}.sds .l{background:var(--sl)}.sds .m{background:var(--sm)}.sds .h{background:var(--sh)}
 /* DETAIL */
 .dbk{color:var(--ts);font-size:13px;padding:6px 12px;margin-bottom:18px;display:inline-flex;align-items:center;gap:6px;transition:all .15s;background:var(--el);border:1px solid var(--brd);border-radius:8px}.dbk:hover{color:var(--text);border-color:var(--bl);background:var(--hov)}
@@ -162,34 +162,34 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .da .o{background:none;border:1px solid var(--brd);color:var(--ts)}.da .o:hover{border-color:var(--bl);color:var(--text)}
 .da .o.active{border-color:var(--sl);color:var(--sl)}
 .spb{display:flex;gap:10px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:24px}
-.sps{flex:1;text-align:center;padding:10px 8px;border-radius:8px}.sps em{font-size:22px;font-weight:700;font-style:normal;display:block}.sps small{font-size:10px;color:var(--td);text-transform:uppercase;letter-spacing:.8px}
+.sps{flex:1;text-align:center;padding:10px 8px;border-radius:8px}.sps em{font-size:22px;font-weight:700;font-style:normal;display:block}.sps small{font-size:10px;color:var(--ts);text-transform:uppercase;letter-spacing:.8px}
 .sps.sl{background:var(--slb)}.sps.sl em{color:var(--sl)}.sps.sm{background:var(--smb)}.sps.sm em{color:var(--sm)}.sps.sv{background:var(--shb)}.sps.sv em{color:var(--sh)}
 .st{font-family:'Fraunces',serif;font-size:19px;font-weight:700;margin-bottom:14px;letter-spacing:-0.5px}
 .cmp{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px}
 .cmp textarea{width:100%;min-height:68px;background:var(--el);border:1px solid var(--brd);border-radius:7px;padding:11px;color:var(--text);font-size:13px;resize:vertical;outline:none;font-family:inherit}
 .cmp textarea:focus{border-color:rgba(255,107,53,0.5)}.cmp textarea::placeholder{color:var(--td)}
 .cmpf{display:flex;align-items:center;justify-content:space-between;margin-top:9px;flex-wrap:wrap;gap:8px}
-.spp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.spp>span{font-size:11px;color:var(--td);margin-right:3px}
+.spp{display:flex;gap:4px;align-items:center;flex-wrap:wrap}.spp>span{font-size:11px;color:var(--ts);margin-right:3px}
 .slb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;transition:all .15s}
 .bps{padding:6px 15px;background:var(--accent);border-radius:7px;color:#fff;font-size:12.5px;font-weight:600;transition:opacity .15s}
 .bps:disabled{opacity:0.5;cursor:not-allowed}
 .cfs{display:flex;gap:4px;margin-bottom:16px;align-items:center;flex-wrap:wrap}.cfs>span{font-size:11px;color:var(--td);margin-right:2px}
-.cfb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;background:var(--card);border:1px solid var(--brd);color:var(--td);transition:all .15s}.cfb:hover{color:var(--ts)}.cfb.on{background:var(--el);color:var(--text);border-color:var(--bl)}
+.cfb{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:500;background:var(--card);border:1px solid var(--brd);color:var(--ts);transition:all .15s}.cfb:hover{color:var(--ts)}.cfb.on{background:var(--el);color:var(--text);border-color:var(--bl)}
 .cm{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:8px;transition:all .15s}.cm:hover{border-color:var(--bl);box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 .cmh{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.cmu{display:flex;align-items:center;gap:8px}
 .av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
-.cmn{font-size:12.5px;font-weight:600}.cmt{font-size:10.5px;color:var(--td)}
+.cmn{font-size:12.5px;font-weight:600}.cmt{font-size:10.5px;color:var(--ts)}
 .sb{padding:2px 9px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px}
-.cmb{font-size:13.5px;line-height:1.6;color:var(--ts);transition:filter .3s}.cmb.bl{filter:blur(6px);user-select:none}
-.rvb{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px;margin-top:7px;background:var(--el);border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;color:var(--td)}.rvb:hover{color:var(--text);background:var(--hov)}
-.cmf{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--td)}.cmf span{cursor:pointer}.cmf span:hover{color:var(--text)}.cmf span.voted{color:var(--accent)}
-.login-prompt{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px;text-align:center;font-size:13px;color:var(--td)}
+.cmb{font-size:13.5px;line-height:1.6;color:var(--text);transition:filter .3s}.cmb.bl{filter:blur(6px);user-select:none}
+.rvb{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px;margin-top:7px;background:var(--el);border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;color:var(--ts)}.rvb:hover{color:var(--text);background:var(--hov)}
+.cmf{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--ts)}.cmf span{cursor:pointer}.cmf span:hover{color:var(--text)}.cmf span.voted{color:var(--accent)}
+.login-prompt{padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:18px;text-align:center;font-size:13px;color:var(--ts)}
 .login-prompt a{color:var(--accent);cursor:pointer}
 /* TRENDING */
 .trc{display:flex;gap:12px;padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:11px;margin-bottom:8px;cursor:pointer;transition:all .2s ease}
 .trc:hover{border-color:var(--bl);background:var(--el);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
 .trk{width:32px;height:32px;border-radius:8px;background:var(--agl);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0}
-.tri{flex:1;min-width:0}.trt{font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin-bottom:2px}.trm{font-size:11.5px;color:var(--td)}
+.tri{flex:1;min-width:0}.trt{font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin-bottom:2px}.trm{font-size:11.5px;color:var(--ts)}
 .trd{padding:2px 8px;background:var(--agl);border-radius:100px;font-size:10px;font-weight:700;color:var(--accent);white-space:nowrap}
 /* ARCHIVE */
 .arcs{display:flex;gap:12px;padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:20px;flex-wrap:wrap}
@@ -200,7 +200,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .cal-hd button{padding:6px 14px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;transition:all .15s}
 .cal-hd button:hover{color:var(--text);border-color:var(--bl)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-dow{text-align:center;font-size:10px;font-weight:600;color:var(--td);text-transform:uppercase;padding:6px 0;letter-spacing:.5px}
+.cal-dow{text-align:center;font-size:10px;font-weight:600;color:var(--ts);text-transform:uppercase;padding:6px 0;letter-spacing:.5px}
 .cal-day{min-height:64px;padding:6px;border-radius:8px;background:var(--el);border:1px solid transparent;cursor:default;transition:all .15s;position:relative}
 .cal-day.empty{background:transparent;border:none}
 .cal-day.has{cursor:pointer;border-color:var(--brd)}
@@ -396,7 +396,7 @@ let sb,user=null,profile=null,userSubs=[],userWatchlist=[];
 const D=__RELEASE_DATA_PLACEHOLDER__;
 const MC={movie:{i:"\uD83C\uDFAC",l:"Film",c:"#6366f1"},tv:{i:"\uD83D\uDCFA",l:"TV",c:"#a855f7"},book:{i:"\uD83D\uDCD6",l:"Book",c:"#14b8a6"},game:{i:"\uD83C\uDFAE",l:"Game",c:"#f43f5e"},anime:{i:"\uD83C\uDF8C",l:"Anime",c:"#ec4899"},music:{i:"\uD83C\uDFB5",l:"Music",c:"#eab308"},podcast:{i:"\uD83C\uDF99",l:"Podcast",c:"#8b5cf6"},boardgame:{i:"\uD83C\uDFB2",l:"Board Game",c:"#06b6d4"},news:{i:"\uD83D\uDCF0",l:"News",c:"#64748b"}};
 const SP={none:{l:"No Spoilers",bg:"var(--el)",c:"var(--td)",b:"var(--brd)"},light:{l:"\uD83D\uDFE2 Light",bg:"var(--slb)",c:"var(--sl)",b:"var(--slr)"},medium:{l:"\uD83D\uDFE1 Medium",bg:"var(--smb)",c:"var(--sm)",b:"var(--smr)"},heavy:{l:"\uD83D\uDD34 Heavy",bg:"var(--shb)",c:"var(--sh)",b:"var(--shr)"}};
-const STM=[{t:"Platforms & Studios",items:[{n:"A24 Releases",i:"\uD83C\uDFAC",d:"Every A24 theatrical and streaming release",f:"~8/mo"},{n:"HBO Originals",i:"\uD83D\uDCFA",d:"New episodes and premieres across HBO",f:"~15/mo"},{n:"Crunchyroll Simulcasts",i:"\uD83C\uDF8C",d:"Every new simulcast episode as it airs",f:"~40/mo"},{n:"Netflix Originals",i:"\uD83D\uDCFA",d:"Every Netflix original film and series",f:"~30/mo"},{n:"PlayStation Exclusives",i:"\uD83C\uDFAE",d:"First-party and exclusive PS5 launches",f:"~4/mo"},{n:"Tor Books",i:"\uD83D\uDCD6",d:"New fantasy and sci-fi from Tor",f:"~12/mo"},{n:"Napalm Records",i:"\uD83C\uDFB5",d:"New metal and rock from Napalm",f:"~10/mo"}]},{t:"Genres",items:[{n:"Horror (All Media)",i:"\uD83D\uDD2A",d:"Horror across all media types",f:"~18/mo"},{n:"Sci-Fi (All Media)",i:"\uD83D\uDE80",d:"Science fiction across all media",f:"~20/mo"},{n:"Fantasy (All Media)",i:"\u2694\uFE0F",d:"Fantasy across all media types",f:"~22/mo"},{n:"New Vinyl",i:"\uD83C\uDFB5",d:"Latest vinyl pressings across genres",f:"~15/mo"}]},{t:"Series & Franchises",items:[{n:"Golden Kamuy",i:"\uD83C\uDF8C",d:"Final season and manga releases",f:"Weekly"},{n:"My Hero Academia",i:"\uD83C\uDF8C",d:"Main series, Vigilantes, spin-offs",f:"Weekly+"},{n:"Fate Series",i:"\uD83C\uDF8C",d:"All Fate anime, movies, games",f:"Varies"}]}];
+const STM=[{t:"Platforms & Studios",items:[{n:"A24 Releases",i:"\uD83C\uDFAC",d:"Every A24 theatrical and streaming release",f:"~8/mo"},{n:"HBO Originals",i:"\uD83D\uDCFA",d:"New episodes and premieres across HBO",f:"~15/mo"},{n:"Crunchyroll Simulcasts",i:"\uD83C\uDF8C",d:"Every new simulcast episode as it airs",f:"~40/mo"},{n:"Netflix Originals",i:"\uD83D\uDCFA",d:"Every Netflix original film and series",f:"~30/mo"},{n:"PlayStation Exclusives",i:"\uD83C\uDFAE",d:"First-party and exclusive PS5 launches",f:"~4/mo"},{n:"Tor Books",i:"\uD83D\uDCD6",d:"New fantasy and sci-fi from Tor",f:"~12/mo"},{n:"Napalm Records",i:"\uD83C\uDFB5",d:"New metal and rock from Napalm",f:"~10/mo"}]},{t:"Curated Picks",items:[{n:"Horror (All Media)",i:"\uD83D\uDD2A",d:"Horror across all media types",f:"~18/mo"},{n:"Sci-Fi (All Media)",i:"\uD83D\uDE80",d:"Science fiction across all media",f:"~20/mo"},{n:"Fantasy (All Media)",i:"\u2694\uFE0F",d:"Fantasy across all media types",f:"~22/mo"},{n:"New Vinyl",i:"\uD83C\uDFB5",d:"Latest vinyl pressings across genres",f:"~15/mo"}]},{t:"Series & Franchises",items:[{n:"Golden Kamuy",i:"\uD83C\uDF8C",d:"Final season and manga releases",f:"Weekly"},{n:"My Hero Academia",i:"\uD83C\uDF8C",d:"Main series, Vigilantes, spin-offs",f:"Weekly+"},{n:"Fate Series",i:"\uD83C\uDF8C",d:"All Fate anime, movies, games",f:"Varies"}]}];
 
 let cf="all",cr=null,ccf="all",rv=new Set(),curPage="feed",selSpoiler="none";
 let vd=D.latest_date||"",R=(D.latest?D.latest.releases:D.releases)||[];
@@ -1458,20 +1458,20 @@ function calNext(){calMonth++;if(calMonth>11){calMonth=0;calYear++}renderCalenda
 // ═══════ STREAMS ═══════
 function renderStreams(){let h='<div class="shd"><h1 class="hero">Your Streams</h1><p>Subscribe to genres, platforms, franchises, and series.'+(user?'':' <a onclick="showAuth(\'signup\')" style="color:var(--accent);cursor:pointer">Sign up</a> to enable subscriptions.')+'</p></div>';
 // Media type subscriptions
-h+='<h3 class="sect" style="margin-top:0">Media Types</h3><p style="font-size:12px;color:var(--td);margin-bottom:12px">Subscribe to get daily email digests for these categories</p><div class="sg">';
+h+='<h3 class="sect" style="margin-top:0">Media Types</h3><p style="font-size:12px;color:var(--ts);margin-bottom:12px">Subscribe to get daily email digests for these categories</p><div class="sg">';
 for(const[t,c]of Object.entries(MC)){const on=isSubbed('media_type',t);h+='<div class="sc"><div class="sct"><div class="si">'+c.i+'</div><button class="ssb'+(on?' on':'')+'" onclick="toggleSub(\'media_type\',\''+t+'\')">'+(on?'\u2713 Subscribed':'Subscribe')+'</button></div><h3>'+c.l+' Releases</h3><p>Daily digest of new '+c.l.toLowerCase()+' releases</p></div>'}
 h+='</div>';
 // Genre subscriptions
 const genreMap=getAllGenreData();
 const topGenres=Object.entries(genreMap).sort((a,b)=>a[0].localeCompare(b[0]));
-h+='<h3 class="sect">Genres</h3><p style="font-size:12px;color:var(--td);margin-bottom:12px">Subscribe to specific genres across all media types</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">';
+h+='<h3 class="sect">Genres</h3><p style="font-size:12px;color:var(--ts);margin-bottom:12px">Subscribe to specific genres across all media types</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">';
 topGenres.forEach(([name,info])=>{
   const icon=getGenreIcon(name);
   const on=isSubbed('genre',name);
   h+='<div style="padding:12px;background:var(--card);border:1px solid '+(on?'var(--accent)':'var(--brd)')+';border-radius:10px;transition:all .15s">';
   h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:18px">'+icon+'</span><button class="ssb'+(on?' on':'')+'" onclick="toggleSub(\'genre\',\''+esc(name).replace(/'/g,"\\'")+'\');setTimeout(renderStreams,300)" style="font-size:10px;padding:3px 10px">'+(on?'\u2713':'Subscribe')+'</button></div>';
   h+='<div style="font-size:13px;font-weight:600">'+esc(name)+'</div>';
-  h+='<div style="font-size:10px;color:var(--td)">'+info.count+' releases</div>';
+  h+='<div style="font-size:10px;color:var(--ts)">'+info.count+' releases</div>';
   h+='</div>';
 });
 h+='</div>';
