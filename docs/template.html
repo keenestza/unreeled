@@ -614,7 +614,7 @@ function renderFeed(){
   const allGenres=new Set();R.forEach(r=>(r.genres||[]).forEach(g=>allGenres.add(g)));
   const sortedGenres=[...allGenres].sort();
   const allCountries=new Set();R.forEach(r=>((r.metadata||{}).countries||[]).forEach(c=>{if(c)allCountries.add(c)}));
-  const sortedCountries=[...allCountries].sort();
+  const sortedCountries=[...allCountries].sort((a,b)=>(CN[a]||a).localeCompare(CN[b]||b));
   h+='<div style="display:flex;gap:6px;margin-bottom:14px;align-items:center;flex-wrap:wrap"><select class="finput" style="width:auto;margin:0;min-width:110px;font-size:11px;padding:5px 8px" onchange="filterGenre=this.value;renderFeed()"><option value="">All genres</option>';
   sortedGenres.forEach(g=>{h+='<option value="'+esc(g)+'"'+(filterGenre===g?' selected':'')+'>'+esc(g)+'</option>'});
   h+='</select>';
