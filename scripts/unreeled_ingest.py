@@ -238,6 +238,9 @@ class TMDBSource:
             for movie in data.get("results", []):
                 details = self._get(f"/movie/{movie['id']}")
                 runtime = details.get("runtime", 0) if details else 0
+                production_countries = []
+                if details:
+                    production_countries = [c.get("iso_3166_1", "") for c in details.get("production_countries", [])]
 
                 # Filter: skip short films
                 if runtime and runtime < MIN_MOVIE_RUNTIME:
@@ -260,6 +263,7 @@ class TMDBSource:
                         "popularity": movie.get("popularity", 0),
                         "vote_average": movie.get("vote_average", 0),
                         "adult": movie.get("adult", False),
+                        "countries": production_countries,
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{movie['poster_path']}"
@@ -336,9 +340,12 @@ class TMDBSource:
                 episode_number = None
                 episode_name = ""
                 total_seasons = None
+                origin_countries = show.get("origin_country", [])
                 if details:
                     networks = [n["name"] for n in details.get("networks", [])]
                     total_seasons = details.get("number_of_seasons")
+                    if not origin_countries:
+                        origin_countries = [c.get("iso_3166_1", "") for c in details.get("production_countries", [])]
                     last_ep = details.get("last_episode_to_air") or {}
                     if last_ep:
                         season_number = last_ep.get("season_number")
@@ -362,6 +369,7 @@ class TMDBSource:
                         "episode_number": episode_number,
                         "episode_name": episode_name,
                         "total_seasons": total_seasons,
+                        "countries": origin_countries,
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{show['poster_path']}"
