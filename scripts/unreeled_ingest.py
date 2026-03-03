@@ -332,8 +332,18 @@ class TMDBSource:
 
                 details = self._get(f"/tv/{show['id']}")
                 networks = []
+                season_number = None
+                episode_number = None
+                episode_name = ""
+                total_seasons = None
                 if details:
                     networks = [n["name"] for n in details.get("networks", [])]
+                    total_seasons = details.get("number_of_seasons")
+                    last_ep = details.get("last_episode_to_air") or {}
+                    if last_ep:
+                        season_number = last_ep.get("season_number")
+                        episode_number = last_ep.get("episode_number")
+                        episode_name = last_ep.get("name", "")
 
                 release = make_release(
                     source="tmdb",
@@ -348,6 +358,10 @@ class TMDBSource:
                         "popularity": show.get("popularity", 0),
                         "vote_average": show.get("vote_average", 0),
                         "episode_air_date": date,
+                        "season_number": season_number,
+                        "episode_number": episode_number,
+                        "episode_name": episode_name,
+                        "total_seasons": total_seasons,
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{show['poster_path']}"
