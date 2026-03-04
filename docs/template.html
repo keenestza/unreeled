@@ -496,7 +496,7 @@ function renderNav(){
     el.innerHTML='<div class="user-pill" onclick="document.getElementById(\'umenu\').classList.toggle(\'show\')"><div class="uav" style="background:'+profile.avatar_color+'">'+init+'</div>'+esc(profile.username)+'</div>';
     document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="openProfile(\''+user.id+'\',\''+esc(profile.username).replace(/'/g,"\\'")+'\')">My Profile</button><button onclick="go(\'streams\')">My Streams</button>'+(isAdmin()?'<button onclick="go(\'admin\');renderAdmin()">Admin Dashboard</button>':'')+'<hr><button onclick="doLogout()">Log Out</button>';
   } else {
-    el.innerHTML='<button class="btn-a" onclick="showAuth(\'signup\')">Sign Up</button><button style="font-size:12.5px;color:var(--td);padding:6px 10px" onclick="showAuth(\'login\')">Log In</button>';
+    el.innerHTML='<button class="btn-a" onclick="showAuth(\'login\')">Sign In</button>';
     document.getElementById('umenu').classList.remove('show');
   }
 }
@@ -505,11 +505,9 @@ function renderNav(){
 function showAuth(mode){
   const box=document.getElementById('auth-box');
   if(mode==='signup'){
-    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Create Account</h2><p class="ms">Join Unreeled to comment, subscribe, and track releases.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20"><input class="finput" id="a-email" placeholder="Email" type="email"><input class="finput" id="a-pass" placeholder="Password (min 6 chars)" type="password"><button class="fbtn" id="a-btn" onclick="doSignup()">Create Account</button><p class="flink">Already have an account? <a onclick="showAuth(\'login\')">Log in</a></p>';
+    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Join Unreeled</h2><p class="ms">Track releases, build watchlists, and join the discussion.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><button class="fbtn" onclick="doGoogleAuth()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#333;border:1px solid var(--brd);margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continue with Google</button><div style="display:flex;align-items:center;gap:12px;margin:14px 0"><div style="flex:1;height:1px;background:var(--brd)"></div><span style="font-size:11px;color:var(--td)">or</span><div style="flex:1;height:1px;background:var(--brd)"></div></div><input class="finput" id="a-email" placeholder="Email address" type="email"><input class="finput" id="a-user" placeholder="Choose a username" maxlength="20"><button class="fbtn" id="a-btn" onclick="doMagicSignup()">Send me a sign-in link</button><p class="flink">Already have an account? <a onclick="showAuth(\'login\')">Log in</a></p>';
   } else if(mode==='login'){
-    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Welcome Back</h2><p class="ms">Log in to your Unreeled account.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-email" placeholder="Email" type="email"><input class="finput" id="a-pass" placeholder="Password" type="password"><button class="fbtn" id="a-btn" onclick="doLogin()">Log In</button><p class="flink"><a onclick="showAuth(\'forgot\')">Forgot password?</a> \u00B7 <a onclick="showAuth(\'signup\')">Create account</a></p>';
-  } else if(mode==='forgot'){
-    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Reset Password</h2><p class="ms">Enter your email and we\'ll send a reset link.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><input class="finput" id="a-email" placeholder="Email" type="email"><button class="fbtn" onclick="doReset()">Send Reset Link</button><p class="flink"><a onclick="showAuth(\'login\')">Back to login</a></p>';
+    box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Welcome Back</h2><p class="ms">Sign in to your Unreeled account.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><button class="fbtn" onclick="doGoogleAuth()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#333;border:1px solid var(--brd);margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continue with Google</button><div style="display:flex;align-items:center;gap:12px;margin:14px 0"><div style="flex:1;height:1px;background:var(--brd)"></div><span style="font-size:11px;color:var(--td)">or</span><div style="flex:1;height:1px;background:var(--brd)"></div></div><input class="finput" id="a-email" placeholder="Email address" type="email"><button class="fbtn" id="a-btn" onclick="doMagicLogin()">Send me a sign-in link</button><p class="flink">New here? <a onclick="showAuth(\'signup\')">Create account</a></p>';
   }
   document.getElementById('auth-modal').classList.add('show');
 }
@@ -517,39 +515,48 @@ function closeModal(){document.getElementById('auth-modal').classList.remove('sh
 function showErr(msg){const e=document.getElementById('aerr');if(e){e.textContent=msg;e.classList.add('show')}}
 function showOk(msg){const e=document.getElementById('aok');if(e){e.textContent=msg;e.classList.add('show')}}
 
-async function doSignup(){
-  const un=document.getElementById('a-user').value.trim();
+async function doGoogleAuth(){
+  const{error}=await sb.auth.signInWithOAuth({
+    provider:'google',
+    options:{redirectTo:'https://keenestza.github.io/unreeled/'}
+  });
+  if(error)showErr(error.message);
+}
+
+async function doMagicSignup(){
   const em=document.getElementById('a-email').value.trim();
-  const pw=document.getElementById('a-pass').value;
+  const un=document.getElementById('a-user').value.trim();
+  if(!em)return showErr('Email is required');
   if(!un||un.length<3)return showErr('Username must be at least 3 characters');
   if(!/^[a-zA-Z0-9_]+$/.test(un))return showErr('Username: letters, numbers, underscores only');
-  if(!em)return showErr('Email is required');
-  if(pw.length<6)return showErr('Password must be at least 6 characters');
   document.getElementById('a-btn').disabled=true;
-  const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{username:un,display_name:un}}});
+  document.getElementById('a-btn').textContent='Sending...';
+  const{error}=await sb.auth.signInWithOtp({
+    email:em,
+    options:{
+      data:{username:un,display_name:un},
+      emailRedirectTo:'https://keenestza.github.io/unreeled/'
+    }
+  });
   document.getElementById('a-btn').disabled=false;
+  document.getElementById('a-btn').textContent='Send me a sign-in link';
   if(error)return showErr(error.message);
-  if(data.user&&!data.session){showOk('Check your email to confirm your account!');return}
-  closeModal();toast('Welcome to Unreeled, '+un+'!');await loadUser();renderNav();renderFeed();
+  showOk('\u2709\uFE0F Check your email! Click the link to sign in.');
 }
 
-async function doLogin(){
-  const em=document.getElementById('a-email').value.trim();
-  const pw=document.getElementById('a-pass').value;
-  if(!em||!pw)return showErr('Email and password required');
-  document.getElementById('a-btn').disabled=true;
-  const{error}=await sb.auth.signInWithPassword({email:em,password:pw});
-  document.getElementById('a-btn').disabled=false;
-  if(error)return showErr(error.message);
-  closeModal();toast('Welcome back!');await loadUser();renderNav();renderFeed();
-}
-
-async function doReset(){
+async function doMagicLogin(){
   const em=document.getElementById('a-email').value.trim();
   if(!em)return showErr('Email is required');
-  const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:'https://keenestza.github.io/unreeled/'});
+  document.getElementById('a-btn').disabled=true;
+  document.getElementById('a-btn').textContent='Sending...';
+  const{error}=await sb.auth.signInWithOtp({
+    email:em,
+    options:{emailRedirectTo:'https://keenestza.github.io/unreeled/'}
+  });
+  document.getElementById('a-btn').disabled=false;
+  document.getElementById('a-btn').textContent='Send me a sign-in link';
   if(error)return showErr(error.message);
-  showOk('Reset link sent! Check your email.');
+  showOk('\u2709\uFE0F Check your email! Click the link to sign in.');
 }
 
 async function doLogout(){
@@ -566,7 +573,22 @@ async function loadUser(){
   const{data}=await sb.auth.getUser();
   user=data.user;
   if(!user)return;
-  const{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  let{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  // Auto-create profile for Google OAuth users or magic link users without one
+  if(!p&&user){
+    const meta=user.user_metadata||{};
+    const username=meta.username||meta.display_name||meta.full_name||(user.email||'').split('@')[0]||'user';
+    const cleanName=username.replace(/[^a-zA-Z0-9_]/g,'_').slice(0,20);
+    const colors=['#6366f1','#a855f7','#14b8a6','#f43f5e','#ec4899','#eab308','#8b5cf6','#06b6d4','#f97316','#ef4444'];
+    const color=colors[Math.floor(Math.random()*colors.length)];
+    const{data:np}=await sb.from('profiles').upsert({
+      id:user.id,
+      username:cleanName,
+      avatar_color:color,
+      role:'user'
+    },{onConflict:'id'}).select().single();
+    p=np;
+  }
   profile=p;
   const{data:s}=await sb.from('subscriptions').select('*').eq('user_id',user.id);
   userSubs=s||[];
@@ -1757,7 +1779,15 @@ document.addEventListener('DOMContentLoaded',async()=>{
   // Show watchlist quick summary
   if(user&&userWatchlist.length)setTimeout(showWatchlistPopup,1500);
   sb.auth.onAuthStateChange(async(event)=>{
-    if(event==='SIGNED_IN'||event==='SIGNED_OUT'){await loadUser();if(user){await loadFollowing();await loadWatched()}renderNav();renderStreams();renderAccount()}
+    if(event==='SIGNED_IN'||event==='SIGNED_OUT'||event==='TOKEN_REFRESHED'){
+      await loadUser();
+      if(user){await loadFollowing();await loadWatched()}
+      renderNav();renderStreams();renderAccount();renderFeed();
+      if(event==='SIGNED_IN'&&user){
+        closeModal();
+        toast('Welcome'+(profile?' back, '+profile.username:'')+'!');
+      }
+    }
   });
   // Register service worker for PWA
   if('serviceWorker' in navigator){
