@@ -561,8 +561,8 @@ async function doMagicLogin(){
 
 async function doLogout(){
   document.getElementById('umenu').classList.remove('show');
-  try{await sb.auth.signOut()}catch(e){console.error('Logout error:',e)}
-  user=null;profile=null;userSubs=[];userWatchlist=[];
+  try{await sb.auth.signOut({scope:'global'})}catch(e){console.error('Logout error:',e)}
+  user=null;profile=null;userSubs=[];userWatchlist=[];userFollowing=[];userWatched=[];
   renderNav();renderFeed();renderStreams();renderAccount();
   go('feed');
   toast('Logged out');
@@ -1660,6 +1660,9 @@ function renderAccount(){
   // Weekly Recap
   h+='<div class="st" style="margin-top:24px">\uD83D\uDCCA This Week\'s Recap</div>';
   h+=buildWeeklyRecap();
+
+  // Logout button
+  h+='<div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--brd);text-align:center"><button onclick="doLogout()" style="padding:10px 32px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">\u{1F6AA} Log Out</button></div>';
 
   document.getElementById('p-account').innerHTML=h}
 
