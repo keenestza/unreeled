@@ -574,11 +574,14 @@ async function loadUser(){
   user=data.user;
   if(!user)return;
   let{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
-  // Auto-create profile for Google OAuth users or magic link users without one
+  const meta=user.user_metadata||{};
+  const idMeta=user.identities?.[0]?.identity_data||{};
+  // Best username from Google: full_name > name > display_name > email prefix
+  const bestName=meta.full_name||meta.name||idMeta.full_name||idMeta.name||meta.display_name||meta.username||(user.email||'').split('@')[0]||'user';
+  const cleanName=bestName.replace(/[^a-zA-Z0-9_ ]/g,'').replace(/\s+/g,'_').slice(0,20);
+
   if(!p&&user){
-    const meta=user.user_metadata||{};
-    const username=meta.username||meta.display_name||meta.full_name||(user.email||'').split('@')[0]||'user';
-    const cleanName=username.replace(/[^a-zA-Z0-9_]/g,'_').slice(0,20);
+    // Auto-create profile for new Google/magic link users
     const colors=['#6366f1','#a855f7','#14b8a6','#f43f5e','#ec4899','#eab308','#8b5cf6','#06b6d4','#f97316','#ef4444'];
     const color=colors[Math.floor(Math.random()*colors.length)];
     const{data:np}=await sb.from('profiles').upsert({
@@ -588,6 +591,10 @@ async function loadUser(){
       role:'user'
     },{onConflict:'id'}).select().single();
     p=np;
+  } else if(p&&p.username.startsWith('user_')&&cleanName&&!cleanName.startsWith('user')){
+    // Fix auto-generated usernames with the real Google name
+    await sb.from('profiles').update({username:cleanName}).eq('id',user.id);
+    p.username=cleanName;
   }
   profile=p;
   const{data:s}=await sb.from('subscriptions').select('*').eq('user_id',user.id);
