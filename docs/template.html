@@ -9,19 +9,19 @@
 <meta property="og:title" content="UNREELED — Daily Media Releases">
 <meta property="og:description" content="Track daily releases across movies, TV, books, games, anime, music and podcasts with spoiler-tagged discussions.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://unreeled.netlify.app">
-<meta property="og:image" content="https://unreeled.netlify.app/og-image.png">
+<meta property="og:url" content="https://unreeled.co.za">
+<meta property="og:image" content="https://unreeled.co.za/og-image.png">
 <meta property="og:site_name" content="UNREELED">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="UNREELED — Daily Media Releases">
 <meta name="twitter:description" content="Track daily releases across movies, TV, books, games, anime, music and podcasts.">
-<meta name="twitter:image" content="https://unreeled.netlify.app/og-image.png">
+<meta name="twitter:image" content="https://unreeled.co.za/og-image.png">
 <!-- PWA -->
 <meta name="theme-color" content="#ff6b35">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="/unreeled/manifest.json">
-<link rel="alternate" type="application/rss+xml" title="UNREELED Daily Releases" href="/unreeled/feed.xml">
+<link rel="manifest" href="/manifest.json">
+<link rel="alternate" type="application/rss+xml" title="UNREELED Daily Releases" href="/feed.xml">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23ff6b35'/><text x='45' y='135' font-size='120' font-weight='bold' fill='white'>U</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -382,7 +382,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
       <button class="tab" data-p="streams" onclick="go('streams')">Streams</button>
     </div>
   </div>
-  <div class="nav-r"><a href="/unreeled/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button><span id="nav-r"></span></div>
+  <div class="nav-r"><a href="/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button><span id="nav-r"></span></div>
 </nav>
 <div class="umenu" id="umenu"></div>
 <!-- AUTH MODAL -->
@@ -518,7 +518,7 @@ function showOk(msg){const e=document.getElementById('aok');if(e){e.textContent=
 async function doGoogleAuth(){
   const{error}=await sb.auth.signInWithOAuth({
     provider:'google',
-    options:{redirectTo:'https://keenestza.github.io/unreeled/'}
+    options:{redirectTo:'https://unreeled.co.za/'}
   });
   if(error)showErr(error.message);
 }
@@ -535,7 +535,7 @@ async function doMagicSignup(){
     email:em,
     options:{
       data:{username:un,display_name:un},
-      emailRedirectTo:'https://keenestza.github.io/unreeled/'
+      emailRedirectTo:'https://unreeled.co.za/'
     }
   });
   document.getElementById('a-btn').disabled=false;
@@ -551,7 +551,7 @@ async function doMagicLogin(){
   document.getElementById('a-btn').textContent='Sending...';
   const{error}=await sb.auth.signInWithOtp({
     email:em,
-    options:{emailRedirectTo:'https://keenestza.github.io/unreeled/'}
+    options:{emailRedirectTo:'https://unreeled.co.za/'}
   });
   document.getElementById('a-btn').disabled=false;
   document.getElementById('a-btn').textContent='Send me a sign-in link';
@@ -1817,7 +1817,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   });
   // Register service worker for PWA
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/unreeled/sw.js').catch(()=>{});
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
   }
 });
 
