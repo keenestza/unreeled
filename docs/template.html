@@ -1437,12 +1437,14 @@ async function renderAdmin(){
 
   try{
     // Fetch stats
-    const[commentsRes,ratingsRes,usersRes,reportsRes,hiddenRes]=await Promise.all([
+    const[commentsRes,ratingsRes,usersRes,reportsRes,hiddenRes,reviewReportsRes,reviewHiddenRes]=await Promise.all([
       sb.from('comments').select('id',{count:'exact',head:true}),
       sb.from('ratings').select('id',{count:'exact',head:true}),
       sb.from('profiles').select('id',{count:'exact',head:true}),
       sb.from('comments').select('id',{count:'exact',head:true}).gt('report_count',0),
       sb.from('comments').select('id',{count:'exact',head:true}).eq('hidden',true),
+      sb.from('reviews').select('id',{count:'exact',head:true}).gt('report_count',0),
+      sb.from('reviews').select('id',{count:'exact',head:true}).eq('hidden',true),
     ]);
 
     const totalComments=commentsRes.count||0;
@@ -1450,12 +1452,20 @@ async function renderAdmin(){
     const totalUsers=usersRes.count||0;
     const reportedCount=reportsRes.count||0;
     const hiddenCount=hiddenRes.count||0;
+    const reviewReportedCount=reviewReportsRes.count||0;
+    const reviewHiddenCount=reviewHiddenRes.count||0;
 
     // Fetch recent reported comments
     const{data:reported}=await sb.from('comments').select('*,profiles(username,avatar_color)').gt('report_count',0).order('report_count',{ascending:false}).limit(20);
 
     // Fetch recent hidden comments
     const{data:hidden}=await sb.from('comments').select('*,profiles(username,avatar_color)').eq('hidden',true).order('created_at',{ascending:false}).limit(10);
+
+    // Fetch reported reviews
+    const{data:reportedReviews}=await sb.from('reviews').select('*,profiles(username,avatar_color)').gt('report_count',0).order('report_count',{ascending:false}).limit(20);
+
+    // Fetch hidden reviews
+    const{data:hiddenReviews}=await sb.from('reviews').select('*,profiles(username,avatar_color)').eq('hidden',true).order('created_at',{ascending:false}).limit(10);
 
     let h='<h1 class="hero">\uD83D\uDEE1 Admin Dashboard</h1><p class="sub">Site moderation and statistics</p>';
 
@@ -1466,8 +1476,10 @@ async function renderAdmin(){
       {n:totalComments,l:'Comments',i:'\uD83D\uDCAC',c:'#6366f1'},
       {n:totalRatings,l:'Ratings',i:'\u2B50',c:'#f0c038'},
       {n:R.length,l:'Releases Today',i:'\uD83C\uDFAC',c:'#14b8a6'},
-      {n:reportedCount,l:'Reported',i:'\uD83D\uDEA9',c:'var(--sm)'},
-      {n:hiddenCount,l:'Hidden',i:'\uD83D\uDEAB',c:'var(--sh)'},
+      {n:reportedCount,l:'Reported Comments',i:'\uD83D\uDEA9',c:'var(--sm)'},
+      {n:hiddenCount,l:'Hidden Comments',i:'\uD83D\uDEAB',c:'var(--sh)'},
+      {n:reviewReportedCount,l:'Reported Reviews',i:'\uD83D\uDEA9',c:'#f97316'},
+      {n:reviewHiddenCount,l:'Hidden Reviews',i:'\uD83D\uDEAB',c:'#ef4444'},
     ];
     stats.forEach(s=>{
       h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;text-align:center">';
@@ -1506,6 +1518,41 @@ async function renderAdmin(){
         h+='</div>';
       });
     } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No hidden comments.</p>'}
+
+    // Reported reviews
+    h+='<div class="st" style="margin-top:16px">\uD83D\uDEA9 Reported Reviews ('+reviewReportedCount+')</div>';
+    if((reportedReviews||[]).length){
+      reportedReviews.forEach(r=>{
+        const p=r.profiles||{};
+        const un=p.username||'anon';
+        h+='<div style="padding:12px;background:var(--card);border:1px solid var(--shr);border-radius:8px;margin-bottom:8px">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:600">'+esc(un)+' <span style="color:var(--accent);font-size:12px">'+'\u2605'.repeat(r.rating)+'</span></span><span style="font-size:11px;color:var(--sh)">\uD83D\uDEA9 '+r.report_count+' reports</span></div>';
+        h+='<div style="font-size:11px;color:var(--td);margin-bottom:4px">'+esc(r.release_title)+'</div>';
+        h+='<div style="font-size:13px;margin-bottom:8px">'+esc((r.body||'').slice(0,200))+'</div>';
+        h+='<div style="display:flex;gap:6px">';
+        if(!r.hidden)h+='<button onclick="modHideReview(\''+r.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--shb);color:var(--sh);border:1px solid var(--shr);border-radius:6px">Hide</button>';
+        else h+='<button onclick="modUnhideReview(\''+r.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--slb);color:var(--sl);border:1px solid var(--slr);border-radius:6px">Unhide</button>';
+        h+='<button onclick="modDismissReviewReports(\''+r.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--el);color:var(--td);border:1px solid var(--brd);border-radius:6px">Dismiss</button>';
+        h+='<button onclick="modDeleteReview(\''+r.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--el);color:var(--sh);border:1px solid var(--brd);border-radius:6px">Delete</button>';
+        h+='</div></div>';
+      });
+    } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">\u2705 No reported reviews.</p>'}
+
+    // Hidden reviews
+    h+='<div class="st" style="margin-top:16px">\uD83D\uDEAB Hidden Reviews ('+reviewHiddenCount+')</div>';
+    if((hiddenReviews||[]).length){
+      hiddenReviews.forEach(r=>{
+        const p=r.profiles||{};
+        h+='<div style="padding:10px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;opacity:0.7">';
+        h+='<div style="font-size:12px;color:var(--td);margin-bottom:4px">'+(p.username||'anon')+' \u00B7 '+'\u2605'.repeat(r.rating)+' \u00B7 '+timeAgo(r.created_at)+'</div>';
+        h+='<div style="font-size:11px;color:var(--td);margin-bottom:2px">'+esc(r.release_title)+'</div>';
+        h+='<div style="font-size:13px">'+esc((r.body||'').slice(0,150))+'</div>';
+        h+='<div style="display:flex;gap:6px;margin-top:6px">';
+        h+='<button onclick="modUnhideReview(\''+r.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--slb);color:var(--sl);border:1px solid var(--slr);border-radius:6px">Unhide</button>';
+        h+='<button onclick="modDeleteReview(\''+r.id+'\');setTimeout(renderAdmin,500)" style="padding:4px 10px;font-size:11px;background:var(--el);color:var(--sh);border:1px solid var(--brd);border-radius:6px">Delete</button>';
+        h+='</div></div>';
+      });
+    } else {h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No hidden reviews.</p>'}
 
     // Media type breakdown for today
     h+='<div class="st" style="margin-top:16px">\uD83D\uDCCA Today\'s Breakdown</div>';
@@ -1899,16 +1946,35 @@ async function loadReviews(rk){
 function renderReviews(){
   const el=document.getElementById('reviews-list');
   if(!el)return;
-  if(!detailReviews.length){el.innerHTML='<p style="color:var(--td);font-size:13px;text-align:center;padding:16px 0">No reviews yet. Be the first to review!</p>';return}
-  const avg=detailReviews.reduce((s,r)=>s+r.rating,0)/detailReviews.length;
-  let h='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+avg.toFixed(1)+'</div><div><div style="font-size:14px;color:var(--ts)">'+'\u2605'.repeat(Math.round(avg))+'\u2606'.repeat(5-Math.round(avg))+'</div><div style="font-size:11px;color:var(--td)">'+detailReviews.length+' review'+(detailReviews.length!==1?'s':'')+'</div></div></div>';
-  detailReviews.forEach(r=>{
+  const adm=isAdmin();
+  const visible=detailReviews.filter(r=>!r.hidden||adm);
+  if(!visible.length){el.innerHTML='<p style="color:var(--td);font-size:13px;text-align:center;padding:16px 0">No reviews yet. Be the first to review!</p>';return}
+  const nonHidden=detailReviews.filter(r=>!r.hidden);
+  const avg=nonHidden.length?nonHidden.reduce((s,r)=>s+r.rating,0)/nonHidden.length:0;
+  let h='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+avg.toFixed(1)+'</div><div><div style="font-size:14px;color:var(--ts)">'+'\u2605'.repeat(Math.round(avg))+'\u2606'.repeat(5-Math.round(avg))+'</div><div style="font-size:11px;color:var(--td)">'+nonHidden.length+' review'+(nonHidden.length!==1?'s':'')+'</div></div></div>';
+  visible.forEach(r=>{
     const p=r.profiles||{};
     const un=p.username||'anon';
     const ac=p.avatar_color||'#ff6b35';
     const init=un.slice(0,2).toUpperCase();
     const mine=user&&r.user_id===user.id;
-    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="av" style="background:'+ac+'">'+init+'</div><div><div style="font-size:12.5px;font-weight:600">'+esc(un)+'</div><div style="font-size:10.5px;color:var(--td)">'+timeAgo(r.created_at)+'</div></div></div><div style="color:var(--accent);font-size:14px">'+'\u2605'.repeat(r.rating)+'<span style="color:var(--td)">\u2606'.repeat(5-r.rating)+'</span></div></div><p style="font-size:13px;color:var(--ts);line-height:1.6">'+esc(r.body)+'</p>'+(mine?'<button onclick="deleteReview(\''+r.id+'\')" style="font-size:11px;color:var(--td);margin-top:8px;padding:4px 8px;background:var(--el);border:1px solid var(--brd);border-radius:4px">Delete</button>':'')+'</div>';
+    const isHidden=r.hidden;
+    h+='<div style="padding:14px;background:var(--card);border:1px solid '+(isHidden?'var(--sh)':'var(--brd)')+';border-radius:10px;margin-bottom:8px;'+(isHidden?'opacity:0.5':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="av" style="background:'+ac+'">'+init+'</div><div><div style="font-size:12.5px;font-weight:600">'+esc(un)+(isHidden&&adm?'<span style="background:var(--shb);color:var(--sh);padding:1px 6px;border-radius:3px;font-size:9px;margin-left:6px">HIDDEN</span>':'')+'</div><div style="font-size:10.5px;color:var(--td)">'+timeAgo(r.created_at)+(r.report_count&&adm?' \u00B7 \uD83D\uDEA9 '+r.report_count+' reports':'')+'</div></div></div><div style="color:var(--accent);font-size:14px">'+'\u2605'.repeat(r.rating)+'<span style="color:var(--td)">\u2606'.repeat(5-r.rating)+'</span></div></div>';
+    if(isHidden&&!adm){
+      h+='<p style="font-size:13px;color:var(--td);font-style:italic">This review has been hidden by a moderator.</p>';
+    } else {
+      h+='<p style="font-size:13px;color:var(--ts);line-height:1.6">'+esc(r.body)+'</p>';
+    }
+    h+='<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">';
+    if(mine)h+='<button onclick="deleteReview(\''+r.id+'\')" style="font-size:11px;color:var(--td);padding:4px 8px;background:var(--el);border:1px solid var(--brd);border-radius:4px">Delete</button>';
+    if(!mine&&user&&!adm)h+='<button onclick="reportReview(\''+r.id+'\')" style="font-size:11px;color:var(--td);padding:4px 8px;background:var(--el);border:1px solid var(--brd);border-radius:4px">\uD83D\uDEA9 Report</button>';
+    if(adm){
+      if(!isHidden)h+='<button onclick="modHideReview(\''+r.id+'\')" style="font-size:11px;color:var(--sh);padding:4px 8px;background:var(--shb);border:1px solid var(--shr);border-radius:4px">Hide</button>';
+      else h+='<button onclick="modUnhideReview(\''+r.id+'\')" style="font-size:11px;color:var(--sl);padding:4px 8px;background:var(--slb);border:1px solid var(--slr);border-radius:4px">Unhide</button>';
+      if(r.report_count>0)h+='<button onclick="modDismissReviewReports(\''+r.id+'\')" style="font-size:11px;color:var(--td);padding:4px 8px;background:var(--el);border:1px solid var(--brd);border-radius:4px">Dismiss Reports</button>';
+      h+='<button onclick="modDeleteReview(\''+r.id+'\')" style="font-size:11px;color:var(--sh);padding:4px 8px;background:var(--el);border:1px solid var(--brd);border-radius:4px">\u2715 Delete</button>';
+    }
+    h+='</div></div>';
   });
   el.innerHTML=h;
 }
@@ -1921,7 +1987,6 @@ async function postReview(){
   const rating=parseInt(document.getElementById('review-rating').value);
   if(!body||body.length<10)return toast('Review must be at least 10 characters');
   if(!rating||rating<1||rating>5)return toast('Select a rating');
-  // Check if user already reviewed
   if(detailReviews.some(r=>user&&r.user_id===user.id))return toast('You already reviewed this title');
   const btn=document.getElementById('review-btn');
   btn.disabled=true;
@@ -1937,6 +2002,39 @@ async function postReview(){
 async function deleteReview(rid){
   await sb.from('reviews').delete().eq('id',rid);
   toast('Review deleted');
+  await loadReviews(releaseKey(cr));
+}
+
+async function reportReview(rid){
+  const r=detailReviews.find(x=>x.id===rid);
+  if(!r)return;
+  await sb.from('reviews').update({report_count:(r.report_count||0)+1}).eq('id',rid);
+  toast('\uD83D\uDEA9 Review reported');
+  await loadReviews(releaseKey(cr));
+}
+
+async function modHideReview(rid){
+  await sb.from('reviews').update({hidden:true}).eq('id',rid);
+  toast('Review hidden');
+  await loadReviews(releaseKey(cr));
+}
+
+async function modUnhideReview(rid){
+  await sb.from('reviews').update({hidden:false}).eq('id',rid);
+  toast('Review unhidden');
+  await loadReviews(releaseKey(cr));
+}
+
+async function modDismissReviewReports(rid){
+  await sb.from('reviews').update({report_count:0}).eq('id',rid);
+  toast('Reports dismissed');
+  await loadReviews(releaseKey(cr));
+}
+
+async function modDeleteReview(rid){
+  if(!confirm('Permanently delete this review?'))return;
+  await sb.from('reviews').delete().eq('id',rid);
+  toast('Review deleted by admin');
   await loadReviews(releaseKey(cr));
 }
 
