@@ -402,6 +402,7 @@ class TMDBSource:
     def fetch_physical_media(self, date: str) -> list[dict]:
         """Fetch physical media releases (4K, Blu-ray, DVD) from TMDB.
         Uses release_type=5 (Physical) to find titles with physical release dates.
+        Optimised: uses only discover endpoint, no per-title lookups.
         """
         if not self.api_key:
             logger.warning("TMDB_API_KEY not set — skipping physical media")
@@ -414,7 +415,7 @@ class TMDBSource:
         page = 1
         total_pages = 1
 
-        while page <= min(total_pages, 3):
+        while page <= min(total_pages, 2):  # Max 2 pages (40 results)
             params = {
                 "release_date.gte": date,
                 "release_date.lte": date,
@@ -431,45 +432,10 @@ class TMDBSource:
             total_pages = data.get("total_pages", 1)
 
             for movie in data.get("results", []):
-                # Skip if no overview AND no poster
                 if not movie.get("overview") and not movie.get("poster_path"):
                     continue
 
-                # Get details for runtime and production countries
-                details = self._get(f"/movie/{movie['id']}")
-                runtime = details.get("runtime", 0) if details else 0
-                production_countries = []
-                if details:
-                    production_countries = [c.get("iso_3166_1", "") for c in details.get("production_countries", [])]
-
-                # Get release dates to find physical format details
-                release_info = self._get(f"/movie/{movie['id']}/release_dates")
-                physical_note = ""
-                if release_info and "results" in release_info:
-                    for country in release_info["results"]:
-                        for rd in country.get("release_dates", []):
-                            if rd.get("type") == 5:  # Physical
-                                note = rd.get("note", "")
-                                if note:
-                                    physical_note = note
-                                    break
-                        if physical_note:
-                            break
-
-                # Resolve genres
                 genres = self._resolve_genres(movie.get("genre_ids", []), "movie")
-
-                # Determine format from note if available
-                formats = []
-                note_lower = (physical_note or "").lower()
-                if "4k" in note_lower or "uhd" in note_lower:
-                    formats.append("4K UHD")
-                if "blu" in note_lower:
-                    formats.append("Blu-ray")
-                if "dvd" in note_lower:
-                    formats.append("DVD")
-                if not formats:
-                    formats = ["4K/Blu-ray/DVD"]  # Default when no specific format noted
 
                 release = make_release(
                     source="tmdb_physical",
@@ -479,13 +445,10 @@ class TMDBSource:
                     synopsis=movie.get("overview", ""),
                     genres=genres,
                     metadata={
-                        "runtime_minutes": runtime,
                         "original_language": movie.get("original_language", ""),
                         "popularity": movie.get("popularity", 0),
                         "vote_average": movie.get("vote_average", 0),
-                        "countries": production_countries,
-                        "physical_formats": formats,
-                        "physical_note": physical_note,
+                        "physical_formats": ["4K/Blu-ray/DVD"],
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{movie['poster_path']}"
@@ -500,21 +463,9 @@ class TMDBSource:
 
         # Deduplicate against theatrical releases (same tmdb_id)
         logger.info(f"TMDB: {len(releases)} physical media releases for {date}")
-
-        # Enrich top releases with streaming providers
-        wp_count = 0
-        for r in releases[:15]:
-            tmdb_id = r.get("external_ids", {}).get("tmdb_id")
-            if not tmdb_id:
-                continue
-            streaming = self._get_watch_providers(tmdb_id, "movie")
-            if streaming:
-                r["metadata"]["streaming"] = streaming
-                wp_count += 1
-        if wp_count:
-            logger.info(f"TMDB: Added streaming info to {wp_count} physical media releases")
-
         return releases
+
+
 # ═══════════════════════════════════════════════════════════════
 
 class OpenLibrarySource:
