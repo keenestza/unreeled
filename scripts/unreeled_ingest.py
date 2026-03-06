@@ -490,6 +490,112 @@ class TMDBSource:
 
 
 # ═══════════════════════════════════════════════════════════════
+# SOURCE: TVmaze (Daily Episodes + Streaming Schedule)
+# ═══════════════════════════════════════════════════════════════
+
+class TVmazeSource:
+    """
+    TVmaze API — daily airing episodes + streaming new releases.
+    Docs: https://www.tvmaze.com/api
+    Rate Limit: ~20 req/10sec (be respectful, no key needed)
+    Cost: Free, no authentication required
+    """
+
+    SCHEDULE_URL = "https://api.tvmaze.com/schedule"
+    WEB_SCHEDULE_URL = "https://api.tvmaze.com/schedule/web"
+
+    def fetch_tv_schedule(self, date: str) -> list[dict]:
+        """Fetch both broadcast and streaming episodes airing on a given date."""
+        releases = []
+        seen_shows = set()
+
+        # 1. Broadcast schedule (US + GB)
+        for country in ["US", "GB"]:
+            try:
+                resp = requests.get(self.SCHEDULE_URL, params={"country": country, "date": date}, timeout=30)
+                if resp.status_code == 200:
+                    for ep in resp.json():
+                        show = ep.get("_embedded", {}).get("show") or ep.get("show") or {}
+                        if not show:
+                            continue
+                        show_name = show.get("name", "")
+                        if not show_name or show_name.lower() in seen_shows:
+                            continue
+                        show_type = (show.get("type") or "").lower()
+                        if show_type in ("news", "talk show", "sports", "variety", "game show", "panel show"):
+                            continue
+                        network = show.get("network") or {}
+                        image = show.get("image") or {}
+                        seen_shows.add(show_name.lower())
+                        releases.append(make_release(
+                            source="tvmaze", media_type="tv", title=show_name, release_date=date,
+                            synopsis=self._clean_html(show.get("summary", "")),
+                            genres=show.get("genres", []),
+                            metadata={
+                                "networks": [network.get("name", "")] if network.get("name") else [],
+                                "popularity": show.get("weight", 0),
+                                "vote_average": (show.get("rating") or {}).get("average", 0) or 0,
+                                "season_number": ep.get("season"), "episode_number": ep.get("number"),
+                                "episode_name": ep.get("name", ""), "episode_air_date": date,
+                                "countries": [(network.get("country") or {}).get("code", "")] if (network.get("country") or {}).get("code") else [],
+                                "source_type": "broadcast",
+                            },
+                            poster_url=image.get("original") or image.get("medium") or "",
+                            external_ids={"tvmaze_id": show.get("id")},
+                        ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.warning(f"TVmaze broadcast {country}: {e}")
+
+        # 2. Web/streaming schedule (global)
+        try:
+            resp = requests.get(self.WEB_SCHEDULE_URL, params={"date": date}, timeout=30)
+            if resp.status_code == 200:
+                for ep in resp.json():
+                    show = ep.get("_embedded", {}).get("show") or {}
+                    if not show:
+                        continue
+                    show_name = show.get("name", "")
+                    if not show_name or show_name.lower() in seen_shows:
+                        continue
+                    show_type = (show.get("type") or "").lower()
+                    if show_type in ("news", "talk show", "sports", "variety", "game show", "panel show"):
+                        continue
+                    web_ch = show.get("webChannel") or {}
+                    platform = web_ch.get("name", "")
+                    image = show.get("image") or {}
+                    seen_shows.add(show_name.lower())
+                    releases.append(make_release(
+                        source="tvmaze_web", media_type="tv", title=show_name, release_date=date,
+                        synopsis=self._clean_html(show.get("summary", "")),
+                        genres=show.get("genres", []),
+                        metadata={
+                            "networks": [platform] if platform else [],
+                            "popularity": show.get("weight", 0),
+                            "vote_average": (show.get("rating") or {}).get("average", 0) or 0,
+                            "season_number": ep.get("season"), "episode_number": ep.get("number"),
+                            "episode_name": ep.get("name", ""), "episode_air_date": date,
+                            "countries": [(web_ch.get("country") or {}).get("code", "")] if (web_ch.get("country") or {}).get("code") else [],
+                            "streaming": {platform: {"type": "sub"}} if platform else {},
+                            "source_type": "streaming",
+                        },
+                        poster_url=image.get("original") or image.get("medium") or "",
+                        external_ids={"tvmaze_id": show.get("id")},
+                    ))
+        except Exception as e:
+            logger.warning(f"TVmaze web schedule: {e}")
+
+        logger.info(f"TVmaze: {len(releases)} TV episodes for {date} (broadcast + streaming)")
+        return releases
+
+    @staticmethod
+    def _clean_html(text):
+        if not text: return ""
+        import re
+        return re.sub(r'<[^>]+>', '', text).strip()
+
+
+# ═══════════════════════════════════════════════════════════════
 
 class OpenLibrarySource:
     """
@@ -1353,6 +1459,7 @@ class UnreeledPipeline:
     def __init__(self):
         self.sources = {
             "tmdb": TMDBSource(TMDB_API_KEY),
+            "tvmaze": TVmazeSource(),
             "open_library": OpenLibrarySource(),
             "igdb": IGDBSource(IGDB_CLIENT_ID, IGDB_CLIENT_SECRET),
             "jikan": JikanSource(),
@@ -1424,6 +1531,20 @@ class UnreeledPipeline:
             logger.error(f"TMDB Physical media failed: {e}")
             source_stats["tmdb_physical"] = 0
             errors["tmdb_physical"] = str(e)
+
+        # TVmaze: Daily Episodes + Streaming
+        try:
+            tvmaze_eps = self.sources["tvmaze"].fetch_tv_schedule(date)
+            existing_tv_titles = {r["title"].lower() for r in all_releases if r["media_type"] == "tv"}
+            new_eps = [ep for ep in tvmaze_eps if ep["title"].lower() not in existing_tv_titles]
+            all_releases.extend(new_eps)
+            source_stats["tvmaze"] = len(new_eps)
+            if len(tvmaze_eps) != len(new_eps):
+                logger.info(f"TVmaze: Deduped {len(tvmaze_eps) - len(new_eps)} titles already from TMDB")
+        except Exception as e:
+            logger.error(f"TVmaze failed: {e}")
+            source_stats["tvmaze"] = 0
+            errors["tvmaze"] = str(e)
 
         # Open Library: Books
         try:
