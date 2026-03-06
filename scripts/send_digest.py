@@ -1,260 +1,193 @@
 """
-Email Digest — sends daily release summaries to subscribers.
+Unreeled - Daily Email Digest
+Sends personalized emails to users about new releases matching their
+watchlist items and subscriptions.
 
-Uses:
-- Supabase to fetch subscribers and their preferences
-- Resend API (free 100 emails/day) to send HTML emails
-- Release data from the latest JSON
+Requires:
+  RESEND_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_KEY (service role)
 
-Usage:
-    python scripts/send_digest.py
-
-Env vars needed:
-    RESEND_API_KEY — from resend.com/api-keys
-    SUPABASE_URL — your Supabase project URL
-    SUPABASE_SERVICE_KEY — service role key (NOT anon key, needed to read all subscriptions)
+Usage: python scripts/send_digest.py
 """
 
-import json
-import os
-import sys
-import requests
-from pathlib import Path
+import os, json, logging, requests
 from datetime import datetime, timezone
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logger = logging.getLogger("unreeled_digest")
 
-RESEND_KEY = os.environ.get("RESEND_API_KEY", "")
-SB_URL = os.environ.get("SUPABASE_URL", "")
-SB_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
-FROM_EMAIL = "Unreeled <onboarding@resend.dev>"
-SITE_URL = "https://keenestza.github.io/unreeled/"
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+SITE_URL = "https://unreeled.co.za"
+FROM_EMAIL = "Unreeled <digest@unreeled.co.za>"
 
 MC = {
-    "movie": {"icon": "🎬", "label": "Film", "color": "#6366f1"},
-    "tv": {"icon": "📺", "label": "TV", "color": "#a855f7"},
-    "book": {"icon": "📖", "label": "Book", "color": "#14b8a6"},
-    "game": {"icon": "🎮", "label": "Game", "color": "#f43f5e"},
-    "anime": {"icon": "🎌", "label": "Anime", "color": "#ec4899"},
-    "music": {"icon": "🎵", "label": "Music", "color": "#eab308"},
-    "podcast": {"icon": "🎙", "label": "Podcast", "color": "#8b5cf6"},
-    "news": {"icon": "📰", "label": "News", "color": "#64748b"},
+    "movie": {"icon": "\U0001f3ac", "label": "Film", "color": "#6366f1"},
+    "tv": {"icon": "\U0001f4fa", "label": "TV", "color": "#a855f7"},
+    "book": {"icon": "\U0001f4d6", "label": "Book", "color": "#14b8a6"},
+    "game": {"icon": "\U0001f3ae", "label": "Game", "color": "#f43f5e"},
+    "anime": {"icon": "\U0001f38c", "label": "Anime", "color": "#ec4899"},
+    "music": {"icon": "\U0001f3b5", "label": "Music", "color": "#eab308"},
+    "podcast": {"icon": "\U0001f399", "label": "Podcast", "color": "#8b5cf6"},
+    "boardgame": {"icon": "\U0001f3b2", "label": "Board Game", "color": "#06b6d4"},
+    "disc": {"icon": "\U0001f4bf", "label": "Physical", "color": "#0ea5e9"},
+    "news": {"icon": "\U0001f4f0", "label": "News", "color": "#64748b"},
 }
 
+def sb_get(endpoint, params=None):
+    headers = {"apikey": SUPABASE_SERVICE_KEY, "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}", "Content-Type": "application/json"}
+    resp = requests.get(f"{SUPABASE_URL}/rest/v1/{endpoint}", headers=headers, params=params, timeout=30)
+    resp.raise_for_status()
+    return resp.json()
 
-def load_latest_releases():
-    """Load latest release data."""
-    data_dir = Path(__file__).parent.parent / "docs" / "data"
-    latest = data_dir / "latest.json"
-    if not latest.exists():
-        print("No latest.json found")
-        return [], ""
-
-    with open(latest, "r", encoding="utf-8") as f:
+def load_todays_releases():
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    path = os.path.join("docs", "data", f"releases_{today}.json")
+    if not os.path.exists(path):
+        logger.warning(f"No release file: {path}")
+        return [], today
+    with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
-
     releases = data.get("releases", [])
-    date = data.get("date", datetime.now(timezone.utc).strftime("%Y-%m-%d"))
-    return releases, date
+    logger.info(f"Loaded {len(releases)} releases for {today}")
+    return releases, today
 
+def get_user_emails():
+    headers = {"apikey": SUPABASE_SERVICE_KEY, "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}"}
+    resp = requests.get(f"{SUPABASE_URL}/auth/v1/admin/users", headers=headers, params={"per_page": 1000}, timeout=30)
+    resp.raise_for_status()
+    data = resp.json()
+    users = data.get("users", data) if isinstance(data, dict) else data
+    return {u["id"]: u.get("email", "") for u in users if u.get("email")}
 
-def get_subscribers():
-    """Fetch all subscribers and their subscription preferences from Supabase."""
-    if not SB_URL or not SB_KEY:
-        print("Missing SUPABASE_URL or SUPABASE_SERVICE_KEY")
-        return []
+def match_releases(releases, subs, watchlist):
+    matched = {"watchlist": [], "subscription": []}
+    sub_types = {s["subscription_value"] for s in subs if s["subscription_type"] == "media_type"}
+    sub_genres = {s["subscription_value"].lower() for s in subs if s["subscription_type"] == "genre"}
+    wl_titles = {w["release_title"].lower() for w in watchlist}
 
-    headers = {
-        "apikey": SB_KEY,
-        "Authorization": f"Bearer {SB_KEY}",
-    }
+    for r in releases:
+        title_lower = (r.get("title") or "").lower()
+        if title_lower in wl_titles:
+            matched["watchlist"].append(r)
+            continue
+        if r.get("media_type") in sub_types:
+            matched["subscription"].append(r)
+            continue
+        release_genres = {g.lower() for g in (r.get("genres") or [])}
+        if release_genres & sub_genres:
+            matched["subscription"].append(r)
+    return matched
 
-    # Get all subscriptions joined with profile info
-    resp = requests.get(
-        f"{SB_URL}/rest/v1/subscriptions?select=*,profiles(username)",
-        headers=headers,
-        timeout=15,
-    )
-    if resp.status_code != 200:
-        print(f"Failed to fetch subscriptions: {resp.status_code} {resp.text}")
-        return []
+def build_email_html(username, matched, date):
+    wl = matched["watchlist"]
+    sub = matched["subscription"][:20]
+    seen = set()
+    unique_wl, unique_sub = [], []
+    for r in wl:
+        k = (r.get("title",""), r.get("media_type",""))
+        if k not in seen: seen.add(k); unique_wl.append(r)
+    for r in sub:
+        k = (r.get("title",""), r.get("media_type",""))
+        if k not in seen: seen.add(k); unique_sub.append(r)
+    if not unique_wl and not unique_sub:
+        return None
 
-    subs = resp.json()
+    fdate = datetime.strptime(date, "%Y-%m-%d").strftime("%B %d, %Y")
+    html = f'''<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#08090c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<div style="max-width:600px;margin:0 auto;padding:20px">
+<div style="text-align:center;padding:24px 0;border-bottom:1px solid #1e1f28">
+<div style="display:inline-block;background:#ff6b35;border-radius:8px;padding:4px 12px;margin-bottom:8px"><span style="color:#fff;font-size:18px;font-weight:800">U</span></div>
+<h1 style="color:#e8e8ec;font-size:24px;font-weight:700;margin:8px 0 4px;letter-spacing:-1px">Your Daily Digest</h1>
+<p style="color:#5e5e6e;font-size:13px;margin:0">{fdate}</p></div>
+<p style="color:#a0a0ae;font-size:14px;padding:20px 0 0">Hey {username} \U0001f44b</p>'''
 
-    # Get user emails (need auth admin API)
-    # Group subs by user_id
-    user_subs = {}
-    for s in subs:
-        uid = s["user_id"]
-        if uid not in user_subs:
-            user_subs[uid] = {
-                "user_id": uid,
-                "username": (s.get("profiles") or {}).get("username", "User"),
-                "types": [],
-            }
-        if s["subscription_type"] == "media_type":
-            user_subs[uid]["types"].append(s["subscription_value"])
+    if unique_wl:
+        html += '<div style="padding:16px 0"><h2 style="color:#ff6b35;font-size:16px;font-weight:700;margin:0 0 12px">\u2b50 From Your Watchlist</h2>'
+        for r in unique_wl:
+            mc = MC.get(r.get("media_type","movie"), MC["movie"])
+            title = r.get("title","Unknown")
+            syn = (r.get("synopsis") or "")[:120]
+            if len(r.get("synopsis") or "") > 120: syn += "..."
+            genres = ", ".join((r.get("genres") or [])[:3])
+            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;padding:14px;margin-bottom:8px"><span style="font-size:15px;font-weight:600;color:#e8e8ec">{title}</span><span style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:3px;font-size:10px;color:{mc["color"]};margin-left:8px">{mc["label"]}</span>'
+            if syn: html += f'<p style="color:#a0a0ae;font-size:12px;margin:6px 0 0;line-height:1.5">{syn}</p>'
+            if genres: html += f'<p style="color:#5e5e6e;font-size:11px;margin:4px 0 0">{genres}</p>'
+            html += '</div>'
+        html += '</div>'
 
-    # Get emails via auth admin
-    for uid in user_subs:
-        resp = requests.get(
-            f"{SB_URL}/auth/v1/admin/users/{uid}",
-            headers={**headers, "Authorization": f"Bearer {SB_KEY}"},
-            timeout=15,
-        )
-        if resp.status_code == 200:
-            user_data = resp.json()
-            user_subs[uid]["email"] = user_data.get("email", "")
+    if unique_sub:
+        html += '<div style="padding:16px 0"><h2 style="color:#a0a0ae;font-size:16px;font-weight:700;margin:0 0 12px">\U0001f4e1 From Your Subscriptions</h2>'
+        for r in unique_sub:
+            mc = MC.get(r.get("media_type","movie"), MC["movie"])
+            title = r.get("title","Unknown")
+            genres = ", ".join((r.get("genres") or [])[:3])
+            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;padding:12px;margin-bottom:6px"><span style="font-size:14px;font-weight:600;color:#e8e8ec">{mc["icon"]} {title}</span>'
+            if genres: html += f'<span style="color:#5e5e6e;font-size:11px;margin-left:8px">{genres}</span>'
+            html += '</div>'
+        html += '</div>'
 
-    return [v for v in user_subs.values() if v.get("email") and v.get("types")]
+    total = len(unique_wl) + len(unique_sub)
+    html += f'''<div style="text-align:center;padding:24px 0"><a href="{SITE_URL}" style="display:inline-block;background:#ff6b35;color:#fff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">View All Releases \u2192</a></div>
+<div style="border-top:1px solid #1e1f28;padding:20px 0;text-align:center"><p style="color:#5e5e6e;font-size:11px;margin:0">You have {total} matching release{"s" if total!=1 else ""} today. Manage subscriptions at <a href="{SITE_URL}" style="color:#ff6b35;text-decoration:none">unreeled.co.za</a></p></div>
+</div></body></html>'''
+    return html
 
-
-def build_email_html(username, releases_by_type, date):
-    """Build a nice HTML email for the digest."""
-    total = sum(len(r) for r in releases_by_type.values())
-    formatted_date = datetime.strptime(date, "%Y-%m-%d").strftime("%B %d, %Y")
-
-    sections = ""
-    for mtype, releases in releases_by_type.items():
-        mc = MC.get(mtype, {"icon": "📦", "label": mtype, "color": "#666"})
-        items = ""
-        for r in releases[:8]:  # Max 8 per type
-            title = r.get("title", "Unknown")
-            synopsis = (r.get("synopsis", "") or "")[:120]
-            genres = ", ".join(r.get("genres", [])[:3])
-            meta_parts = []
-            m = r.get("metadata", {})
-            if mtype == "tv" and m.get("networks"):
-                meta_parts.append(m["networks"][0])
-            if mtype == "movie" and m.get("runtime_minutes"):
-                meta_parts.append(f"{m['runtime_minutes']} min")
-            if mtype == "music" and m.get("artists"):
-                meta_parts.append(m["artists"][0])
-            if mtype == "book" and m.get("authors"):
-                meta_parts.append(m["authors"][0])
-            meta_str = " · ".join(meta_parts)
-
-            items += f"""
-            <tr>
-              <td style="padding:8px 0;border-bottom:1px solid #1e1f28">
-                <div style="font-size:14px;font-weight:600;color:#e8e8ec">{title}</div>
-                {f'<div style="font-size:11px;color:#a0a0ae;margin-top:2px">{meta_str}</div>' if meta_str else ''}
-                {f'<div style="font-size:12px;color:#5e5e6e;margin-top:4px">{synopsis}{"..." if len(r.get("synopsis","")or"") > 120 else ""}</div>' if synopsis else ''}
-                {f'<div style="font-size:10px;color:#5e5e6e;margin-top:3px">{genres}</div>' if genres else ''}
-              </td>
-            </tr>"""
-
-        more = len(releases) - 8
-        if more > 0:
-            items += f'<tr><td style="padding:8px 0;font-size:12px;color:#5e5e6e">+ {more} more {mc["label"].lower()} releases</td></tr>'
-
-        sections += f"""
-        <div style="margin-bottom:24px">
-          <div style="font-size:16px;font-weight:700;color:{mc['color']};margin-bottom:8px">{mc['icon']} {mc['label']} ({len(releases)})</div>
-          <table style="width:100%">{items}</table>
-        </div>"""
-
-    return f"""
-    <div style="max-width:560px;margin:0 auto;background:#08090c;color:#e8e8ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;border-radius:12px;overflow:hidden">
-      <div style="background:#ff6b35;padding:20px 24px">
-        <div style="font-size:22px;font-weight:700;color:#fff">UNREELED</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px">Daily Digest — {formatted_date}</div>
-      </div>
-      <div style="padding:24px">
-        <div style="font-size:15px;margin-bottom:20px">Hey {username} 👋</div>
-        <div style="font-size:14px;color:#a0a0ae;margin-bottom:20px">
-          Here are today's <strong style="color:#e8e8ec">{total} releases</strong> in your subscribed categories:
-        </div>
-        {sections}
-        <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid #1e1f28">
-          <a href="{SITE_URL}" style="display:inline-block;padding:10px 24px;background:#ff6b35;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">View All Releases →</a>
-        </div>
-        <div style="text-align:center;margin-top:20px;font-size:11px;color:#5e5e6e">
-          You're receiving this because you subscribed on Unreeled.<br>
-          Manage your subscriptions at {SITE_URL}
-        </div>
-      </div>
-    </div>"""
-
-
-def send_email(to_email, subject, html_body):
-    """Send email via Resend API."""
-    if not RESEND_KEY:
-        print(f"  SKIP (no RESEND_API_KEY): {to_email}")
-        return False
-
-    resp = requests.post(
-        "https://api.resend.com/emails",
-        headers={
-            "Authorization": f"Bearer {RESEND_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "from": FROM_EMAIL,
-            "to": [to_email],
-            "subject": subject,
-            "html": html_body,
-        },
-        timeout=15,
-    )
-
-    if resp.status_code in (200, 201):
-        print(f"  ✓ Sent to {to_email}")
-        return True
-    else:
-        print(f"  ✗ Failed for {to_email}: {resp.status_code} {resp.text}")
-        return False
-
+def send_email(to, subject, html):
+    resp = requests.post("https://api.resend.com/emails", headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+        json={"from": FROM_EMAIL, "to": [to], "subject": subject, "html": html}, timeout=30)
+    if resp.status_code in (200, 201): return True
+    logger.error(f"Resend error {to}: {resp.status_code} {resp.text}")
+    return False
 
 def main():
-    print("📧 Unreeled Email Digest")
-    print("=" * 40)
+    if not RESEND_API_KEY: logger.error("RESEND_API_KEY not set"); return
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY: logger.error("Supabase creds not set"); return
 
-    releases, date = load_latest_releases()
-    if not releases:
-        print("No releases found — skipping digest")
-        return
+    releases, today = load_todays_releases()
+    if not releases: logger.info("No releases — skipping"); return
 
-    print(f"Date: {date} | Releases: {len(releases)}")
+    subs = sb_get("subscriptions", {"select": "user_id,subscription_type,subscription_value", "email_digest": "eq.true"})
+    watchlist = sb_get("watchlist", {"select": "user_id,release_title,media_type"})
+    profiles = sb_get("profiles", {"select": "id,username"})
+    profile_map = {p["id"]: p["username"] for p in profiles}
+    emails = get_user_emails()
 
-    # Group releases by media type
-    by_type = {}
-    for r in releases:
-        mt = r.get("media_type", "")
-        if mt not in by_type:
-            by_type[mt] = []
-        by_type[mt].append(r)
+    # Group by user
+    users = {}
+    for s in subs:
+        users.setdefault(s["user_id"], {"subs": [], "wl": []})["subs"].append(s)
+    for w in watchlist:
+        users.setdefault(w["user_id"], {"subs": [], "wl": []})["wl"].append(w)
 
-    subscribers = get_subscribers()
-    if not subscribers:
-        print("No subscribers found — skipping digest")
-        return
+    logger.info(f"{len(emails)} users with emails, {len(users)} with subs/watchlist")
 
-    print(f"Subscribers: {len(subscribers)}")
-    sent = 0
-    failed = 0
+    sent = skipped = errors = 0
+    fdate = datetime.strptime(today, "%Y-%m-%d").strftime("%b %d")
 
-    for sub in subscribers:
-        # Filter releases to subscriber's chosen types
-        sub_releases = {}
-        for mt in sub["types"]:
-            if mt in by_type and by_type[mt]:
-                sub_releases[mt] = by_type[mt]
+    for uid, data in users.items():
+        email = emails.get(uid)
+        if not email: skipped += 1; continue
 
-        if not sub_releases:
-            print(f"  SKIP {sub['email']}: no matching releases")
-            continue
+        matched = match_releases(releases, data["subs"], data["wl"])
+        if not matched["watchlist"] and not matched["subscription"]: skipped += 1; continue
 
-        total = sum(len(r) for r in sub_releases.values())
-        subject = f"📬 {total} new releases today — {date}"
-        html = build_email_html(sub["username"], sub_releases, date)
+        username = profile_map.get(uid, "there")
+        html = build_email_html(username, matched, today)
+        if not html: skipped += 1; continue
 
-        if send_email(sub["email"], subject, html):
-            sent += 1
-        else:
-            failed += 1
+        wc, sc = len(matched["watchlist"]), len(matched["subscription"])
+        parts = []
+        if wc: parts.append(f"{wc} watchlisted")
+        if sc: parts.append(f"{sc} new")
+        subject = f"\U0001f3ac {' + '.join(parts)} release{'s' if (wc+sc)>1 else ''} — {fdate}"
 
-    print(f"\nDone: {sent} sent, {failed} failed")
+        if send_email(email, subject, html):
+            sent += 1; logger.info(f"Sent to {email} ({wc} wl, {sc} sub)")
+        else: errors += 1
 
+    logger.info(f"Done: {sent} sent, {skipped} skipped, {errors} errors")
 
 if __name__ == "__main__":
     main()
