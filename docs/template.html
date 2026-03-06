@@ -1732,7 +1732,7 @@ function openWatchlistItem(rk,title,mtype){
 function renderAccount(){
   if(!user||!profile){document.getElementById('p-account').innerHTML='<div class="empty"><h2>Not logged in</h2><p><a onclick="showAuth(\'login\')" style="color:var(--accent);cursor:pointer">Log in</a> to view your account.</p></div>';return}
   let h='<h1 class="hero">My Account</h1>';
-  h+='<div style="padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="av" style="background:'+profile.avatar_color+';width:48px;height:48px;font-size:18px;border-radius:12px">'+profile.username.slice(0,2).toUpperCase()+'</div><div><div style="font-size:18px;font-weight:600">'+esc(profile.username)+'</div><div style="font-size:12px;color:var(--td)">'+esc(user.email)+'</div></div></div></div>';
+  h+='<div style="padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="av" style="background:'+profile.avatar_color+';width:48px;height:48px;font-size:18px;border-radius:12px">'+profile.username.slice(0,2).toUpperCase()+'</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:18px;font-weight:600" id="acct-name-display">'+esc(profile.username)+'</span><button onclick="showUsernameEdit()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer">\u270F\uFE0F Edit</button></div><div style="font-size:12px;color:var(--td)">'+esc(user.email)+'</div></div></div><div id="username-edit" style="display:none;padding:12px;background:var(--el);border-radius:8px;margin-top:8px"><div style="font-size:12px;color:var(--ts);margin-bottom:6px">Choose a display name (3-20 chars, letters, numbers, underscores)</div><div style="display:flex;gap:8px"><input class="finput" id="new-username" style="margin:0;flex:1" placeholder="New username" maxlength="20" value="'+esc(profile.username)+'"><button onclick="saveUsername()" class="fbtn" style="width:auto;padding:8px 16px;margin:0" id="save-un-btn">Save</button><button onclick="document.getElementById(\'username-edit\').style.display=\'none\'" style="padding:8px 12px;background:var(--el);border:1px solid var(--brd);border-radius:7px;color:var(--td);font-size:13px">Cancel</button></div><div class="ferr" id="un-err" style="margin-top:6px"></div></div></div>';
   // Subscriptions
   h+='<div class="st">My Subscriptions ('+userSubs.length+')</div>';
   if(userSubs.length){userSubs.forEach(s=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span style="font-size:13px">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><button class="ssb on" onclick="toggleSub(\''+s.subscription_type+'\',\''+s.subscription_value.replace(/'/g,"\\'")+'\')">\u2713 Subscribed</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a></p>'}
@@ -1890,6 +1890,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   if(user)setTimeout(checkTrendingWatchlist,2000);
   // Show watchlist quick summary
   if(user&&userWatchlist.length)setTimeout(showWatchlistPopup,1500);
+  // Prompt Google users to choose a username
+  if(user)setTimeout(checkUsernamePrompt,2500);
   sb.auth.onAuthStateChange(async(event)=>{
     if(event==='SIGNED_IN'||event==='SIGNED_OUT'||event==='TOKEN_REFRESHED'){
       await loadUser();
@@ -1932,6 +1934,64 @@ function pwaInstall(){
 function pwaDismiss(){
   document.getElementById('pwa-banner').classList.remove('show');
   localStorage.setItem('unreeled-pwa-dismissed','1');
+}
+
+// ═══════ USERNAME EDIT ═══════
+function showUsernameEdit(){
+  document.getElementById('username-edit').style.display='block';
+  document.getElementById('new-username').focus();
+}
+
+async function saveUsername(){
+  const un=document.getElementById('new-username').value.trim();
+  const err=document.getElementById('un-err');
+  err.classList.remove('show');
+  if(!un||un.length<3){err.textContent='Username must be at least 3 characters';err.classList.add('show');return}
+  if(un.length>20){err.textContent='Username must be 20 characters or less';err.classList.add('show');return}
+  if(!/^[a-zA-Z0-9_]+$/.test(un)){err.textContent='Only letters, numbers, and underscores';err.classList.add('show');return}
+  const btn=document.getElementById('save-un-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  // Check if username is taken
+  const{data:existing}=await sb.from('profiles').select('id').eq('username',un).neq('id',user.id).limit(1);
+  if(existing&&existing.length){btn.disabled=false;btn.textContent='Save';err.textContent='Username already taken';err.classList.add('show');return}
+  const{error}=await sb.from('profiles').update({username:un}).eq('id',user.id);
+  btn.disabled=false;btn.textContent='Save';
+  if(error){err.textContent=error.message;err.classList.add('show');return}
+  profile.username=un;
+  document.getElementById('username-edit').style.display='none';
+  renderNav();renderAccount();
+  toast('Username updated to '+un+'!');
+}
+
+// Prompt Google users with auto-generated names to choose a username
+function checkUsernamePrompt(){
+  if(!user||!profile)return;
+  const un=profile.username||'';
+  // Detect auto-generated names: contain underscores with random chars, or match Google name patterns with spaces replaced
+  const isAutoGen=un.startsWith('user_')||un.match(/^[A-Z][a-z]+_[A-Z][a-z]+$/);
+  if(isAutoGen&&!sessionStorage.getItem('unreeled-un-prompted')){
+    sessionStorage.setItem('unreeled-un-prompted','1');
+    setTimeout(()=>{
+      const box=document.getElementById('auth-box');
+      box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Choose Your Username</h2><p class="ms">Pick a display name for your comments and reviews. This is what other users will see.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20" value="'+esc(profile.username)+'"><button class="fbtn" id="a-btn" onclick="saveUsernameFromPrompt()">Save Username</button><p class="flink"><a onclick="closeModal()">Skip for now</a></p>';
+      document.getElementById('auth-modal').classList.add('show');
+    },1000);
+  }
+}
+
+async function saveUsernameFromPrompt(){
+  const un=document.getElementById('a-user').value.trim();
+  if(!un||un.length<3)return showErr('Username must be at least 3 characters');
+  if(!/^[a-zA-Z0-9_]+$/.test(un))return showErr('Only letters, numbers, and underscores');
+  document.getElementById('a-btn').disabled=true;
+  const{data:existing}=await sb.from('profiles').select('id').eq('username',un).neq('id',user.id).limit(1);
+  if(existing&&existing.length){document.getElementById('a-btn').disabled=false;return showErr('Username already taken')}
+  const{error}=await sb.from('profiles').update({username:un}).eq('id',user.id);
+  document.getElementById('a-btn').disabled=false;
+  if(error)return showErr(error.message);
+  profile.username=un;
+  closeModal();renderNav();
+  toast('Welcome, '+un+'!');
 }
 
 // ═══════ REVIEWS ═══════
