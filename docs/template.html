@@ -686,8 +686,8 @@ function renderFeed(){
   if(isL&&!searchQ&&cf==='all'&&!filterGenre&&!filterCountry){
     const highlights=R.filter(r=>r.poster_url&&r.synopsis).sort((a,b)=>((b.metadata||{}).popularity||0)-((a.metadata||{}).popularity||0)).slice(0,8);
     if(highlights.length>=3){
-      h+='<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:13px;font-weight:600;color:var(--ts)">\u2728 Today\'s Highlights</span><span style="font-size:10px;color:var(--td)">\u2190 scroll \u2192</span></div>';
-      h+='<div class="hero-carousel">';
+      h+='<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:13px;font-weight:600;color:var(--ts)">\u2728 Today\'s Highlights</span><div style="display:flex;gap:6px"><button onclick="document.getElementById(\'hc\').scrollBy({left:-300,behavior:\'smooth\'})" style="width:28px;height:28px;border-radius:50%;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2190</button><button onclick="document.getElementById(\'hc\').scrollBy({left:300,behavior:\'smooth\'})" style="width:28px;height:28px;border-radius:50%;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2192</button></div></div>';
+      h+='<div class="hero-carousel" id="hc">';
       highlights.forEach(r=>{
         const ri=R.indexOf(r);
         const c=MC[r.media_type]||MC.movie;
@@ -1989,14 +1989,19 @@ async function postReview(){
   if(!rating||rating<1||rating>5)return toast('Select a rating');
   if(detailReviews.some(r=>user&&r.user_id===user.id))return toast('You already reviewed this title');
   const btn=document.getElementById('review-btn');
-  btn.disabled=true;
-  const{error}=await sb.from('reviews').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,rating:rating,body:body});
-  btn.disabled=false;
-  if(error){toast('Error: '+error.message);return}
-  document.getElementById('review-body').value='';
-  document.getElementById('review-rating').value='5';
-  toast('\u2B50 Review posted!');
-  await loadReviews(rk);
+  btn.disabled=true;btn.textContent='Posting...';
+  try{
+    const{data,error}=await sb.from('reviews').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,rating:rating,body:body}).select();
+    btn.disabled=false;btn.textContent='Post Review';
+    if(error){console.error('Review error:',error);toast('Error: '+error.message);return}
+    document.getElementById('review-body').value='';
+    document.getElementById('review-rating').value='5';
+    toast('\u2B50 Review posted!');
+    await loadReviews(rk);
+  }catch(e){
+    btn.disabled=false;btn.textContent='Post Review';
+    console.error('Review exception:',e);toast('Error posting review');
+  }
 }
 
 async function deleteReview(rid){
