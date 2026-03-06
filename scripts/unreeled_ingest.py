@@ -236,11 +236,22 @@ class TMDBSource:
             total_pages = data.get("total_pages", 1)
 
             for movie in data.get("results", []):
-                details = self._get(f"/movie/{movie['id']}")
+                details = self._get(f"/movie/{movie['id']}", {"append_to_response": "videos"})
                 runtime = details.get("runtime", 0) if details else 0
                 production_countries = []
+                trailer_key = ""
                 if details:
                     production_countries = [c.get("iso_3166_1", "") for c in details.get("production_countries", [])]
+                    # Extract YouTube trailer
+                    for v in (details.get("videos", {}).get("results", [])):
+                        if v.get("site") == "YouTube" and v.get("type") == "Trailer" and v.get("key"):
+                            trailer_key = v["key"]
+                            break
+                    if not trailer_key:
+                        for v in (details.get("videos", {}).get("results", [])):
+                            if v.get("site") == "YouTube" and v.get("key"):
+                                trailer_key = v["key"]
+                                break
 
                 # Filter: skip short films
                 if runtime and runtime < MIN_MOVIE_RUNTIME:
@@ -264,6 +275,7 @@ class TMDBSource:
                         "vote_average": movie.get("vote_average", 0),
                         "adult": movie.get("adult", False),
                         "countries": production_countries,
+                        "trailer_key": trailer_key,
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{movie['poster_path']}"
@@ -334,12 +346,13 @@ class TMDBSource:
                 if not show.get("overview") and not show.get("poster_path"):
                     continue
 
-                details = self._get(f"/tv/{show['id']}")
+                details = self._get(f"/tv/{show['id']}", {"append_to_response": "videos"})
                 networks = []
                 season_number = None
                 episode_number = None
                 episode_name = ""
                 total_seasons = None
+                trailer_key = ""
                 origin_countries = show.get("origin_country", [])
                 if details:
                     networks = [n["name"] for n in details.get("networks", [])]
@@ -351,6 +364,15 @@ class TMDBSource:
                         season_number = last_ep.get("season_number")
                         episode_number = last_ep.get("episode_number")
                         episode_name = last_ep.get("name", "")
+                    for v in (details.get("videos", {}).get("results", [])):
+                        if v.get("site") == "YouTube" and v.get("type") == "Trailer" and v.get("key"):
+                            trailer_key = v["key"]
+                            break
+                    if not trailer_key:
+                        for v in (details.get("videos", {}).get("results", [])):
+                            if v.get("site") == "YouTube" and v.get("key"):
+                                trailer_key = v["key"]
+                                break
 
                 release = make_release(
                     source="tmdb",
@@ -370,6 +392,7 @@ class TMDBSource:
                         "episode_name": episode_name,
                         "total_seasons": total_seasons,
                         "countries": origin_countries,
+                        "trailer_key": trailer_key,
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{show['poster_path']}"
