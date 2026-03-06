@@ -488,6 +488,70 @@ class TMDBSource:
         logger.info(f"TMDB: {len(releases)} physical media releases for {date}")
         return releases
 
+    def fetch_digital_releases(self, date: str) -> list[dict]:
+        """Fetch movies with digital/streaming release on a given date.
+        Uses release_type=4 (Digital) to find new streaming drops.
+        """
+        if not self.api_key:
+            logger.warning("TMDB_API_KEY not set — skipping digital releases")
+            return []
+
+        if not self._movie_genres:
+            self._load_genres()
+
+        releases = []
+        page = 1
+        total_pages = 1
+
+        while page <= min(total_pages, 2):  # Max 2 pages
+            params = {
+                "release_date.gte": date,
+                "release_date.lte": date,
+                "with_release_type": "4",  # 4 = Digital
+                "sort_by": "popularity.desc",
+                "page": page,
+                "region": "US|GB|ZA",
+            }
+
+            data = self._get("/discover/movie", params)
+            if not data:
+                break
+
+            total_pages = data.get("total_pages", 1)
+
+            for movie in data.get("results", []):
+                if not movie.get("overview") and not movie.get("poster_path"):
+                    continue
+
+                genres = self._resolve_genres(movie.get("genre_ids", []), "movie")
+
+                release = make_release(
+                    source="tmdb_digital",
+                    media_type="movie",
+                    title=movie.get("title", "Unknown"),
+                    release_date=date,
+                    synopsis=movie.get("overview", ""),
+                    genres=genres,
+                    metadata={
+                        "original_language": movie.get("original_language", ""),
+                        "popularity": movie.get("popularity", 0),
+                        "vote_average": movie.get("vote_average", 0),
+                        "digital_release": True,
+                    },
+                    poster_url=(
+                        f"{self.IMAGE_BASE}{movie['poster_path']}"
+                        if movie.get("poster_path")
+                        else ""
+                    ),
+                    external_ids={"tmdb_id": movie["id"]},
+                )
+                releases.append(release)
+
+            page += 1
+
+        logger.info(f"TMDB: {len(releases)} digital/streaming releases for {date}")
+        return releases
+
 
 # ═══════════════════════════════════════════════════════════════
 # SOURCE: TVmaze (Daily Episodes + Streaming Schedule)
@@ -1531,6 +1595,20 @@ class UnreeledPipeline:
             logger.error(f"TMDB Physical media failed: {e}")
             source_stats["tmdb_physical"] = 0
             errors["tmdb_physical"] = str(e)
+
+        # TMDB: Digital/Streaming Movie Releases
+        try:
+            digital = self.sources["tmdb"].fetch_digital_releases(date)
+            existing_movie_titles = {r["title"].lower() for r in all_releases if r["media_type"] == "movie"}
+            new_digital = [d for d in digital if d["title"].lower() not in existing_movie_titles]
+            all_releases.extend(new_digital)
+            source_stats["tmdb_digital"] = len(new_digital)
+            if len(digital) != len(new_digital):
+                logger.info(f"TMDB Digital: Deduped {len(digital) - len(new_digital)} titles already in movies")
+        except Exception as e:
+            logger.error(f"TMDB Digital releases failed: {e}")
+            source_stats["tmdb_digital"] = 0
+            errors["tmdb_digital"] = str(e)
 
         # TVmaze: Daily Episodes + Streaming
         try:
