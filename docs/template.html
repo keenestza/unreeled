@@ -561,11 +561,13 @@ async function doMagicLogin(){
 
 async function doLogout(){
   document.getElementById('umenu').classList.remove('show');
-  try{await sb.auth.signOut({scope:'global'})}catch(e){console.error('Logout error:',e)}
+  // Clear state immediately for instant UI feedback
   user=null;profile=null;userSubs=[];userWatchlist=[];userFollowing=[];userWatched=[];
   renderNav();renderFeed();renderStreams();renderAccount();
   go('feed');
   toast('Logged out');
+  // Then sign out in background (local scope = fast, no server round-trip)
+  try{await sb.auth.signOut({scope:'local'})}catch(e){console.error('Logout error:',e)}
 }
 
 // ═══════ USER DATA ═══════
