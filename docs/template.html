@@ -660,7 +660,27 @@ function renderFeed(){
   const{fl,cn}=getFilteredFeed();
   feedFiltered=fl;
   const isL=vd===D.latest_date;
-  let h='<h1 class="hero">'+(isL?'Today in Media':'Releases')+'</h1>';
+  let h='';
+
+  // Landing hero for non-logged-in visitors
+  if(!user&&isL&&!searchQ){
+    const totalTypes=Object.keys(cn).length;
+    h+='<div style="padding:32px 24px;background:linear-gradient(145deg,#0f1014,#1a1020);border:1px solid var(--brd);border-radius:16px;margin-bottom:24px;text-align:center">';
+    h+='<div style="font-size:36px;margin-bottom:8px">\uD83C\uDFAC\uD83D\uDCFA\uD83D\uDCD6\uD83C\uDFAE\uD83C\uDF8C\uD83C\uDFB5</div>';
+    h+='<h1 style="font-family:\'Fraunces\',serif;font-size:28px;font-weight:700;letter-spacing:-1.2px;line-height:1.15;margin-bottom:10px">Your daily hub for<br><span style="background:linear-gradient(90deg,var(--accent),#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">new releases</span></h1>';
+    h+='<p style="color:var(--ts);font-size:14px;line-height:1.6;max-width:420px;margin:0 auto 18px">Track <b style="color:var(--text)">'+R.length+'+ daily releases</b> across '+totalTypes+' media types. Watchlist titles, get email alerts, write reviews, and never miss a release.</p>';
+    h+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
+    h+='<button class="btn-a" onclick="showAuth(\'login\')" style="padding:10px 28px;font-size:14px;border-radius:8px">Get Started \u2192</button>';
+    h+='<button onclick="document.querySelector(\'.fbar\').scrollIntoView({behavior:\'smooth\'})" style="padding:10px 28px;font-size:14px;border-radius:8px;background:var(--el);border:1px solid var(--brd);color:var(--ts)">Browse Releases</button>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap">';
+    h+='<span style="font-size:11px;color:var(--td)">\u2705 Free forever</span>';
+    h+='<span style="font-size:11px;color:var(--td)">\uD83D\uDCE7 Daily email alerts</span>';
+    h+='<span style="font-size:11px;color:var(--td)">\u2B50 Watchlist & reviews</span>';
+    h+='</div></div>';
+  } else {
+    h+='<h1 class="hero">'+(isL?'Today in Media':'Releases')+'</h1>';
+  }
 
   // Hero carousel - top 5 most popular with posters
   if(isL&&!searchQ&&cf==='all'&&!filterGenre&&!filterCountry){
@@ -782,8 +802,13 @@ async function openD(i){
   const wl=isWatchlisted(rk);
   const subbed=user&&isSubbed('media_type',r.media_type);
 
-  let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+r.media_type+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o'+(wl?' active':'')+'" onclick="toggleWL()" id="wl-btn">'+(wl?'\u2705 Watchlisted':'\u2B50 Watchlist')+'</button><button class="o'+(isWatched(rk)?' active':'')+'" onclick="toggleWatched(\''+rk.replace(/'/g,"\\'")+'\',\''+esc(r.title).replace(/'/g,"\\'")+'\',\''+r.media_type+'\')"><span id="watched-btn">'+(isWatched(rk)?'\u2705 Watched':'\uD83D\uDC41 Mark Watched')+'</span></button></div></div></div>';
+  let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+r.media_type+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o'+(wl?' active':'')+'" onclick="toggleWL()" id="wl-btn">'+(wl?'\u2705 Watchlisted':'\u2B50 Watchlist')+'</button><button class="o'+(isWatched(rk)?' active':'')+'" onclick="toggleWatched(\''+rk.replace(/'/g,"\\'")+'\',\''+esc(r.title).replace(/'/g,"\\'")+'\',\''+r.media_type+'\')"><span id="watched-btn">'+(isWatched(rk)?'\u2705 Watched':'\uD83D\uDC41 Mark Watched')+'</span></button>'+((r.metadata||{}).trailer_key?'<a href="https://www.youtube.com/watch?v='+r.metadata.trailer_key+'" target="_blank" rel="noopener" class="o" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none">\u25B6 Trailer</a>':'')+'</div></div></div>';
   h+='<div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div>';
+
+  // Trailer embed
+  if((r.metadata||{}).trailer_key){
+    h+='<div style="margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--brd);aspect-ratio:16/9"><iframe src="https://www.youtube.com/embed/'+esc(r.metadata.trailer_key)+'" style="width:100%;height:100%;border:none" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+  }
 
   // Episode info for TV shows
   if(r.media_type==='tv'){
@@ -858,10 +883,22 @@ async function openD(i){
     h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to join the discussion</div>';
   }
   h+='<div class="cfs"><span>Show:</span><button class="cfb on" onclick="fCmt(\'all\',this)">All</button><button class="cfb" onclick="fCmt(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fCmt(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fCmt(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fCmt(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"><p style="color:var(--td);font-size:13px">Loading comments...</p></div>';
+
+  // Reviews section
+  h+='<div class="st" style="margin-top:28px">\u2B50 Reviews</div>';
+  if(user){
+    const alreadyReviewed=false;// will check after load
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:14px" id="review-composer"><div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><label style="font-size:12px;color:var(--ts)">Your rating:</label><select id="review-rating" class="finput" style="width:auto;margin:0;min-width:80px;font-size:13px;padding:5px 8px"><option value="5">\u2605\u2605\u2605\u2605\u2605</option><option value="4">\u2605\u2605\u2605\u2605\u2606</option><option value="3">\u2605\u2605\u2605\u2606\u2606</option><option value="2">\u2605\u2605\u2606\u2606\u2606</option><option value="1">\u2605\u2606\u2606\u2606\u2606</option></select></div><textarea id="review-body" class="finput" style="min-height:60px;resize:vertical" placeholder="Write your review (min 10 characters)..."></textarea><button class="fbtn" id="review-btn" onclick="postReview()" style="margin-top:6px">Post Review</button></div>';
+  } else {
+    h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to write a review</div>';
+  }
+  h+='<div id="reviews-list"><p style="color:var(--td);font-size:13px">Loading reviews...</p></div>';
+
   document.getElementById('p-detail').innerHTML=h;
   go('detail');
   await loadComments(rk);
   loadRating(rk);
+  loadReviews(rk);
 }
 
 function findRelated(r,max){
@@ -1848,6 +1885,59 @@ function pwaInstall(){
 function pwaDismiss(){
   document.getElementById('pwa-banner').classList.remove('show');
   localStorage.setItem('unreeled-pwa-dismissed','1');
+}
+
+// ═══════ REVIEWS ═══════
+let detailReviews=[];
+
+async function loadReviews(rk){
+  const{data}=await sb.from('reviews').select('*,profiles(username,avatar_color)').eq('release_key',rk).order('created_at',{ascending:false});
+  detailReviews=data||[];
+  renderReviews();
+}
+
+function renderReviews(){
+  const el=document.getElementById('reviews-list');
+  if(!el)return;
+  if(!detailReviews.length){el.innerHTML='<p style="color:var(--td);font-size:13px;text-align:center;padding:16px 0">No reviews yet. Be the first to review!</p>';return}
+  const avg=detailReviews.reduce((s,r)=>s+r.rating,0)/detailReviews.length;
+  let h='<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div style="font-size:28px;font-weight:700;color:var(--accent)">'+avg.toFixed(1)+'</div><div><div style="font-size:14px;color:var(--ts)">'+'\u2605'.repeat(Math.round(avg))+'\u2606'.repeat(5-Math.round(avg))+'</div><div style="font-size:11px;color:var(--td)">'+detailReviews.length+' review'+(detailReviews.length!==1?'s':'')+'</div></div></div>';
+  detailReviews.forEach(r=>{
+    const p=r.profiles||{};
+    const un=p.username||'anon';
+    const ac=p.avatar_color||'#ff6b35';
+    const init=un.slice(0,2).toUpperCase();
+    const mine=user&&r.user_id===user.id;
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:8px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="av" style="background:'+ac+'">'+init+'</div><div><div style="font-size:12.5px;font-weight:600">'+esc(un)+'</div><div style="font-size:10.5px;color:var(--td)">'+timeAgo(r.created_at)+'</div></div></div><div style="color:var(--accent);font-size:14px">'+'\u2605'.repeat(r.rating)+'<span style="color:var(--td)">\u2606'.repeat(5-r.rating)+'</span></div></div><p style="font-size:13px;color:var(--ts);line-height:1.6">'+esc(r.body)+'</p>'+(mine?'<button onclick="deleteReview(\''+r.id+'\')" style="font-size:11px;color:var(--td);margin-top:8px;padding:4px 8px;background:var(--el);border:1px solid var(--brd);border-radius:4px">Delete</button>':'')+'</div>';
+  });
+  el.innerHTML=h;
+}
+
+async function postReview(){
+  if(!user)return showAuth('login');
+  if(!cr)return;
+  const rk=releaseKey(cr);
+  const body=document.getElementById('review-body').value.trim();
+  const rating=parseInt(document.getElementById('review-rating').value);
+  if(!body||body.length<10)return toast('Review must be at least 10 characters');
+  if(!rating||rating<1||rating>5)return toast('Select a rating');
+  // Check if user already reviewed
+  if(detailReviews.some(r=>user&&r.user_id===user.id))return toast('You already reviewed this title');
+  const btn=document.getElementById('review-btn');
+  btn.disabled=true;
+  const{error}=await sb.from('reviews').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,rating:rating,body:body});
+  btn.disabled=false;
+  if(error){toast('Error: '+error.message);return}
+  document.getElementById('review-body').value='';
+  document.getElementById('review-rating').value='5';
+  toast('\u2B50 Review posted!');
+  await loadReviews(rk);
+}
+
+async function deleteReview(rid){
+  await sb.from('reviews').delete().eq('id',rid);
+  toast('Review deleted');
+  await loadReviews(releaseKey(cr));
 }
 
 // ═══════ WATCHED TRACKING ═══════
