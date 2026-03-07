@@ -1159,7 +1159,7 @@ async function toggleSub(type,value){
     userSubs=userSubs.filter(s=>!(s.subscription_type===type&&s.subscription_value===value));
     toast('Unsubscribed');
   } else {
-    const{data}=await sb.from('subscriptions').insert({user_id:user.id,subscription_type:type,subscription_value:value,email_digest:true}).select().single();
+    const{data}=await sb.from('subscriptions').insert({user_id:user.id,subscription_type:type,subscription_value:value,email_digest:false}).select().single();
     if(data)userSubs.push(data);
     toast('Subscribed! You\'ll get daily updates.');
   }
@@ -1734,8 +1734,12 @@ function renderAccount(){
   let h='<h1 class="hero">My Account</h1>';
   h+='<div style="padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px"><div style="display:flex;align-items:center;gap:14px;margin-bottom:16px"><div class="av" style="background:'+profile.avatar_color+';width:48px;height:48px;font-size:18px;border-radius:12px">'+profile.username.slice(0,2).toUpperCase()+'</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:18px;font-weight:600" id="acct-name-display">'+esc(profile.username)+'</span><button onclick="showUsernameEdit()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer">\u270F\uFE0F Edit</button></div><div style="font-size:12px;color:var(--td)">'+esc(user.email)+'</div></div></div><div id="username-edit" style="display:none;padding:12px;background:var(--el);border-radius:8px;margin-top:8px"><div style="font-size:12px;color:var(--ts);margin-bottom:6px">Choose a display name (3-20 chars, letters, numbers, underscores)</div><div style="display:flex;gap:8px"><input class="finput" id="new-username" style="margin:0;flex:1" placeholder="New username" maxlength="20" value="'+esc(profile.username)+'"><button onclick="saveUsername()" class="fbtn" style="width:auto;padding:8px 16px;margin:0" id="save-un-btn">Save</button><button onclick="document.getElementById(\'username-edit\').style.display=\'none\'" style="padding:8px 12px;background:var(--el);border:1px solid var(--brd);border-radius:7px;color:var(--td);font-size:13px">Cancel</button></div><div class="ferr" id="un-err" style="margin-top:6px"></div></div></div>';
   // Subscriptions
+  // Email preferences
+  const anyDigest=userSubs.some(s=>s.email_digest);
+  h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-size:14px;font-weight:600">\uD83D\uDCE7 Daily Email Digest</div><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" '+(anyDigest?'checked':'')+' onchange="toggleAllDigest(this.checked)" style="accent-color:var(--accent)"><span style="font-size:12px;color:var(--ts)">'+(anyDigest?'On':'Off')+'</span></label></div><p style="font-size:12px;color:var(--td);line-height:1.5">Receive a daily email with new releases matching your subscriptions and watchlist.</p></div>';
+
   h+='<div class="st">My Subscriptions ('+userSubs.length+')</div>';
-  if(userSubs.length){userSubs.forEach(s=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span style="font-size:13px">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><button class="ssb on" onclick="toggleSub(\''+s.subscription_type+'\',\''+s.subscription_value.replace(/'/g,"\\'")+'\')">\u2713 Subscribed</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a></p>'}
+  if(userSubs.length){userSubs.forEach(s=>{h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;flex-wrap:wrap;gap:6px"><span style="font-size:13px;flex:1">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><div style="display:flex;align-items:center;gap:8px"><label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;color:var(--td)" title="Email alerts"><input type="checkbox" '+(s.email_digest?'checked':'')+' onchange="toggleDigest(\''+s.id+'\',this.checked)" style="accent-color:var(--accent)">\uD83D\uDCE7</label><button class="ssb on" onclick="toggleSub(\''+s.subscription_type+'\',\''+s.subscription_value.replace(/'/g,"\\'")+'\')">Unsubscribe</button></div></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a></p>'}
   // Watchlist
   h+='<div class="st" style="margin-top:24px">My Watchlist ('+userWatchlist.length+')</div>';
   if(userWatchlist.length){userWatchlist.forEach(w=>{const c=MC[w.media_type]||MC.movie;h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;transition:all .15s" onmouseover="this.style.borderColor=\'var(--bl)\'" onmouseout="this.style.borderColor=\'var(--brd)\'"><span class="mb '+w.media_type+'">'+c.l+'</span><span style="font-size:13px;flex:1;cursor:pointer" onclick="openWatchlistItem(\''+esc(w.release_key)+'\',\''+esc(w.release_title)+'\',\''+w.media_type+'\')">'+esc(w.release_title)+'</span><button onclick="event.stopPropagation();removeFromWL(\''+esc(w.release_key)+'\')" style="padding:4px 10px;font-size:11px;color:var(--sh);background:var(--shb);border:1px solid var(--shr);border-radius:6px;cursor:pointer;white-space:nowrap">\u2715 Remove</button></div>'})}else{h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No items in watchlist yet.</p>'}
@@ -1934,6 +1938,26 @@ function pwaInstall(){
 function pwaDismiss(){
   document.getElementById('pwa-banner').classList.remove('show');
   localStorage.setItem('unreeled-pwa-dismissed','1');
+}
+
+// ═══════ EMAIL DIGEST CONTROLS ═══════
+async function toggleDigest(subId,enabled){
+  await sb.from('subscriptions').update({email_digest:enabled}).eq('id',subId);
+  const s=userSubs.find(x=>x.id===subId);
+  if(s)s.email_digest=enabled;
+  toast(enabled?'\uD83D\uDCE7 Email alerts on':'\uD83D\uDCE7 Email alerts off');
+  renderAccount();
+}
+
+async function toggleAllDigest(enabled){
+  if(!userSubs.length)return;
+  const ids=userSubs.map(s=>s.id);
+  for(const id of ids){
+    await sb.from('subscriptions').update({email_digest:enabled}).eq('id',id);
+  }
+  userSubs.forEach(s=>s.email_digest=enabled);
+  toast(enabled?'\uD83D\uDCE7 Daily digest enabled for all':'\uD83D\uDCE7 Daily digest disabled');
+  renderAccount();
 }
 
 // ═══════ USERNAME EDIT ═══════
