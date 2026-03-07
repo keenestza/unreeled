@@ -193,5 +193,103 @@ def main():
 
     logger.info(f"Done: {sent} sent, {skipped} skipped, {errors} errors")
 
+    # Weekly recap on Fridays
+    try:
+        send_weekly_recap()
+    except Exception as e:
+        logger.error(f"Weekly recap failed: {e}")
+
 if __name__ == "__main__":
     main()
+
+
+def send_weekly_recap():
+    """Send Friday weekly recap email with the week's top releases."""
+    today = datetime.now(timezone.utc)
+    if today.weekday() != 4:  # Only on Fridays
+        logger.info("Not Friday — skipping weekly recap")
+        return
+
+    # Load all releases from this week
+    week_releases = []
+    for i in range(7):
+        d = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        path = os.path.join("docs", "data", f"releases_{d}.json")
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            week_releases.extend(data.get("releases", []))
+
+    if not week_releases:
+        logger.info("No releases this week")
+        return
+
+    # Get top 10 by popularity
+    week_releases.sort(key=lambda r: (r.get("metadata") or {}).get("popularity", 0), reverse=True)
+    top10 = week_releases[:10]
+
+    # Count by type
+    type_counts = {}
+    for r in week_releases:
+        t = r.get("media_type", "other")
+        type_counts[t] = type_counts.get(t, 0) + 1
+
+    week_start = (today - timedelta(days=6)).strftime("%b %d")
+    week_end = today.strftime("%b %d, %Y")
+
+    # Build email
+    html = f'''<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#08090c;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+<div style="max-width:600px;margin:0 auto;padding:20px">
+<div style="text-align:center;padding:24px 0;border-bottom:1px solid #1e1f28">
+<div style="display:inline-block;background:#ff6b35;border-radius:8px;padding:4px 12px;margin-bottom:8px"><span style="color:#fff;font-size:18px;font-weight:800">U</span></div>
+<h1 style="color:#e8e8ec;font-size:24px;font-weight:700;margin:8px 0 4px;letter-spacing:-1px">\U0001f3ac Weekly Recap</h1>
+<p style="color:#5e5e6e;font-size:13px;margin:0">{week_start} — {week_end}</p></div>
+
+<div style="padding:20px 0">
+<p style="color:#a0a0ae;font-size:14px;margin-bottom:16px">This week on Unreeled: <b style="color:#e8e8ec">{len(week_releases)} releases</b> across {len(type_counts)} media types.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">'''
+
+    for t, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True):
+        mc = MC.get(t, MC.get("movie"))
+        html += f'<span style="padding:4px 10px;background:#16171d;border:1px solid #1e1f28;border-radius:6px;font-size:12px;color:#a0a0ae">{mc["icon"]} {mc["label"]}: {count}</span>'
+
+    html += '''</div>
+<h2 style="color:#ff6b35;font-size:16px;font-weight:700;margin:0 0 12px">\U0001f525 Top 10 This Week</h2>'''
+
+    for i, r in enumerate(top10):
+        mc = MC.get(r.get("media_type", "movie"), MC["movie"])
+        title = r.get("title", "Unknown")
+        syn = (r.get("synopsis") or "")[:100]
+        if len(r.get("synopsis") or "") > 100:
+            syn += "..."
+        poster = r.get("poster_url", "")
+
+        html += f'''<div style="display:flex;gap:12px;padding:12px;background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;margin-bottom:8px">
+<div style="width:28px;height:28px;border-radius:6px;background:rgba(255,107,53,0.12);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#ff6b35;flex-shrink:0">{i+1}</div>
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:#e8e8ec;margin-bottom:2px">{title} <span style="font-size:10px;color:{mc["color"]}">{mc["label"]}</span></div>
+{f'<div style="font-size:12px;color:#5e5e6e;line-height:1.4">{syn}</div>' if syn else ''}</div></div>'''
+
+    html += f'''</div>
+<div style="text-align:center;padding:24px 0"><a href="{SITE_URL}" style="display:inline-block;background:#ff6b35;color:#fff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">Explore All Releases \u2192</a></div>
+<div style="border-top:1px solid #1e1f28;padding:20px 0;text-align:center"><p style="color:#5e5e6e;font-size:11px;margin:0">Weekly recap from <a href="{SITE_URL}" style="color:#ff6b35;text-decoration:none">unreeled.co.za</a><br><a href="{SITE_URL}" style="color:#5e5e6e;text-decoration:underline">Unsubscribe</a> — toggle off in My Account.</p></div>
+</div></body></html>'''
+
+    # Send to all users with at least one digest-enabled subscription
+    subs = sb_get("subscriptions", {"select": "user_id", "email_digest": "eq.true"})
+    recap_users = list({s["user_id"] for s in subs})
+    emails_map = get_user_emails()
+    profiles = sb_get("profiles", {"select": "id,username"})
+    profile_map = {p["id"]: p["username"] for p in profiles}
+
+    sent = 0
+    subject = f"\U0001f525 Unreeled Weekly Recap — {week_start} to {week_end}"
+    for uid in recap_users:
+        email = emails_map.get(uid)
+        if not email:
+            continue
+        if send_email(email, subject, html):
+            sent += 1
+
+    logger.info(f"Weekly recap: sent to {sent} users")
