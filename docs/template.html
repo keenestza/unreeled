@@ -390,6 +390,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
   <div class="modal" id="auth-box"></div>
 </div>
 <div class="toast" id="toast"></div>
+<div style="max-width:920px;margin:20px auto;padding:0 20px 80px;text-align:center"><p style="font-size:10px;color:var(--td);line-height:1.5">Unreeled is a participant in the Amazon Associates Program. Some links may earn us a commission at no extra cost to you. <a href="https://affiliate-program.amazon.com/help/operating/agreement" target="_blank" style="color:var(--td);text-decoration:underline">Learn more</a></p></div>
 <!-- REPORT MODAL -->
 <div class="modal-bg" id="report-modal" onclick="if(event.target===this)document.getElementById('report-modal').classList.remove('show')">
   <div class="modal" id="report-box"></div>
@@ -418,6 +419,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 <script>
 // ═══════ SUPABASE ═══════
 const SB_URL='https://zqxivnhfvhgphuqmahkg.supabase.co';
+const AMAZON_TAG='unreeled-20'; // Amazon Associates tag
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxeGl2bmhmdmhncGh1cW1haGtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTA5OTQsImV4cCI6MjA4Nzc4Njk5NH0.GlgESEQPREYYJ5dglOLSi5NOGDEnINOJU8VpKrfSiLw';
 let sb,user=null,profile=null,userSubs=[],userWatchlist=[];
 
@@ -614,6 +616,11 @@ function isAdmin(){return profile&&(profile.role==='admin'||profile.role==='mode
 
 // ═══════ HELPERS ═══════
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function amazonLink(title,mediaType){
+  const q=encodeURIComponent(title);
+  const cat=mediaType==='disc'?'&i=movies-tv':mediaType==='movie'||mediaType==='tv'?'&i=movies-tv':mediaType==='book'?'&i=stripbooks':mediaType==='game'?'&i=videogames':mediaType==='music'?'&i=music':'';
+  return'https://www.amazon.com/s?k='+q+cat+'&tag='+AMAZON_TAG;
+}
 function countryFlag(code){if(!code||code.length!==2)return'';const c=code.toUpperCase();return String.fromCodePoint(...[...c].map(ch=>0x1F1E6+ch.charCodeAt(0)-65))}
 function countryFlags(m){const cc=(m.countries||[]).filter(Boolean).slice(0,3);if(!cc.length)return'';return cc.map(c=>countryFlag(c)).join('')}
 const CN={US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',FR:'France',DE:'Germany',IT:'Italy',ES:'Spain',JP:'Japan',KR:'South Korea',CN:'China',IN:'India',BR:'Brazil',MX:'Mexico',RU:'Russia',SE:'Sweden',NO:'Norway',DK:'Denmark',FI:'Finland',NL:'Netherlands',BE:'Belgium',AT:'Austria',CH:'Switzerland',IE:'Ireland',NZ:'New Zealand',ZA:'South Africa',AR:'Argentina',CL:'Chile',CO:'Colombia',PE:'Peru',PL:'Poland',CZ:'Czechia',HU:'Hungary',RO:'Romania',TR:'Turkey',TH:'Thailand',PH:'Philippines',ID:'Indonesia',MY:'Malaysia',SG:'Singapore',TW:'Taiwan',HK:'Hong Kong',IL:'Israel',AE:'UAE',SA:'Saudi Arabia',EG:'Egypt',NG:'Nigeria',KE:'Kenya',GH:'Ghana',PT:'Portugal',GR:'Greece',UA:'Ukraine',RS:'Serbia',HR:'Croatia',BG:'Bulgaria',LT:'Lithuania',LV:'Latvia',EE:'Estonia',IS:'Iceland',LU:'Luxembourg',MT:'Malta',CY:'Cyprus',SK:'Slovakia',SI:'Slovenia',BA:'Bosnia',MK:'North Macedonia',AL:'Albania',VN:'Vietnam',MM:'Myanmar',KH:'Cambodia',LA:'Laos',BD:'Bangladesh',PK:'Pakistan',LK:'Sri Lanka',NP:'Nepal',UZ:'Uzbekistan',KZ:'Kazakhstan',GE:'Georgia',AM:'Armenia',BY:'Belarus',MD:'Moldova',PA:'Panama',CR:'Costa Rica',EC:'Ecuador',UY:'Uruguay',PY:'Paraguay',BO:'Bolivia',VE:'Venezuela',DO:'Dominican Republic',GT:'Guatemala',CU:'Cuba',PR:'Puerto Rico',JM:'Jamaica',TT:'Trinidad',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',HT:'Haiti',BB:'Barbados',LC:'Saint Lucia',MA:'Morocco',TN:'Tunisia',DZ:'Algeria',LB:'Lebanon',JO:'Jordan',QA:'Qatar',KW:'Kuwait',BH:'Bahrain',OM:'Oman',IQ:'Iraq',SY:'Syria',AF:'Afghanistan',IR:'Iran',LY:'Libya',SD:'Sudan',TZ:'Tanzania',UG:'Uganda',ZW:'Zimbabwe',ZM:'Zambia',MW:'Malawi',MZ:'Mozambique',AO:'Angola',CM:'Cameroon',SN:'Senegal',CI:"Ivory Coast",ML:'Mali',BF:'Burkina Faso',NE:'Niger',TD:'Chad',MG:'Madagascar',MU:'Mauritius',FJ:'Fiji',PG:'Papua New Guinea',WS:'Samoa',TO:'Tonga',MN:'Mongolia',BT:'Bhutan',MV:'Maldives',BN:'Brunei',TL:'Timor-Leste',LA:'Laos'};
@@ -848,7 +855,13 @@ async function openD(i){
       const badge=info.type==='sub'?'var(--slb)':info.type==='rent'?'var(--smb)':'var(--el)';
       const lbl=info.type==='sub'?'Stream':info.type==='rent'?'Rent':info.type==='buy'?'Buy':'Watch';
       h+='<a '+(info.url?'href="'+esc(info.url)+'" target="_blank"':'')+'style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:'+badge+';border:1px solid var(--brd);border-radius:6px;font-size:11.5px;color:var(--text);text-decoration:none;transition:all .15s"><span style="font-size:10px;color:var(--td)">'+lbl+'</span> '+esc(name)+'</a>'}
+    // Amazon affiliate link
+    if(AMAZON_TAG){h+='<a href="'+amazonLink(r.title,r.media_type)+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:linear-gradient(135deg,#ff9900,#e47911);border:none;border-radius:6px;font-size:11.5px;color:#111;font-weight:600;text-decoration:none;transition:all .15s">Buy on Amazon</a>'}
     h+='</div></div>'}
+
+  // Amazon link for titles without streaming info
+  if((!strm||!Object.keys(strm).length)&&AMAZON_TAG&&['movie','tv','disc','book','game','music'].includes(r.media_type)){
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px"><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:13px;font-weight:600">\uD83D\uDECD\uFE0F Get It</span><a href="'+amazonLink(r.title,r.media_type)+'" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,#ff9900,#e47911);border:none;border-radius:8px;font-size:13px;color:#111;font-weight:700;text-decoration:none;transition:all .15s">'+(r.media_type==='disc'?'\uD83D\uDCBF Buy Physical':'Buy on Amazon')+'</a></div></div>'}
 
   // Recommendations
   const recs=(r.metadata||{}).recommendations;
