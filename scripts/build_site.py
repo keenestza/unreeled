@@ -47,7 +47,7 @@ def process_releases(releases, max_per_type=30, max_total=200):
 
     by_type = {}
     for r in releases:
-        by_type.setdefault(r.get("media_type", "other"), []).append(r)
+        by_type.setdefault(r.get("media_type", "other"),[]).append(r)
 
     def sort_key(r):
         score = r.get("metadata", {}).get("popularity", 0) or 0
@@ -62,7 +62,7 @@ def process_releases(releases, max_per_type=30, max_total=200):
 
     guaranteed_per_type = min(max_per_type, 15)
     selected = []
-    remaining = []
+    remaining =[]
 
     for media_type, items in by_type.items():
         guaranteed = items[:guaranteed_per_type]
@@ -88,7 +88,7 @@ def compute_trending(all_data):
     title_info = {}
 
     for date_str, data in all_data.items():
-        for r in data.get("releases", []):
+        for r in data.get("releases",[]):
             key = (r.get("title", "").lower().strip(), r.get("media_type", ""))
             title_appearances[key] += 1
 
@@ -128,13 +128,13 @@ def compute_archive_stats(all_data):
     Build archive metadata: per-date stats for the date picker,
     weekly and monthly summaries.
     """
-    dates = []
+    dates =[]
     weekly = {}
     monthly = {}
 
     for date_str in sorted(all_data.keys()):
         data = all_data[date_str]
-        releases = data.get("releases", [])
+        releases = data.get("releases",[])
         stats = data.get("source_stats", {})
 
         # Per-type counts
@@ -184,6 +184,7 @@ def build():
     data_dir = project_root / "public" / "data"
     template_file = project_root / "public" / "template.html"
     output_file = project_root / "public" / "index.html"
+    docs_dir = project_root / "docs"  # Added this line to fix the missing variable bug
 
     # ── Load ALL available release files ──
     all_data = {}
@@ -203,7 +204,7 @@ def build():
             "date": today,
             "total_releases": 0,
             "source_stats": {},
-            "releases": [],
+            "releases":[],
         }
 
     # ── Find the latest date ──
@@ -212,12 +213,12 @@ def build():
     print(f"Latest date: {latest_date} ({latest_data.get('total_releases', 0)} releases)")
 
     # ── Process latest releases for display ──
-    latest_releases = process_releases(latest_data.get("releases", []))
+    latest_releases = process_releases(latest_data.get("releases",[]))
 
     # ── Process each historical date (smaller set for archive browsing) ──
     historical = {}
     for date_str, data in all_data.items():
-        processed = process_releases(data.get("releases", []), max_per_type=20, max_total=150)
+        processed = process_releases(data.get("releases",[]), max_per_type=20, max_total=150)
         historical[date_str] = processed
 
     # ── Compute trending ──
@@ -271,21 +272,16 @@ def build():
     return True
 
 
-if __name__ == "__main__":
-    success = build()
-    exit(0 if success else 1)
-
-
 def generate_release_pages(all_data, docs_dir):
     """Generate individual SEO-friendly HTML pages for each release."""
     releases_dir = docs_dir / "r"
     releases_dir.mkdir(exist_ok=True)
     
     count = 0
-    sitemap_entries = []
+    sitemap_entries =[]
     
     for date_str, data in all_data.items():
-        for r in data.get("releases", []):
+        for r in data.get("releases",[]):
             title = r.get("title", "")
             if not title:
                 continue
@@ -388,3 +384,8 @@ h1{{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}}
     
     print(f"Generated {count} release pages + sitemap.xml + robots.txt")
     return count
+
+# Executable block moved to the very bottom
+if __name__ == "__main__":
+    success = build()
+    exit(0 if success else 1)
