@@ -1016,20 +1016,22 @@ async function postReply(parentId){
 function fCmt(f,btn){ccf=f;document.querySelectorAll('.cfb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderComments()}
 
 async function postComment(){
-  const body=document.getElementById('cmt-body').value.trim();
+  const bodyEl=document.getElementById('cmt-body');
+  const body=bodyEl?bodyEl.value.trim():'';
   if(!body)return toast('Write something first!');
   if(!user)return showAuth('login');
   const rk=releaseKey(cr);
   const btn=document.getElementById('post-btn');
+  if(!btn)return;
   try{
-    btn.disabled=true;
+    btn.disabled=true;btn.textContent='Posting...';
     const{data,error}=await sb.from('comments').insert({user_id:user.id,release_key:rk,body:body,spoiler_level:selSpoiler}).select();
-    btn.disabled=false;
+    btn.disabled=false;btn.textContent='Post';
     if(error){console.error('Post error:',error);toast('Error: '+error.message);return}
-    document.getElementById('cmt-body').value='';
+    bodyEl.value='';
     toast('Comment posted!');
     await loadComments(rk);
-  }catch(e){btn.disabled=false;console.error('Post exception:',e);toast('Error posting comment')}
+  }catch(e){btn.disabled=false;btn.textContent='Post';console.error('Post exception:',e);toast('Error posting comment')}
 }
 
 async function vote(cid,type){
