@@ -404,6 +404,8 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 <div id="p-streams" class="page"></div>
 <div id="p-account" class="page"></div>
 <div id="p-admin" class="page"></div>
+<div id="p-notifications" class="page"></div>
+<div id="p-analytics" class="page"></div>
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bnav" id="bnav">
   <button class="on" data-p="feed" onclick="go('feed')"><span class="bi">&#127916;</span>Releases</button>
@@ -479,9 +481,9 @@ function go(p,push){
   // Show skeleton while async pages load
   if(p==='profile')showSkeleton(pg,4);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'?'feed':p)+'"]')?.classList.add('on');
+  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'?'feed':p)+'"]')?.classList.add('on');
   document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));
-  const bp=p==='detail'||p==='profile'||p==='admin'?'feed':p;
+  const bp=p==='detail'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'?'feed':p;
   document.querySelector('.bnav button[data-p="'+bp+'"]')?.classList.add('on');
   if(push!==false&&p!==curPage)history.pushState({page:p},'','');
   curPage=p;window.scrollTo({top:0,behavior:'smooth'});
@@ -494,7 +496,7 @@ function renderNav(){
   if(user&&profile){
     const init=profile.username.slice(0,2).toUpperCase();
     el.innerHTML='<div class="user-pill" onclick="document.getElementById(\'umenu\').classList.toggle(\'show\')"><div class="uav" style="background:'+profile.avatar_color+'">'+init+'</div>'+esc(profile.username)+'</div>';
-    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="openProfile(\''+user.id+'\',\''+esc(profile.username).replace(/'/g,"\\'")+'\')">My Profile</button><button onclick="go(\'streams\')">My Streams</button>'+(isAdmin()?'<button onclick="go(\'admin\');renderAdmin()">Admin Dashboard</button>':'')+'<hr><button onclick="doLogout()">Log Out</button>';
+    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="openProfile(\''+user.id+'\',\''+esc(profile.username).replace(/'/g,"\\'")+'\')">My Profile</button><button onclick="go(\'streams\')">My Streams</button><button onclick="go(\'notifications\');renderNotifications()">Notifications</button>'+(isAdmin()?'<button onclick="go(\'analytics\');renderAnalytics()">Analytics</button><button onclick="go(\'admin\');renderAdmin()">Admin Dashboard</button>':'')+'<hr><button onclick="doLogout()">Log Out</button>';
   } else {
     el.innerHTML='<button class="btn-a" onclick="showAuth(\'login\')">Sign In</button>';
     document.getElementById('umenu').classList.remove('show');
@@ -1572,6 +1574,139 @@ async function renderAdmin(){
 
     pg.innerHTML=h;
   }catch(e){console.error('Admin error:',e);pg.innerHTML='<div class="empty"><span class="empty-icon">\u26A0\uFE0F</span><h2>Error</h2><p>'+e.message+'</p></div>'}
+}
+
+// ═══════ NOTIFICATION PREFERENCES ═══════
+function renderNotifications(){
+  if(!user||!profile){document.getElementById('p-notifications').innerHTML='<div class="empty"><h2>Not logged in</h2><p><a onclick="showAuth(\'login\')" style="color:var(--accent);cursor:pointer">Log in</a> to manage notifications.</p></div>';return}
+
+  const anyDigest=userSubs.some(s=>s.email_digest);
+  let h='<h1 class="hero">\uD83D\uDD14 Notification Preferences</h1><p class="sub">Control how and when you receive updates</p>';
+
+  // Email digest master toggle
+  h+='<div style="padding:18px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">\uD83D\uDCE7 Daily Email Digest</div><div style="font-size:12px;color:var(--td);margin-top:4px">Receive a personalized email each morning with new releases matching your subscriptions</div></div><label style="position:relative;width:44px;height:24px;flex-shrink:0"><input type="checkbox" '+(anyDigest?'checked':'')+' onchange="toggleAllDigest(this.checked)" style="opacity:0;width:0;height:0"><span style="position:absolute;cursor:pointer;inset:0;background:'+(anyDigest?'var(--accent)':'var(--el)')+';border-radius:12px;transition:.3s"><span style="position:absolute;height:18px;width:18px;left:'+(anyDigest?'22px':'3px')+';bottom:3px;background:#fff;border-radius:50%;transition:.3s"></span></span></label></div></div>';
+
+  // Weekly recap toggle
+  h+='<div style="padding:18px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">\uD83D\uDD25 Weekly Recap (Fridays)</div><div style="font-size:12px;color:var(--td);margin-top:4px">Top 10 releases of the week delivered every Friday</div></div><label style="position:relative;width:44px;height:24px;flex-shrink:0"><input type="checkbox" '+(anyDigest?'checked':'')+' disabled style="opacity:0;width:0;height:0"><span style="position:absolute;cursor:pointer;inset:0;background:'+(anyDigest?'var(--accent)':'var(--el)')+';border-radius:12px;transition:.3s"><span style="position:absolute;height:18px;width:18px;left:'+(anyDigest?'22px':'3px')+';bottom:3px;background:#fff;border-radius:50%;transition:.3s"></span></span></label></div><div style="font-size:11px;color:var(--td);margin-top:6px">Follows your daily digest setting</div></div>';
+
+  // Browser notifications
+  const notifPerm=typeof Notification!=='undefined'?Notification.permission:'denied';
+  h+='<div style="padding:18px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">\uD83D\uDD14 Browser Notifications</div><div style="font-size:12px;color:var(--td);margin-top:4px">Get notified when watchlisted items are trending</div></div>'+(notifPerm==='granted'?'<span style="font-size:12px;color:var(--sl);font-weight:600">\u2705 Enabled</span>':notifPerm==='denied'?'<span style="font-size:12px;color:var(--sh)">Blocked in browser</span>':'<button onclick="Notification.requestPermission().then(p=>{renderNotifications()})" style="padding:6px 14px;background:var(--accent);color:#fff;border-radius:6px;font-size:12px;font-weight:600">Enable</button>')+'</div></div>';
+
+  // Watchlist alerts
+  h+='<div style="padding:18px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:12px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:15px;font-weight:600">\u2B50 Watchlist Alerts</div><div style="font-size:12px;color:var(--td);margin-top:4px">Include watchlisted titles in your daily email digest</div></div><span style="font-size:12px;color:var(--ts)">'+userWatchlist.length+' items</span></div></div>';
+
+  // Per-subscription toggles
+  h+='<div class="st" style="margin-top:24px">\uD83D\uDCE1 Per-Subscription Email Alerts</div>';
+  if(userSubs.length){
+    userSubs.forEach(s=>{
+      const mc=MC[s.subscription_value]||{};
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><span style="font-size:13px">'+esc(s.subscription_value)+' <span style="color:var(--td);font-size:11px">('+s.subscription_type+')</span></span><label style="display:flex;align-items:center;gap:6px;cursor:pointer"><span style="font-size:11px;color:var(--td)">'+(s.email_digest?'On':'Off')+'</span><input type="checkbox" '+(s.email_digest?'checked':'')+' onchange="toggleDigest(\''+s.id+'\',this.checked)" style="accent-color:var(--accent)"></label></div>';
+    });
+  } else {
+    h+='<p style="color:var(--td);font-size:13px;padding:16px 0">No subscriptions yet. <a onclick="go(\'streams\')" style="color:var(--accent);cursor:pointer">Browse streams</a> to subscribe.</p>';
+  }
+
+  document.getElementById('p-notifications').innerHTML=h;
+}
+
+// ═══════ ANALYTICS DASHBOARD ═══════
+async function renderAnalytics(){
+  const pg=document.getElementById('p-analytics');
+  if(!user||!isAdmin()){pg.innerHTML='<div class="empty"><h2>\uD83D\uDD12 Admin Only</h2><p>Analytics is available to admins.</p></div>';return}
+  showSkeleton(pg,6);
+
+  try{
+    const[usersRes,commentsRes,ratingsRes,reviewsRes,watchlistRes]=await Promise.all([
+      sb.from('profiles').select('id,created_at'),
+      sb.from('comments').select('id',{count:'exact',head:true}),
+      sb.from('ratings').select('id',{count:'exact',head:true}),
+      sb.from('reviews').select('id',{count:'exact',head:true}),
+      sb.from('watchlist').select('id',{count:'exact',head:true}),
+    ]);
+
+    const users=usersRes.data||[];
+    const totalUsers=users.length;
+    const totalComments=commentsRes.count||0;
+    const totalRatings=ratingsRes.count||0;
+    const totalReviews=reviewsRes.count||0;
+    const totalWatchlist=watchlistRes.count||0;
+
+    // Users joined per day (last 30 days)
+    const now=new Date();
+    const joinsByDay={};
+    for(let i=0;i<30;i++){
+      const d=new Date(now);d.setDate(d.getDate()-i);
+      joinsByDay[d.toISOString().slice(0,10)]=0;
+    }
+    users.forEach(u=>{
+      const d=(u.created_at||'').slice(0,10);
+      if(d in joinsByDay)joinsByDay[d]++;
+    });
+
+    // Release stats from archive
+    const archiveDates=D.archive?.dates||[];
+    const totalReleases=archiveDates.reduce((s,d)=>s+d.total,0);
+    const avgPerDay=archiveDates.length?Math.round(totalReleases/archiveDates.length):0;
+
+    // Media type breakdown today
+    const todayTypes={};
+    R.forEach(r=>{todayTypes[r.media_type]=(todayTypes[r.media_type]||0)+1});
+
+    let h='<h1 class="hero">\uD83D\uDCCA Analytics</h1><p class="sub">Site statistics and growth metrics</p>';
+
+    // Key metrics
+    h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:20px 0">';
+    [{n:totalUsers,l:'Total Users',i:'\uD83D\uDC65',c:'var(--accent)'},
+     {n:totalComments,l:'Comments',i:'\uD83D\uDCAC',c:'#6366f1'},
+     {n:totalReviews,l:'Reviews',i:'\u2B50',c:'#f0c038'},
+     {n:totalRatings,l:'Ratings',i:'\u2605',c:'#14b8a6'},
+     {n:totalWatchlist,l:'Watchlisted',i:'\uD83D\uDCCB',c:'#ec4899'},
+     {n:R.length,l:'Releases Today',i:'\uD83C\uDFAC',c:'#0ea5e9'},
+     {n:archiveDates.length,l:'Days Tracked',i:'\uD83D\uDCC5',c:'#a855f7'},
+     {n:avgPerDay,l:'Avg/Day',i:'\uD83D\uDCCA',c:'#8b5cf6'},
+    ].forEach(s=>{
+      h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;text-align:center"><div style="font-size:22px;margin-bottom:4px">'+s.i+'</div><div style="font-size:22px;font-weight:700;color:'+s.c+'">'+s.n+'</div><div style="font-size:11px;color:var(--td)">'+s.l+'</div></div>';
+    });
+    h+='</div>';
+
+    // User growth chart (simple bar chart)
+    h+='<div class="st">\uD83D\uDCC8 User Signups (Last 30 Days)</div>';
+    h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px">';
+    const days=Object.entries(joinsByDay).sort();
+    const maxJoins=Math.max(...days.map(d=>d[1]),1);
+    h+='<div style="display:flex;align-items:flex-end;gap:2px;height:100px">';
+    days.forEach(([d,count])=>{
+      const pct=Math.max((count/maxJoins)*100,2);
+      h+='<div title="'+d+': '+count+' users" style="flex:1;background:var(--accent);border-radius:2px 2px 0 0;height:'+pct+'%;min-height:2px;opacity:'+(count>0?1:0.2)+';cursor:help"></div>';
+    });
+    h+='</div>';
+    h+='<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--td)"><span>'+days[0]?.[0]?.slice(5)+'</span><span>'+days[days.length-1]?.[0]?.slice(5)+'</span></div>';
+    h+='</div>';
+
+    // Today's media breakdown
+    h+='<div class="st">\uD83D\uDCCA Today\'s Media Breakdown</div>';
+    h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:10px;margin-bottom:20px">';
+    for(const[t,count]of Object.entries(todayTypes).sort((a,b)=>b[1]-a[1])){
+      const c=MC[t]||{i:'?',l:t,c:'#666'};
+      const pct=Math.round(count/R.length*100);
+      h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:28px;text-align:center">'+c.i+'</span><span style="width:80px;font-size:12px;font-weight:600">'+c.l+'</span><div style="flex:1;height:8px;background:var(--el);border-radius:4px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+c.c+';border-radius:4px"></div></div><span style="width:60px;text-align:right;font-size:12px;color:var(--td)">'+count+' ('+pct+'%)</span></div>';
+    }
+    h+='</div>';
+
+    // Trending performance
+    if(D.trending&&D.trending.length){
+      h+='<div class="st">\uD83D\uDD25 Trending Performance</div>';
+      h+='<div style="padding:14px;background:var(--card);border:1px solid var(--brd);border-radius:12px">';
+      D.trending.slice(0,10).forEach((t,i)=>{
+        const c=MC[t.media_type]||MC.movie;
+        h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;'+(i<9?'border-bottom:1px solid var(--brd)':'')+'"><span style="font-size:13px;font-weight:700;color:var(--accent);width:24px">'+(i+1)+'</span><span style="flex:1;font-size:13px;font-weight:600">'+esc(t.title)+'</span><span style="font-size:11px;color:var(--td)">'+c.l+'</span><span style="font-size:11px;color:var(--accent)">'+(t.days_seen||1)+' days</span></div>';
+      });
+      h+='</div>';
+    }
+
+    pg.innerHTML=h;
+  }catch(e){console.error('Analytics error:',e);pg.innerHTML='<div class="empty"><h2>Error</h2><p>'+e.message+'</p></div>'}
 }
 
 // ═══════ ARCHIVE ═══════
