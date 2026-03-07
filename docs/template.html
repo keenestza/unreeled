@@ -406,6 +406,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 <div id="p-admin" class="page"></div>
 <div id="p-notifications" class="page"></div>
 <div id="p-analytics" class="page"></div>
+<div id="p-feedback" class="page"></div>
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bnav" id="bnav">
   <button class="on" data-p="feed" onclick="go('feed')"><span class="bi">&#127916;</span>Releases</button>
@@ -482,9 +483,9 @@ function go(p,push){
   // Show skeleton while async pages load
   if(p==='profile')showSkeleton(pg,4);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'?'feed':p)+'"]')?.classList.add('on');
+  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'||p==='feedback'?'feed':p)+'"]')?.classList.add('on');
   document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));
-  const bp=p==='detail'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'?'feed':p;
+  const bp=p==='detail'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'||p==='feedback'?'feed':p;
   document.querySelector('.bnav button[data-p="'+bp+'"]')?.classList.add('on');
   if(push!==false&&p!==curPage)history.pushState({page:p},'','');
   curPage=p;window.scrollTo({top:0,behavior:'smooth'});
@@ -497,7 +498,7 @@ function renderNav(){
   if(user&&profile){
     const init=profile.username.slice(0,2).toUpperCase();
     el.innerHTML='<div class="user-pill" onclick="document.getElementById(\'umenu\').classList.toggle(\'show\')"><div class="uav" style="background:'+profile.avatar_color+'">'+init+'</div>'+esc(profile.username)+'</div>';
-    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="openProfile(\''+user.id+'\',\''+esc(profile.username).replace(/'/g,"\\'")+'\')">My Profile</button><button onclick="go(\'streams\')">My Streams</button><button onclick="go(\'notifications\');renderNotifications()">Notifications</button>'+(isAdmin()?'<button onclick="go(\'analytics\');renderAnalytics()">Analytics</button><button onclick="go(\'admin\');renderAdmin()">Admin Dashboard</button>':'')+'<hr><button onclick="doLogout()">Log Out</button>';
+    document.getElementById('umenu').innerHTML='<button onclick="go(\'account\')">My Account</button><button onclick="openProfile(\''+user.id+'\',\''+esc(profile.username).replace(/'/g,"\\'")+'\')">My Profile</button><button onclick="go(\'streams\')">My Streams</button><button onclick="go(\'notifications\');renderNotifications()">Notifications</button><button onclick="go(\'feedback\');renderFeedback()">Feedback</button>'+(isAdmin()?'<button onclick="go(\'analytics\');renderAnalytics()">Analytics</button><button onclick="go(\'admin\');renderAdmin()">Admin Dashboard</button>':'')+'<hr><button onclick="doLogout()">Log Out</button>';
   } else {
     el.innerHTML='<button class="btn-a" onclick="showAuth(\'login\')">Sign In</button>';
     document.getElementById('umenu').classList.remove('show');
@@ -1453,7 +1454,7 @@ async function renderAdmin(){
 
   try{
     // Fetch stats
-    const[commentsRes,ratingsRes,usersRes,reportsRes,hiddenRes,reviewReportsRes,reviewHiddenRes]=await Promise.all([
+    const[commentsRes,ratingsRes,usersRes,reportsRes,hiddenRes,reviewReportsRes,reviewHiddenRes,feedbackOpenRes]=await Promise.all([
       sb.from('comments').select('id',{count:'exact',head:true}),
       sb.from('ratings').select('id',{count:'exact',head:true}),
       sb.from('profiles').select('id',{count:'exact',head:true}),
@@ -1461,6 +1462,7 @@ async function renderAdmin(){
       sb.from('comments').select('id',{count:'exact',head:true}).eq('hidden',true),
       sb.from('reviews').select('id',{count:'exact',head:true}).gt('report_count',0),
       sb.from('reviews').select('id',{count:'exact',head:true}).eq('hidden',true),
+      sb.from('feedback').select('id',{count:'exact',head:true}).eq('status','open'),
     ]);
 
     const totalComments=commentsRes.count||0;
@@ -1496,6 +1498,7 @@ async function renderAdmin(){
       {n:hiddenCount,l:'Hidden Comments',i:'\uD83D\uDEAB',c:'var(--sh)'},
       {n:reviewReportedCount,l:'Reported Reviews',i:'\uD83D\uDEA9',c:'#f97316'},
       {n:reviewHiddenCount,l:'Hidden Reviews',i:'\uD83D\uDEAB',c:'#ef4444'},
+      {n:(feedbackOpenRes.count||0),l:'Open Feedback',i:'\uD83D\uDCEC',c:'#22d3ee'},
     ];
     stats.forEach(s=>{
       h+='<div style="padding:16px;background:var(--card);border:1px solid var(--brd);border-radius:10px;text-align:center">';
@@ -1588,6 +1591,133 @@ async function renderAdmin(){
 
     pg.innerHTML=h;
   }catch(e){console.error('Admin error:',e);pg.innerHTML='<div class="empty"><span class="empty-icon">\u26A0\uFE0F</span><h2>Error</h2><p>'+e.message+'</p></div>'}
+}
+
+// ═══════ FEEDBACK ═══════
+function renderFeedback(){
+  let h='<h1 class="hero">\uD83D\uDCEC Feedback</h1><p class="sub">Report a bug, request a feature, or share your thoughts</p>';
+
+  // Feedback form
+  h+='<div style="padding:18px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:20px">';
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="cfb on" id="fb-type-bug" onclick="pickFbType(\'bug\',this)">\uD83D\uDC1B Bug Report</button><button class="cfb" id="fb-type-feature" onclick="pickFbType(\'feature\',this)">\u2728 Feature Request</button><button class="cfb" id="fb-type-general" onclick="pickFbType(\'general\',this)">\uD83D\uDCAC General</button></div>';
+  if(!user)h+='<input class="finput" id="fb-email" placeholder="Your email (optional)" type="email">';
+  h+='<input class="finput" id="fb-subject" placeholder="Subject (short summary)" maxlength="200">';
+  h+='<textarea class="finput" id="fb-body" style="min-height:100px;resize:vertical" placeholder="Describe the issue or your idea in detail (min 10 characters)..."></textarea>';
+  h+='<div class="ferr" id="fb-err"></div>';
+  h+='<button class="fbtn" id="fb-btn" onclick="submitFeedback()">Submit Feedback</button>';
+  h+='</div>';
+
+  // Show user's previous feedback
+  if(user){
+    h+='<div id="my-feedback"><p style="color:var(--td);font-size:13px">Loading your submissions...</p></div>';
+  }
+
+  // Admin: all feedback
+  if(isAdmin()){
+    h+='<div id="all-feedback" style="margin-top:24px"><p style="color:var(--td);font-size:13px">Loading all feedback...</p></div>';
+  }
+
+  document.getElementById('p-feedback').innerHTML=h;
+  if(user)loadMyFeedback();
+  if(isAdmin())loadAllFeedback();
+}
+
+let fbType='bug';
+function pickFbType(type,btn){
+  fbType=type;
+  document.querySelectorAll('#fb-type-bug,#fb-type-feature,#fb-type-general').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+async function submitFeedback(){
+  const subject=document.getElementById('fb-subject').value.trim();
+  const body=document.getElementById('fb-body').value.trim();
+  const emailEl=document.getElementById('fb-email');
+  const email=emailEl?emailEl.value.trim():(user?user.email:'');
+  const err=document.getElementById('fb-err');
+  err.classList.remove('show');
+
+  if(!subject||subject.length<3){err.textContent='Subject must be at least 3 characters';err.classList.add('show');return}
+  if(!body||body.length<10){err.textContent='Description must be at least 10 characters';err.classList.add('show');return}
+
+  const btn=document.getElementById('fb-btn');
+  btn.disabled=true;btn.textContent='Submitting...';
+
+  try{
+    const row={feedback_type:fbType,subject:subject,body:body};
+    if(user)row.user_id=user.id;
+    if(email)row.email=email;
+    const{error}=await sb.from('feedback').insert(row);
+    btn.disabled=false;btn.textContent='Submit Feedback';
+    if(error){err.textContent='Error: '+error.message;err.classList.add('show');return}
+    document.getElementById('fb-subject').value='';
+    document.getElementById('fb-body').value='';
+    toast('\uD83D\uDCEC Feedback submitted! Thank you.');
+    if(user)loadMyFeedback();
+    if(isAdmin())loadAllFeedback();
+  }catch(e){
+    btn.disabled=false;btn.textContent='Submit Feedback';
+    err.textContent='Error submitting feedback';err.classList.add('show');
+  }
+}
+
+async function loadMyFeedback(){
+  const{data}=await sb.from('feedback').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(10);
+  const el=document.getElementById('my-feedback');
+  if(!el)return;
+  if(!data||!data.length){el.innerHTML='<p style="color:var(--td);font-size:13px">No previous submissions.</p>';return}
+  let h='<div class="st" style="margin-top:16px">My Submissions</div>';
+  data.forEach(f=>{
+    const typeIcon=f.feedback_type==='bug'?'\uD83D\uDC1B':f.feedback_type==='feature'?'\u2728':'\uD83D\uDCAC';
+    const statusColor=f.status==='open'?'var(--accent)':f.status==='in_progress'?'var(--sm)':f.status==='resolved'?'var(--sl)':'var(--td)';
+    h+='<div style="padding:12px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:13px;font-weight:600">'+typeIcon+' '+esc(f.subject)+'</span><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--el);color:'+statusColor+';font-weight:600;text-transform:uppercase">'+f.status+'</span></div><p style="font-size:12px;color:var(--ts);line-height:1.5">'+esc(f.body.slice(0,150))+(f.body.length>150?'...':'')+'</p><div style="font-size:10px;color:var(--td);margin-top:4px">'+timeAgo(f.created_at)+'</div>'+(f.admin_notes?'<div style="margin-top:6px;padding:8px;background:var(--el);border-radius:6px;font-size:12px;color:var(--ts)"><span style="font-size:10px;color:var(--accent);font-weight:600">Admin reply:</span> '+esc(f.admin_notes)+'</div>':'')+'</div>';
+  });
+  el.innerHTML=h;
+}
+
+async function loadAllFeedback(){
+  const{data}=await sb.from('feedback').select('*,profiles(username)').order('created_at',{ascending:false}).limit(50);
+  const el=document.getElementById('all-feedback');
+  if(!el)return;
+  if(!data||!data.length){el.innerHTML='<div class="st">\uD83D\uDCEC All Feedback</div><p style="color:var(--td);font-size:13px">No feedback yet.</p>';return}
+
+  const open=data.filter(f=>f.status==='open').length;
+  const inProg=data.filter(f=>f.status==='in_progress').length;
+
+  let h='<div class="st">\uD83D\uDCEC All Feedback ('+open+' open, '+inProg+' in progress)</div>';
+  data.forEach(f=>{
+    const typeIcon=f.feedback_type==='bug'?'\uD83D\uDC1B':f.feedback_type==='feature'?'\u2728':'\uD83D\uDCAC';
+    const statusColor=f.status==='open'?'var(--accent)':f.status==='in_progress'?'var(--sm)':f.status==='resolved'?'var(--sl)':'var(--td)';
+    const un=(f.profiles||{}).username||f.email||'Anonymous';
+    h+='<div style="padding:12px;background:var(--card);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:13px;font-weight:600">'+typeIcon+' '+esc(f.subject)+'</span><span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--el);color:'+statusColor+';font-weight:600;text-transform:uppercase">'+f.status+'</span></div>';
+    h+='<div style="font-size:11px;color:var(--td);margin-bottom:4px">'+esc(un)+' \u00B7 '+timeAgo(f.created_at)+'</div>';
+    h+='<p style="font-size:12px;color:var(--ts);line-height:1.5;margin-bottom:8px">'+esc(f.body)+'</p>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    ['open','in_progress','resolved','closed'].forEach(s=>{
+      const active=f.status===s;
+      h+='<button onclick="updateFeedbackStatus(\''+f.id+'\',\''+s+'\')" style="padding:3px 8px;font-size:10px;border-radius:4px;border:1px solid '+(active?'var(--accent)':'var(--brd)')+';background:'+(active?'var(--agl)':'var(--el)')+';color:'+(active?'var(--accent)':'var(--td)')+';cursor:pointer">'+s.replace('_',' ')+'</button>';
+    });
+    h+='<button onclick="promptAdminNote(\''+f.id+'\')" style="padding:3px 8px;font-size:10px;border-radius:4px;border:1px solid var(--brd);background:var(--el);color:var(--td);cursor:pointer">\uD83D\uDCDD Reply</button>';
+    h+='</div>';
+    if(f.admin_notes)h+='<div style="margin-top:6px;padding:8px;background:var(--el);border-radius:6px;font-size:12px;color:var(--ts)"><span style="font-size:10px;color:var(--accent);font-weight:600">Admin note:</span> '+esc(f.admin_notes)+'</div>';
+    h+='</div>';
+  });
+  el.innerHTML=h;
+}
+
+async function updateFeedbackStatus(fid,status){
+  await sb.from('feedback').update({status:status}).eq('id',fid);
+  toast('Status updated to '+status);
+  loadAllFeedback();
+}
+
+function promptAdminNote(fid){
+  const note=prompt('Admin reply/note:');
+  if(note===null)return;
+  sb.from('feedback').update({admin_notes:note}).eq('id',fid).then(()=>{
+    toast('Note saved');
+    loadAllFeedback();
+  });
 }
 
 // ═══════ NOTIFICATION PREFERENCES ═══════
