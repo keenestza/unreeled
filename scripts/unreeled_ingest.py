@@ -73,9 +73,9 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 # ── Filters (adjust these to your preferences) ──
 MIN_MOVIE_RUNTIME = 40          # Minutes — filters out short films
 LANGUAGE_FILTER = None           # Set to "en" to only show English content, None for all
-INCLUDE_TALK_SHOWS = False       # Set True to include talk/late night shows
-INCLUDE_REALITY = False          # Set True to include reality TV
-INCLUDE_NEWS = False             # Set True to include news programs
+INCLUDE_TALK_SHOWS = True        # Include talk/late night shows
+INCLUDE_REALITY = True           # Include reality TV
+INCLUDE_NEWS = True              # Include news programs
 INCLUDE_SINGLES = False          # Set True to include single releases in music
 MUSIC_COVER_ART_LIMIT = 80      # Max cover art lookups per run (~1 sec each)
 
@@ -586,8 +586,7 @@ class TVmazeSource:
                         if not show_name or show_name.lower() in seen_shows:
                             continue
                         show_type = (show.get("type") or "").lower()
-                        if show_type in ("news", "talk show", "sports", "variety", "game show", "panel show"):
-                            continue
+                        # All show types included
                         network = show.get("network") or {}
                         image = show.get("image") or {}
                         seen_shows.add(show_name.lower())
@@ -623,8 +622,7 @@ class TVmazeSource:
                     if not show_name or show_name.lower() in seen_shows:
                         continue
                     show_type = (show.get("type") or "").lower()
-                    if show_type in ("news", "talk show", "sports", "variety", "game show", "panel show"):
-                        continue
+                    # All show types included
                     web_ch = show.get("webChannel") or {}
                     platform = web_ch.get("name", "")
                     image = show.get("image") or {}
