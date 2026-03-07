@@ -407,6 +407,8 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 <div id="p-notifications" class="page"></div>
 <div id="p-analytics" class="page"></div>
 <div id="p-feedback" class="page"></div>
+<div id="p-privacy" class="page"></div>
+<div id="p-rules" class="page"></div>
 <!-- MOBILE BOTTOM NAV -->
 <nav class="bnav" id="bnav">
   <button class="on" data-p="feed" onclick="go('feed')"><span class="bi">&#127916;</span>Releases</button>
@@ -483,9 +485,9 @@ function go(p,push){
   // Show skeleton while async pages load
   if(p==='profile')showSkeleton(pg,4);
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
-  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'||p==='feedback'?'feed':p)+'"]')?.classList.add('on');
+  document.querySelector('.tab[data-p="'+(p==='detail'||p==='account'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'||p==='feedback'||p==='privacy'||p==='rules'?'feed':p)+'"]')?.classList.add('on');
   document.querySelectorAll('.bnav button').forEach(b=>b.classList.remove('on'));
-  const bp=p==='detail'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'||p==='feedback'?'feed':p;
+  const bp=p==='detail'||p==='profile'||p==='admin'||p==='notifications'||p==='analytics'||p==='feedback'||p==='privacy'||p==='rules'?'feed':p;
   document.querySelector('.bnav button[data-p="'+bp+'"]')?.classList.add('on');
   if(push!==false&&p!==curPage)history.pushState({page:p},'','');
   curPage=p;window.scrollTo({top:0,behavior:'smooth'});
@@ -686,6 +688,7 @@ function renderFeed(){
     h+='<span style="font-size:11px;color:var(--td)">\u2705 Free forever</span>';
     h+='<span style="font-size:11px;color:var(--td)">\uD83D\uDCE7 Daily email alerts</span>';
     h+='<span style="font-size:11px;color:var(--td)">\u2B50 Watchlist & reviews</span>';
+    h+='</div><div style="display:flex;gap:12px;justify-content:center;margin-top:14px"><a onclick="go(\'privacy\');renderPrivacy()" style="font-size:11px;color:var(--td);cursor:pointer;text-decoration:underline">Privacy Policy</a><a onclick="go(\'rules\');renderRules()" style="font-size:11px;color:var(--td);cursor:pointer;text-decoration:underline">Community Rules</a>';
     h+='</div></div>';
   } else {
     h+='<h1 class="hero">'+(isL?'Today in Media':'Releases')+'</h1>';
@@ -893,7 +896,7 @@ async function openD(i){
 
   // Composer
   if(user){
-    h+='<div class="cmp"><textarea id="cmt-body" placeholder="Share your thoughts... Tag your spoiler level below."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb sl-none" data-sl="none" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="pickSp(this)">No Spoilers</button><button class="slb" data-sl="light" style="border:1px solid var(--slr);color:var(--sl)" onclick="pickSp(this)">\uD83D\uDFE2 Light</button><button class="slb" data-sl="medium" style="border:1px solid var(--smr);color:var(--sm)" onclick="pickSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" data-sl="heavy" style="border:1px solid var(--shr);color:var(--sh)" onclick="pickSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps" id="post-btn" onclick="postComment()">Post</button></div></div>';
+    h+='<div class="cmp"><textarea id="cmt-body" placeholder="Share your thoughts... Tag your spoiler level below."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb sl-none" data-sl="none" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="pickSp(this)">No Spoilers</button><button class="slb" data-sl="light" style="border:1px solid var(--slr);color:var(--sl)" onclick="pickSp(this)">\uD83D\uDFE2 Light</button><button class="slb" data-sl="medium" style="border:1px solid var(--smr);color:var(--sm)" onclick="pickSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" data-sl="heavy" style="border:1px solid var(--shr);color:var(--sh)" onclick="pickSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps" id="post-btn" onclick="postComment()">Post</button></div><div style="font-size:10px;color:var(--td);margin-top:6px">By posting, you agree to our <a onclick="go(\'rules\');renderRules()" style="color:var(--accent);cursor:pointer">Community Rules</a></div></div>';
   } else {
     h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to join the discussion</div>';
   }
@@ -1593,6 +1596,108 @@ async function renderAdmin(){
   }catch(e){console.error('Admin error:',e);pg.innerHTML='<div class="empty"><span class="empty-icon">\u26A0\uFE0F</span><h2>Error</h2><p>'+e.message+'</p></div>'}
 }
 
+// ═══════ PRIVACY POLICY ═══════
+function renderPrivacy(){
+  let h='<h1 class="hero">\uD83D\uDD12 Privacy Policy</h1><p class="sub">Last updated: March 2026</p>';
+  h+='<div style="padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;line-height:1.8;font-size:13.5px;color:var(--ts)">';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">1. Who We Are</h3>';
+  h+='<p style="margin-bottom:16px">Unreeled (<a href="https://unreeled.co.za" style="color:var(--accent)">unreeled.co.za</a>) is a daily media release tracker. We are based in South Africa and operate globally.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">2. What Data We Collect</h3>';
+  h+='<p style="margin-bottom:8px">When you create an account, we collect:</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Email address (for authentication and email digests)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Username (chosen by you, displayed publicly)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Google profile name (if signing in with Google)</p>';
+  h+='<p style="margin-bottom:16px">When you use the site, we store your comments, reviews, ratings, watchlist, subscriptions, and feedback submissions.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">3. How We Use Your Data</h3>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 To provide and personalise the service (recommendations, watchlist alerts)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 To send daily email digests and weekly recaps (only if you opt in)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 To display your username on comments and reviews</p>';
+  h+='<p style="margin-bottom:16px;padding-left:16px">\u2022 To moderate content and prevent abuse</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">4. Data Storage & Security</h3>';
+  h+='<p style="margin-bottom:16px">Your data is stored securely on Supabase (PostgreSQL) with row-level security policies. Authentication is handled by Supabase Auth with Google OAuth and magic link email. We do not store passwords. All connections use HTTPS encryption.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">5. Third-Party Services</h3>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Supabase</strong> — database and authentication (<a href="https://supabase.com/privacy" target="_blank" style="color:var(--accent)">privacy policy</a>)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Google OAuth</strong> — sign-in (<a href="https://policies.google.com/privacy" target="_blank" style="color:var(--accent)">privacy policy</a>)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Resend</strong> — email delivery (<a href="https://resend.com/legal/privacy-policy" target="_blank" style="color:var(--accent)">privacy policy</a>)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>YouTube</strong> — embedded trailers (Google privacy policy applies)</p>';
+  h+='<p style="margin-bottom:16px;padding-left:16px">\u2022 <strong>Amazon Associates</strong> — affiliate links (Amazon privacy policy applies). We earn a small commission on qualifying purchases at no extra cost to you.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">6. Cookies & Local Storage</h3>';
+  h+='<p style="margin-bottom:16px">We use browser localStorage to store your theme preference, onboarding status, and dismissed recommendations. Supabase uses a session token for authentication. We do not use tracking cookies or third-party analytics. YouTube embeds may set their own cookies.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">7. Your Rights (GDPR / POPIA)</h3>';
+  h+='<p style="margin-bottom:8px">Under the EU General Data Protection Regulation (GDPR) and South Africa\'s Protection of Personal Information Act (POPIA), you have the right to:</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Access</strong> — request a copy of your personal data</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Rectification</strong> — correct inaccurate data (you can edit your username anytime)</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Erasure</strong> — request deletion of your account and all associated data</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Withdraw consent</strong> — opt out of email digests anytime via Notification Preferences</p>';
+  h+='<p style="margin-bottom:16px;padding-left:16px">\u2022 <strong>Data portability</strong> — request your data in a machine-readable format</p>';
+  h+='<p style="margin-bottom:16px">To exercise any of these rights, use the <a onclick="go(\'feedback\');renderFeedback()" style="color:var(--accent);cursor:pointer">Feedback form</a> or email us.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">8. Data Retention</h3>';
+  h+='<p style="margin-bottom:16px">Your data is retained for as long as your account is active. If you delete your account, all personal data (profile, comments, reviews, watchlist, subscriptions) will be permanently removed.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">9. Children</h3>';
+  h+='<p style="margin-bottom:16px">Unreeled is not intended for children under 13. We do not knowingly collect data from children. If you believe a child has provided us with personal data, please contact us.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">10. Changes to This Policy</h3>';
+  h+='<p style="margin-bottom:16px">We may update this policy from time to time. Changes will be posted on this page with an updated date. Continued use of the site after changes constitutes acceptance.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">11. Contact</h3>';
+  h+='<p>For privacy-related inquiries, use the <a onclick="go(\'feedback\');renderFeedback()" style="color:var(--accent);cursor:pointer">Feedback form</a> and select "General".</p>';
+
+  h+='</div>';
+  document.getElementById('p-privacy').innerHTML=h;
+}
+
+// ═══════ COMMUNITY RULES ═══════
+function renderRules(){
+  let h='<h1 class="hero">\uD83D\uDCDC Community Rules</h1><p class="sub">Guidelines for comments, reviews, and participation</p>';
+  h+='<div style="padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;line-height:1.8;font-size:13.5px;color:var(--ts)">';
+
+  h+='<div style="padding:14px;background:var(--agl);border:1px solid var(--accent);border-radius:8px;margin-bottom:20px"><p style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:4px">\u26A0\uFE0F Important</p><p style="font-size:13px;color:var(--text)">All comments and reviews must be directly related to the film, TV show, game, book, music, or other media being discussed. Violations will result in content removal and may lead to account suspension or permanent ban.</p></div>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">\u2705 Do</h3>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Share genuine opinions, reviews, and discussions about the release</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Use the spoiler tag system — mark your spoiler level honestly</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Be respectful and constructive, even when disagreeing</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 Report content that violates these rules using the \uD83D\uDEA9 Report button</p>';
+  h+='<p style="margin-bottom:20px;padding-left:16px">\u2022 Keep discussions on-topic and relevant to the media</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">\u274C Absolutely Not Allowed</h3>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Spam</strong> — promotional content, links to unrelated sites, repetitive posting</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Racism, hate speech & discrimination</strong> — any content targeting race, ethnicity, religion, gender, sexual orientation, disability, or nationality</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Political commentary</strong> — keep political opinions out of media discussions</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Personal attacks & harassment</strong> — targeting other users with insults, threats, or bullying</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>NSFW / explicit content</strong> — graphic sexual or violent descriptions beyond what the media itself contains</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Doxxing</strong> — sharing personal information about other users</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Impersonation</strong> — pretending to be someone else</p>';
+  h+='<p style="margin-bottom:20px;padding-left:16px">\u2022 <strong>Off-topic content</strong> — comments or reviews unrelated to the release being discussed</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">\uD83D\uDEA8 Enforcement</h3>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>First offence</strong> — content removed, warning issued</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>Second offence</strong> — content removed, temporary account suspension</p>';
+  h+='<p style="margin-bottom:20px;padding-left:16px">\u2022 <strong>Severe or repeated offences</strong> — permanent account ban</p>';
+  h+='<p style="margin-bottom:16px">Moderators have final discretion on all content decisions. If you believe a moderation action was made in error, use the <a onclick="go(\'feedback\');renderFeedback()" style="color:var(--accent);cursor:pointer">Feedback form</a> to appeal.</p>';
+
+  h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">\uD83C\uDFAC Spoiler Policy</h3>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>No Spoilers</strong> — general impressions, no plot details</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>\uD83D\uDFE2 Light</strong> — minor plot points, setting descriptions, character introductions</p>';
+  h+='<p style="margin-bottom:8px;padding-left:16px">\u2022 <strong>\uD83D\uDFE1 Medium</strong> — significant plot developments, twists, character arcs</p>';
+  h+='<p style="margin-bottom:16px;padding-left:16px">\u2022 <strong>\uD83D\uDD34 Heavy</strong> — major plot twists, endings, deaths, key revelations</p>';
+  h+='<p style="margin-bottom:16px">Intentionally mislabelling spoiler levels to bypass the filter is a violation of these rules.</p>';
+
+  h+='<p style="font-size:12px;color:var(--td);margin-top:8px">These rules may be updated at any time. Last updated: March 2026.</p>';
+
+  h+='</div>';
+  document.getElementById('p-rules').innerHTML=h;
+}
+
 // ═══════ FEEDBACK ═══════
 function renderFeedback(){
   let h='<h1 class="hero">\uD83D\uDCEC Feedback</h1><p class="sub">Report a bug, request a feature, or share your thoughts</p>';
@@ -2055,7 +2160,7 @@ function renderAccount(){
 
   // Logout button
   // Support section
-  h+='<div style="margin-top:32px;padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;text-align:center"><div style="font-size:15px;font-weight:600;margin-bottom:6px">\u2615 Support Unreeled</div><p style="font-size:12px;color:var(--td);line-height:1.5;margin-bottom:14px">Unreeled is free and built with love. If you enjoy the site, consider buying us a coffee to help cover hosting and API costs.</p><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:10px 24px;background:#ff5e5b;color:#fff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all .15s">\u2615 Support on Ko-fi</a><p style="font-size:10px;color:var(--td);margin-top:14px;line-height:1.5">Some links on Unreeled are affiliate links. We may earn a small commission at no extra cost to you. This helps keep the site running.</p></div>';
+  h+='<div style="margin-top:32px;padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;text-align:center"><div style="font-size:15px;font-weight:600;margin-bottom:6px">\u2615 Support Unreeled</div><p style="font-size:12px;color:var(--td);line-height:1.5;margin-bottom:14px">Unreeled is free and built with love. If you enjoy the site, consider buying us a coffee to help cover hosting and API costs.</p><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:10px 24px;background:#ff5e5b;color:#fff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all .15s">\u2615 Support on Ko-fi</a><p style="font-size:10px;color:var(--td);margin-top:14px;line-height:1.5">Some links on Unreeled are affiliate links. We may earn a small commission at no extra cost to you. This helps keep the site running.</p><div style="display:flex;gap:12px;justify-content:center;margin-top:12px"><a onclick="go(\'privacy\');renderPrivacy()" style="font-size:11px;color:var(--td);cursor:pointer;text-decoration:underline">Privacy Policy</a><a onclick="go(\'rules\');renderRules()" style="font-size:11px;color:var(--td);cursor:pointer;text-decoration:underline">Community Rules</a></div></div>';
 
   h+='<div style="margin-top:16px;padding-top:20px;border-top:1px solid var(--brd);text-align:center"><button onclick="doLogout()" style="padding:10px 32px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">\u{1F6AA} Log Out</button></div>';
 
