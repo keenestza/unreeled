@@ -1,13 +1,13 @@
 """
 Build script for Unreeled static site.
 
-Reads all release JSON files from public/data/ and builds:
+Reads all release JSON files from docs/data/ and builds:
 - Date index (all available dates)
 - Latest day's releases
 - Trending data (titles appearing across multiple days)
 - Weekly/monthly archive stats
 
-Injects everything into public/template.html → public/index.html
+Injects everything into docs/template.html → docs/index.html
 
 Usage:
     python scripts/build_site.py
@@ -61,7 +61,7 @@ def process_releases(releases, max_per_type=30, max_total=200):
         items.sort(key=sort_key, reverse=True)
 
     guaranteed_per_type = min(max_per_type, 15)
-    selected = []
+    selected =[]
     remaining =[]
 
     for media_type, items in by_type.items():
@@ -181,10 +181,12 @@ def compute_archive_stats(all_data):
 
 def build():
     project_root = Path(__file__).parent.parent
-    data_dir = project_root / "public" / "data"
-    template_file = project_root / "public" / "template.html"
-    output_file = project_root / "public" / "index.html"
-    docs_dir = project_root / "docs"  # Added this line to fix the missing variable bug
+    docs_dir = project_root / "docs"
+    
+    # ── Completely updated to use docs directory ──
+    data_dir = docs_dir / "data"
+    template_file = docs_dir / "template.html"
+    output_file = docs_dir / "index.html"
 
     # ── Load ALL available release files ──
     all_data = {}
