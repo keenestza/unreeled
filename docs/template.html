@@ -382,7 +382,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
       <button class="tab" data-p="streams" onclick="go('streams')">Streams</button>
     </div>
   </div>
-  <div class="nav-r"><a href="/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button><span id="nav-r"></span></div>
+  <div class="nav-r"><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" class="theme-btn" title="Support us on Ko-fi" style="text-decoration:none;font-size:14px;color:#ff5e5b">&#9829;</a><a href="/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button><span id="nav-r"></span></div>
 </nav>
 <div class="umenu" id="umenu"></div>
 <!-- AUTH MODAL -->
@@ -390,7 +390,6 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
   <div class="modal" id="auth-box"></div>
 </div>
 <div class="toast" id="toast"></div>
-<div style="max-width:920px;margin:20px auto;padding:0 20px 80px;text-align:center"><p style="font-size:10px;color:var(--td);line-height:1.5">Unreeled is a participant in the Amazon Associates Program. Some links may earn us a commission at no extra cost to you. <a href="https://affiliate-program.amazon.com/help/operating/agreement" target="_blank" style="color:var(--td);text-decoration:underline">Learn more</a></p></div>
 <!-- REPORT MODAL -->
 <div class="modal-bg" id="report-modal" onclick="if(event.target===this)document.getElementById('report-modal').classList.remove('show')">
   <div class="modal" id="report-box"></div>
@@ -1925,7 +1924,10 @@ function renderAccount(){
   h+=buildWeeklyRecap();
 
   // Logout button
-  h+='<div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--brd);text-align:center"><button onclick="doLogout()" style="padding:10px 32px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">\u{1F6AA} Log Out</button></div>';
+  // Support section
+  h+='<div style="margin-top:32px;padding:20px;background:var(--card);border:1px solid var(--brd);border-radius:12px;text-align:center"><div style="font-size:15px;font-weight:600;margin-bottom:6px">\u2615 Support Unreeled</div><p style="font-size:12px;color:var(--td);line-height:1.5;margin-bottom:14px">Unreeled is free and built with love. If you enjoy the site, consider buying us a coffee to help cover hosting and API costs.</p><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:10px 24px;background:#ff5e5b;color:#fff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:all .15s">\u2615 Support on Ko-fi</a><p style="font-size:10px;color:var(--td);margin-top:14px;line-height:1.5">Some links on Unreeled are affiliate links. We may earn a small commission at no extra cost to you. This helps keep the site running.</p></div>';
+
+  h+='<div style="margin-top:16px;padding-top:20px;border-top:1px solid var(--brd);text-align:center"><button onclick="doLogout()" style="padding:10px 32px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s">\u{1F6AA} Log Out</button></div>';
 
   document.getElementById('p-account').innerHTML=h}
 
