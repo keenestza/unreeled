@@ -130,7 +130,7 @@ def build_email_html(username, matched, date):
 
     total = len(unique_wl) + len(unique_sub)
     html += f'''<div style="text-align:center;padding:24px 0"><a href="{SITE_URL}" style="display:inline-block;background:#ff6b35;color:#fff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">View All Releases \u2192</a></div>
-<div style="border-top:1px solid #1e1f28;padding:20px 0;text-align:center"><p style="color:#5e5e6e;font-size:11px;margin:0">You have {total} matching release{"s" if total!=1 else ""} today. Manage subscriptions at <a href="{SITE_URL}" style="color:#ff6b35;text-decoration:none">unreeled.co.za</a></p></div>
+<div style="border-top:1px solid #1e1f28;padding:20px 0;text-align:center"><p style="color:#5e5e6e;font-size:11px;margin:0">You have {total} matching release{"s" if total!=1 else ""} today.<br><a href="{SITE_URL}" style="color:#ff6b35;text-decoration:none">Manage your subscriptions</a> to change what you receive.<br><br><a href="{SITE_URL}" style="color:#5e5e6e;text-decoration:underline">Unsubscribe from daily emails</a> — go to My Account and toggle off the Daily Email Digest.</p></div>
 </div></body></html>'''
     return html
 
@@ -154,12 +154,16 @@ def main():
     profile_map = {p["id"]: p["username"] for p in profiles}
     emails = get_user_emails()
 
-    # Group by user
+    # Group by user — only users with digest-enabled subs get emails
     users = {}
+    digest_users = set()
     for s in subs:
         users.setdefault(s["user_id"], {"subs": [], "wl": []})["subs"].append(s)
+        digest_users.add(s["user_id"])
     for w in watchlist:
-        users.setdefault(w["user_id"], {"subs": [], "wl": []})["wl"].append(w)
+        # Only include watchlist for users who opted into digest
+        if w["user_id"] in digest_users:
+            users.setdefault(w["user_id"], {"subs": [], "wl": []})["wl"].append(w)
 
     logger.info(f"{len(emails)} users with emails, {len(users)} with subs/watchlist")
 
