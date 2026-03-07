@@ -41,7 +41,7 @@ def process_releases(releases, max_per_type=30, max_total=200):
     Truncate long synopses.
     """
     for r in releases:
-        syn = r.get("synopsis", "")
+        syn = r.get("synopsis") or ""
         if len(syn) > 500:
             r["synopsis"] = syn[:497] + "..."
 
