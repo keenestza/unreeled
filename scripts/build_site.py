@@ -1,6 +1,12 @@
 """
 Build script for Unreeled static site.
 
+Pipeline:
+1. unreeled_ingest.py writes JSON files into scripts/output/
+2. GitHub Actions copies those files into docs/data/
+3. This script reads docs/data/ and builds docs/index.html
+4. It also generates SEO pages in docs/r/
+
 Reads all release JSON files from docs/data/ and builds:
 - Date index (all available dates)
 - Latest day's releases
@@ -183,12 +189,12 @@ def build():
     project_root = Path(__file__).parent.parent
     docs_dir = project_root / "docs"
     
-    # ── Completely updated to use docs directory ──
+    # Build only from docs/, which is the published GitHub Pages output tree.
     data_dir = docs_dir / "data"
     template_file = docs_dir / "template.html"
     output_file = docs_dir / "index.html"
 
-    # ── Load ALL available release files ──
+    # Load all release files already copied into docs/data by the workflow.
     all_data = {}
     json_files = sorted(glob.glob(str(data_dir / "releases_*.json")))
 
@@ -249,7 +255,7 @@ def build():
 
     json_str = json.dumps(inject_data, ensure_ascii=False, separators=(",", ":"))
 
-    # ── Read template and inject ──
+    # Read the template and inject a single JSON blob for the frontend app.
     if not template_file.exists():
         print(f"ERROR: Template not found at {template_file}")
         return False
@@ -257,6 +263,7 @@ def build():
     with open(template_file, "r", encoding="utf-8") as f:
         template = f.read()
 
+    # The frontend reads this injected payload from the placeholder at build time.
     html = template.replace("__RELEASE_DATA_PLACEHOLDER__", json_str)
 
     with open(output_file, "w", encoding="utf-8") as f:
