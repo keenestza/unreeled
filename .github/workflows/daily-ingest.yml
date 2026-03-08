@@ -20,7 +20,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install requests python-dotenv
 
       - name: Run ingest
         run: |
@@ -30,7 +30,7 @@ jobs:
       - name: Copy output to docs data folder
         run: |
           mkdir -p docs/data
-          cp scripts/output/releases_*.json docs/data/
+          cp -f scripts/output/releases_*.json docs/data/
           LATEST=$(ls -t scripts/output/releases_*.json | head -1)
           cp "$LATEST" docs/data/latest.json
 
