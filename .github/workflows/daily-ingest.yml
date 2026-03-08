@@ -1,60 +1,53 @@
-name: Daily Media Ingestion
+name: Daily ingest
+
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: "0 6 * * *"
   workflow_dispatch:
+
 jobs:
   ingest:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.11"
+
       - name: Install dependencies
-        run: pip install requests python-dotenv
-      - name: Run ingestion script
-        env:
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-          IGDB_CLIENT_ID: ${{ secrets.IGDB_CLIENT_ID }}
-          IGDB_CLIENT_SECRET: ${{ secrets.IGDB_CLIENT_SECRET }}
-          PODCAST_INDEX_KEY: ${{ secrets.PODCAST_INDEX_KEY }}
-          PODCAST_INDEX_SECRET: ${{ secrets.PODCAST_INDEX_SECRET }}
-          RAWG_KEY: ${{ secrets.RAWG_KEY }}
-          OMDB_KEY: ${{ secrets.OMDB_KEY }}
-          WATCHMODE_KEY: ${{ secrets.WATCHMODE_KEY }}
-          NEWSDATA_KEY: ${{ secrets.NEWSDATA_KEY }}
+        run: pip install -r requirements.txt
+
+      - name: Run ingest
         run: |
           cd scripts
           python unreeled_ingest.py --date $(date -u +%Y-%m-%d)
+
       - name: Copy output to docs data folder
         run: |
           mkdir -p docs/data
-          # Migrate any old data from public/data if it exists
-          if [ -d "public/data" ]; then
-            cp -n public/data/releases_*.json docs/data/ 2>/dev/null || true
-          fi
           cp scripts/output/releases_*.json docs/data/
           LATEST=$(ls -t scripts/output/releases_*.json | head -1)
           cp "$LATEST" docs/data/latest.json
+
       - name: Build site
         run: python scripts/build_site.py
-      - name: Commit and push updated data
+
+      - name: Commit updated docs
         run: |
-          git config user.name "Unreeled Bot"
-          git config user.email "bot@unreeled.co.za"
-          git add docs/
-          git diff --staged --quiet || git commit -m "📦 Daily release update: $(date -u +%Y-%m-%d)"
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs
+          git commit -m "Daily build $(date -u +%Y-%m-%d)" || echo "No changes"
           git push
-      - name: Send email digest
-        if: success()
+
+      - name: Send digest
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: |
-          pip install requests
-          python scripts/send_digest.py
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: python scripts/send_digest.py
