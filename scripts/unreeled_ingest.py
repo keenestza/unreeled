@@ -5,6 +5,15 @@ UNREELED — Media Release Ingestion Pipeline v4
 Pulls daily new releases from multiple public APIs and normalizes
 them into a unified schema for the Unreeled platform.
 
+This script is used in two ways:
+  - Local/manual runs while developing or testing the pipeline
+  - Production daily runs via GitHub Actions
+
+Production pipeline:
+  1. This script writes JSON output files into scripts/output/
+  2. The workflow copies those files into docs/data/
+  3. build_site.py reads docs/data/ and builds the live site
+
 Data Sources:
   - TMDB (The Movie Database) — Movies & TV shows
   - Open Library API — New book releases
@@ -26,7 +35,7 @@ Setup:
      IGDB_CLIENT_SECRET=your_twitch_client_secret
   3. Run:
      python unreeled_ingest.py              # Today's releases
-     python unreeled_ingest.py --schedule   # Daily at 6 AM UTC
+     python unreeled_ingest.py --schedule   # Daily at 6 AM UTC (local/manual use)
      python unreeled_ingest.py --date 2026-02-20
 """
 
@@ -67,6 +76,8 @@ OMDB_KEY = os.getenv("OMDB_KEY", "")
 WATCHMODE_KEY = os.getenv("WATCHMODE_KEY", "")
 NEWSDATA_KEY = os.getenv("NEWSDATA_KEY", "")
 
+# Output is written to scripts/output when run from the GitHub Actions workflow,
+# because the workflow changes into the scripts/ directory before execution.
 OUTPUT_DIR = Path("./output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -101,7 +112,7 @@ def utcnow_iso() -> str:
 
 
 # ═══════════════════════════════════════════════════════════════
-# UNIFIED RELEASE SCHEMA
+# SHARED HELPERS / UNIFIED RELEASE SCHEMA
 # ═══════════════════════════════════════════════════════════════
 
 def make_release(
@@ -1517,6 +1528,10 @@ class MusicBrainzSource:
 # INGESTION PIPELINE
 # ═══════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════
+# PIPELINE
+# ═══════════════════════════════════════════════════════════════
+
 class UnreeledPipeline:
     def __init__(self):
         self.sources = {
@@ -1806,6 +1821,10 @@ def run_scheduled():
         schedule.run_pending()
         time.sleep(60)
 
+
+# ═══════════════════════════════════════════════════════════════
+# CLI / SCHEDULING
+# ═══════════════════════════════════════════════════════════════
 
 def run_once(days_back: int = 0):
     pipeline = UnreeledPipeline()
