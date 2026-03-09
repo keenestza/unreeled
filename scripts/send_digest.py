@@ -79,6 +79,22 @@ def match_releases(releases, subs, watchlist):
             matched["subscription"].append(r)
     return matched
 
+
+
+def tv_badge_html(r):
+    meta = r.get("metadata") or {}
+    if r.get("media_type") != "tv":
+        return ""
+    kind = meta.get("tv_release_kind", "")
+    base = "display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;margin-left:8px;color:#fff;vertical-align:middle"
+    if kind == "series_premiere":
+        return f'<span style="{base};background:#16a34a">Brand New Series</span>'
+    if kind == "season_premiere":
+        return f'<span style="{base};background:#2563eb">New Season</span>'
+    if kind == "new_episode":
+        return f'<span style="{base};background:#7c3aed">New Episode</span>'
+    return ""
+
 def build_email_html(username, matched, date):
     wl = matched["watchlist"]
     sub = matched["subscription"][:20]
@@ -111,7 +127,7 @@ def build_email_html(username, matched, date):
             syn = (r.get("synopsis") or "")[:120]
             if len(r.get("synopsis") or "") > 120: syn += "..."
             genres = ", ".join((r.get("genres") or [])[:3])
-            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;padding:14px;margin-bottom:8px"><span style="font-size:15px;font-weight:600;color:#e8e8ec">{title}</span><span style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:3px;font-size:10px;color:{mc["color"]};margin-left:8px">{mc["label"]}</span>'
+            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;padding:14px;margin-bottom:8px"><span style="font-size:15px;font-weight:600;color:#e8e8ec">{title}</span>{tv_badge_html(r)}<span style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:3px;font-size:10px;color:{mc["color"]};margin-left:8px">{mc["label"]}</span>'
             if syn: html += f'<p style="color:#a0a0ae;font-size:12px;margin:6px 0 0;line-height:1.5">{syn}</p>'
             if genres: html += f'<p style="color:#5e5e6e;font-size:11px;margin:4px 0 0">{genres}</p>'
             html += '</div>'
@@ -123,7 +139,7 @@ def build_email_html(username, matched, date):
             mc = MC.get(r.get("media_type","movie"), MC["movie"])
             title = r.get("title","Unknown")
             genres = ", ".join((r.get("genres") or [])[:3])
-            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;padding:12px;margin-bottom:6px"><span style="font-size:14px;font-weight:600;color:#e8e8ec">{mc["icon"]} {title}</span>'
+            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {mc["color"]};border-radius:8px;padding:12px;margin-bottom:6px"><span style="font-size:14px;font-weight:600;color:#e8e8ec">{mc["icon"]} {title}</span>{tv_badge_html(r)}'
             if genres: html += f'<span style="color:#5e5e6e;font-size:11px;margin-left:8px">{genres}</span>'
             html += '</div>'
         html += '</div>'
