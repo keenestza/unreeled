@@ -20,11 +20,17 @@ Usage:
 """
 
 import json
-import os
 import glob
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from collections import Counter
+
+
+# Keep the first paint fast by limiting how much older release data is embedded
+# directly into index.html. Archive stats still include the full dataset.
+INLINE_RECENT_DAYS = 45
+HISTORICAL_MAX_PER_TYPE = 12
+HISTORICAL_MAX_TOTAL = 90
 
 
 def utcnow_iso():
@@ -223,10 +229,20 @@ def build():
     # ── Process latest releases for display ──
     latest_releases = process_releases(latest_data.get("releases",[]))
 
-    # ── Process each historical date (smaller set for archive browsing) ──
+    # ── Process only a recent slice of historical dates for inline browsing ──
+    # Older dates still remain in docs/data and are reflected in archive stats,
+    # but we do not embed the full archive into index.html anymore.
     historical = {}
-    for date_str, data in all_data.items():
-        processed = process_releases(data.get("releases",[]), max_per_type=20, max_total=150)
+    sorted_dates_desc = sorted(all_data.keys(), reverse=True)
+    recent_dates = sorted_dates_desc[:INLINE_RECENT_DAYS]
+
+    for date_str in recent_dates:
+        data = all_data[date_str]
+        processed = process_releases(
+            data.get("releases", []),
+            max_per_type=HISTORICAL_MAX_PER_TYPE,
+            max_total=HISTORICAL_MAX_TOTAL,
+        )
         historical[date_str] = processed
 
     # ── Compute trending ──
@@ -241,10 +257,10 @@ def build():
     inject_data = {
         "latest_date": latest_date,
         "built_at": utcnow_iso(),
-        "dates_available": sorted(all_data.keys(), reverse=True),
+        "dates_available": recent_dates,
         "latest": {
             "date": latest_date,
-            "total_releases": len(latest_releases),
+            "total_releases": latest_data.get("total_releases", len(latest_releases)),
             "source_stats": latest_data.get("source_stats", {}),
             "releases": latest_releases,
         },
@@ -272,7 +288,7 @@ def build():
     file_size = output_file.stat().st_size / 1024
     print(f"Built {output_file} ({file_size:.0f} KB)")
     print(f"  Latest: {len(latest_releases)} releases from {latest_date}")
-    print(f"  Historical dates: {len(all_data)}")
+    print(f"  Inline historical dates: {len(historical)} of {len(all_data)} total")
     print(f"  Trending: {len(trending)} titles")
 
     # Generate individual SEO release pages
