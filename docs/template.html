@@ -634,7 +634,7 @@ function fmtD(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{
 function dayN(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}catch(e){return''}}
 function timeAgo(ts){const s=Math.floor((Date.now()-new Date(ts))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
 function loadDate(d){vd=d;R=(D.historical&&D.historical[d])?D.historical[d]:(D.latest&&D.latest.date===d)?D.latest.releases:[];cf="all";renderFeed()}
-function selectedDateTotal(){if(vd===D.latest_date&&D.latest&&typeof D.latest.total_releases==='number')return D.latest.total_releases;const ds=((D.archive||{}).dates||[]).find(x=>x.date===vd);if(ds&&typeof ds.total==='number')return ds.total;return R.length}
+function selectedDateTotal(){return R.length}
 function card(r,i,oc){const c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{},hs=(sp.light||0)+(sp.medium||0)+(sp.heavy||0)>0;let dots='';if(hs){dots='<span class="sds">';if(sp.light)dots+='<i class="l"></i>';if(sp.medium)dots+='<i class="m"></i>';if(sp.heavy)dots+='<i class="h"></i>';dots+='</span> Spoilers'}const gt=(r.genres||[]).slice(0,3).map(g=>'<span>'+esc(g)+'</span>').join('');const isNew=r.release_date===D.latest_date;const nbadge=r.media_type==='tv'?tvReleaseBadge(r):(isNew?'<span class="new-badge">New</span>':'');const strbadge=(r.metadata||{}).digital_release?'<span style="display:inline-block;padding:2px 6px;background:rgba(14,165,233,0.15);color:#0ea5e9;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-left:4px;vertical-align:middle">\uD83D\uDCFA Streaming</span>':'';return'<div class="rc t-'+r.media_type+'" onclick="'+oc+'" style="animation-delay:'+Math.min(i*.03,.3)+'s">'+poster(r,68,95,24)+'<div class="ri"><div class="rt"><div class="rn">'+esc(r.title)+nbadge+strbadge+'</div><span class="mb '+r.media_type+'">'+c.l+'</span></div><div class="rm">'+meta(r)+'</div>'+(r.synopsis?'<p class="rs">'+esc(r.synopsis)+'</p>':'')+'<div class="rf"><div class="gt">'+gt+'</div><div class="rst"><span>\uD83D\uDCAC '+(r.comment_count||0)+'</span>'+(hs?'<span>'+dots+'</span>':'')+'</div></div></div></div>'}
 
 // ═══════ FEED ═══════
@@ -2265,6 +2265,8 @@ function buildWeeklyRecap(){
 
 // ═══════ INIT ═══════
 let deferredInstallPrompt=null;
+const deferNonCritical=(cb)=>('requestIdleCallback' in window)?requestIdleCallback(cb,{timeout:1200}):setTimeout(cb,16);
+
 document.addEventListener('DOMContentLoaded',async()=>{
   sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
   // Clean auth tokens from URL hash
@@ -2274,7 +2276,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   await loadUser();
   if(user)await loadFollowing();
   if(user)await loadWatched();
-  renderNav();renderFeed();renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount();
+  renderNav();renderFeed();
+  deferNonCritical(()=>{renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount()});
   // Onboarding for new visitors
   if(!localStorage.getItem('unreeled-onboarded')){
     setTimeout(showOnboarding,500);
