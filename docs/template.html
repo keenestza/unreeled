@@ -708,7 +708,7 @@ function renderFeed(){
         h+='<div class="hero-card-bg" style="background-image:url('+esc(r.poster_url)+');background-color:'+c.c+'22"></div>';
         h+='<div class="hero-card-info"><span class="mb '+r.media_type+'" style="margin-bottom:4px;display:inline-block">'+c.l+'</span>';
         h+='<h4>'+esc(r.title)+'</h4>';
-        h+='<p>'+esc(r.synopsis)+'</p></div></div>';
+        h+='<p>'+(flags?flags+' ':'')+esc(r.synopsis)+'</p></div></div>';
       });
       h+='</div></div>';
     }
@@ -2377,24 +2377,17 @@ async function saveUsername(){
 // Prompt Google users with auto-generated names to choose a username
 function checkUsernamePrompt(){
   if(!user||!profile)return;
-
-  const un=(profile.username||'').trim();
-  const isAutoGen=typeof un==='string'&&un.toLowerCase().startsWith('user_');
-
-  if(!isAutoGen)return;
-
-  const promptKey='unreeled-un-prompted-'+user.id;
-  if(localStorage.getItem(promptKey))return;
-
-  localStorage.setItem(promptKey,'1');
-
-  setTimeout(()=>{
-    const box=document.getElementById('auth-box');
-    if(!box)return;
-    box.innerHTML='<button class="close" onclick="closeModal()">✕</button><h2>Choose Your Username</h2><p class="ms">Pick a display name for your comments and reviews. This is what other users will see.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20" value="'+esc(profile.username)+'"><button class="fbtn" id="a-btn" onclick="saveUsernameFromPrompt()">Save Username</button><p class="flink"><a onclick="closeModal()">Skip for now</a></p>';
-    const modal=document.getElementById('auth-modal');
-    if(modal)modal.classList.add('show');
-  },1000);
+  const un=profile.username||'';
+  // Detect auto-generated names: contain underscores with random chars, or match Google name patterns with spaces replaced
+  const isAutoGen=typeof un === 'string' && un.toLowerCase().startsWith('user_');
+  if(isAutoGen&&!sessionStorage.getItem('unreeled-un-prompted')){
+    sessionStorage.setItem('unreeled-un-prompted','1');
+    setTimeout(()=>{
+      const box=document.getElementById('auth-box');
+      box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Choose Your Username</h2><p class="ms">Pick a display name for your comments and reviews. This is what other users will see.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20" value="'+esc(profile.username)+'"><button class="fbtn" id="a-btn" onclick="saveUsernameFromPrompt()">Save Username</button><p class="flink"><a onclick="closeModal()">Skip for now</a></p>';
+      document.getElementById('auth-modal').classList.add('show');
+    },1000);
+  }
 }
 
 async function saveUsernameFromPrompt(){
@@ -2408,8 +2401,7 @@ async function saveUsernameFromPrompt(){
   document.getElementById('a-btn').disabled=false;
   if(error)return showErr(error.message);
   profile.username=un;
-  localStorage.removeItem('unreeled-un-prompted-'+user.id);
-  closeModal();renderNav();renderAccount();
+  closeModal();renderNav();
   toast('Welcome, '+un+'!');
 }
 
