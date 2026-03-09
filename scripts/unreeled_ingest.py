@@ -5,15 +5,6 @@ UNREELED — Media Release Ingestion Pipeline v4
 Pulls daily new releases from multiple public APIs and normalizes
 them into a unified schema for the Unreeled platform.
 
-This script is used in two ways:
-  - Local/manual runs while developing or testing the pipeline
-  - Production daily runs via GitHub Actions
-
-Production pipeline:
-  1. This script writes JSON output files into scripts/output/
-  2. The workflow copies those files into docs/data/
-  3. build_site.py reads docs/data/ and builds the live site
-
 Data Sources:
   - TMDB (The Movie Database) — Movies & TV shows
   - Open Library API — New book releases
@@ -35,7 +26,7 @@ Setup:
      IGDB_CLIENT_SECRET=your_twitch_client_secret
   3. Run:
      python unreeled_ingest.py              # Today's releases
-     python unreeled_ingest.py --schedule   # Daily at 6 AM UTC (local/manual use)
+     python unreeled_ingest.py --schedule   # Daily at 6 AM UTC
      python unreeled_ingest.py --date 2026-02-20
 """
 
@@ -76,8 +67,6 @@ OMDB_KEY = os.getenv("OMDB_KEY", "")
 WATCHMODE_KEY = os.getenv("WATCHMODE_KEY", "")
 NEWSDATA_KEY = os.getenv("NEWSDATA_KEY", "")
 
-# Output is written to scripts/output when run from the GitHub Actions workflow,
-# because the workflow changes into the scripts/ directory before execution.
 OUTPUT_DIR = Path("./output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
@@ -112,7 +101,7 @@ def utcnow_iso() -> str:
 
 
 # ═══════════════════════════════════════════════════════════════
-# SHARED HELPERS / UNIFIED RELEASE SCHEMA
+# UNIFIED RELEASE SCHEMA
 # ═══════════════════════════════════════════════════════════════
 
 def make_release(
@@ -385,6 +374,12 @@ class TMDBSource:
                                 trailer_key = v["key"]
                                 break
 
+                tv_release_kind = "new_episode"
+                if show.get("first_air_date") == date:
+                    tv_release_kind = "series_premiere"
+                elif episode_number == 1:
+                    tv_release_kind = "season_premiere"
+
                 release = make_release(
                     source="tmdb",
                     media_type="tv",
@@ -404,6 +399,7 @@ class TMDBSource:
                         "total_seasons": total_seasons,
                         "countries": origin_countries,
                         "trailer_key": trailer_key,
+                        "tv_release_kind": tv_release_kind,
                     },
                     poster_url=(
                         f"{self.IMAGE_BASE}{show['poster_path']}"
@@ -601,6 +597,7 @@ class TVmazeSource:
                         network = show.get("network") or {}
                         image = show.get("image") or {}
                         seen_shows.add(show_name.lower())
+                        tv_release_kind = "series_premiere" if show.get("premiered") == date else ("season_premiere" if ep.get("number") == 1 else "new_episode")
                         releases.append(make_release(
                             source="tvmaze", media_type="tv", title=show_name, release_date=date,
                             synopsis=self._clean_html(show.get("summary", "")),
@@ -613,6 +610,7 @@ class TVmazeSource:
                                 "episode_name": ep.get("name", ""), "episode_air_date": date,
                                 "countries": [(network.get("country") or {}).get("code", "")] if (network.get("country") or {}).get("code") else [],
                                 "source_type": "broadcast",
+                                "tv_release_kind": tv_release_kind,
                             },
                             poster_url=image.get("original") or image.get("medium") or "",
                             external_ids={"tvmaze_id": show.get("id")},
@@ -638,6 +636,7 @@ class TVmazeSource:
                     platform = web_ch.get("name", "")
                     image = show.get("image") or {}
                     seen_shows.add(show_name.lower())
+                    tv_release_kind = "series_premiere" if show.get("premiered") == date else ("season_premiere" if ep.get("number") == 1 else "new_episode")
                     releases.append(make_release(
                         source="tvmaze_web", media_type="tv", title=show_name, release_date=date,
                         synopsis=self._clean_html(show.get("summary", "")),
@@ -651,6 +650,7 @@ class TVmazeSource:
                             "countries": [(web_ch.get("country") or {}).get("code", "")] if (web_ch.get("country") or {}).get("code") else [],
                             "streaming": {platform: {"type": "sub"}} if platform else {},
                             "source_type": "streaming",
+                            "tv_release_kind": tv_release_kind,
                         },
                         poster_url=image.get("original") or image.get("medium") or "",
                         external_ids={"tvmaze_id": show.get("id")},
@@ -1528,10 +1528,6 @@ class MusicBrainzSource:
 # INGESTION PIPELINE
 # ═══════════════════════════════════════════════════════════════
 
-# ═══════════════════════════════════════════════════════════════
-# PIPELINE
-# ═══════════════════════════════════════════════════════════════
-
 class UnreeledPipeline:
     def __init__(self):
         self.sources = {
@@ -1821,10 +1817,6 @@ def run_scheduled():
         schedule.run_pending()
         time.sleep(60)
 
-
-# ═══════════════════════════════════════════════════════════════
-# CLI / SCHEDULING
-# ═══════════════════════════════════════════════════════════════
 
 def run_once(days_back: int = 0):
     pipeline = UnreeledPipeline()
