@@ -339,7 +339,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .hero-carousel::-webkit-scrollbar{display:none}
 .hero-card{flex-shrink:0;width:280px;scroll-snap-align:start;border-radius:14px;overflow:hidden;position:relative;cursor:pointer;transition:transform .2s;border:1px solid var(--brd)}
 .hero-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.3)}
-.hero-card-bg{width:100%;height:160px;background-size:cover;background-position:top center;position:relative}
+.hero-card-bg{width:100%;height:160px;background-size:cover;background-position:center;position:relative}
 .hero-card-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,var(--card) 0%,transparent 60%)}
 .hero-card-info{padding:0 14px 14px;position:relative;margin-top:-40px;z-index:1}
 .hero-card-info h4{font-family:'Fraunces',serif;font-size:15px;font-weight:700;line-height:1.2;margin-bottom:4px}
@@ -625,6 +625,7 @@ function amazonLink(title,mediaType){
 }
 function countryFlag(code){if(!code||code.length!==2)return'';const c=code.toUpperCase();return String.fromCodePoint(...[...c].map(ch=>0x1F1E6+ch.charCodeAt(0)-65))}
 function countryFlags(m){const cc=(m.countries||[]).filter(Boolean).slice(0,3);if(!cc.length)return'';return cc.map(c=>countryFlag(c)).join('')}
+function tvBadge(r){const k=((r.metadata||{}).tv_release_kind)||'';if(r.media_type!=='tv'||!k)return'';if(k==='series_premiere')return '<span class="new-badge" style="background:#16a34a;margin-left:4px">Brand New Series</span>';if(k==='season_premiere')return '<span class="new-badge" style="background:#2563eb;margin-left:4px">New Season</span>';if(k==='new_episode')return '<span class="new-badge" style="background:#7c3aed;margin-left:4px">New Episode</span>';return''}
 const CN={US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',FR:'France',DE:'Germany',IT:'Italy',ES:'Spain',JP:'Japan',KR:'South Korea',CN:'China',IN:'India',BR:'Brazil',MX:'Mexico',RU:'Russia',SE:'Sweden',NO:'Norway',DK:'Denmark',FI:'Finland',NL:'Netherlands',BE:'Belgium',AT:'Austria',CH:'Switzerland',IE:'Ireland',NZ:'New Zealand',ZA:'South Africa',AR:'Argentina',CL:'Chile',CO:'Colombia',PE:'Peru',PL:'Poland',CZ:'Czechia',HU:'Hungary',RO:'Romania',TR:'Turkey',TH:'Thailand',PH:'Philippines',ID:'Indonesia',MY:'Malaysia',SG:'Singapore',TW:'Taiwan',HK:'Hong Kong',IL:'Israel',AE:'UAE',SA:'Saudi Arabia',EG:'Egypt',NG:'Nigeria',KE:'Kenya',GH:'Ghana',PT:'Portugal',GR:'Greece',UA:'Ukraine',RS:'Serbia',HR:'Croatia',BG:'Bulgaria',LT:'Lithuania',LV:'Latvia',EE:'Estonia',IS:'Iceland',LU:'Luxembourg',MT:'Malta',CY:'Cyprus',SK:'Slovakia',SI:'Slovenia',BA:'Bosnia',MK:'North Macedonia',AL:'Albania',VN:'Vietnam',MM:'Myanmar',KH:'Cambodia',LA:'Laos',BD:'Bangladesh',PK:'Pakistan',LK:'Sri Lanka',NP:'Nepal',UZ:'Uzbekistan',KZ:'Kazakhstan',GE:'Georgia',AM:'Armenia',BY:'Belarus',MD:'Moldova',PA:'Panama',CR:'Costa Rica',EC:'Ecuador',UY:'Uruguay',PY:'Paraguay',BO:'Bolivia',VE:'Venezuela',DO:'Dominican Republic',GT:'Guatemala',CU:'Cuba',PR:'Puerto Rico',JM:'Jamaica',TT:'Trinidad',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',HT:'Haiti',BB:'Barbados',LC:'Saint Lucia',MA:'Morocco',TN:'Tunisia',DZ:'Algeria',LB:'Lebanon',JO:'Jordan',QA:'Qatar',KW:'Kuwait',BH:'Bahrain',OM:'Oman',IQ:'Iraq',SY:'Syria',AF:'Afghanistan',IR:'Iran',LY:'Libya',SD:'Sudan',TZ:'Tanzania',UG:'Uganda',ZW:'Zimbabwe',ZM:'Zambia',MW:'Malawi',MZ:'Mozambique',AO:'Angola',CM:'Cameroon',SN:'Senegal',CI:"Ivory Coast",ML:'Mali',BF:'Burkina Faso',NE:'Niger',TD:'Chad',MG:'Madagascar',MU:'Mauritius',FJ:'Fiji',PG:'Papua New Guinea',WS:'Samoa',TO:'Tonga',MN:'Mongolia',BT:'Bhutan',MV:'Maldives',BN:'Brunei',TL:'Timor-Leste',LA:'Laos'};
 function meta(r){const m=r.metadata||{},p=[];if(r.media_type==='movie'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language&&!(m.countries||[]).length)p.push(m.original_language.toUpperCase());if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes);if(m.ratings?.metacritic)p.push('MC: '+m.ratings.metacritic)}if(r.media_type==='tv'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.season_number&&m.episode_number)p.push('S'+m.season_number+'E'+m.episode_number);else if(m.total_seasons)p.push(m.total_seasons+' season'+(m.total_seasons!==1?'s':''));if(m.networks?.length)p.push(m.networks[0]);if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes)}if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}if(r.media_type==='podcast'){if(m.author)p.push(m.author);if(m.episode_count)p.push(m.episode_count+' eps')}if(r.media_type==='boardgame'){if(m.players)p.push(m.players+' players');if(m.playtime_minutes)p.push(m.playtime_minutes+' min')}if(r.media_type==='comic'){if(m.volume)p.push(m.volume);if(m.publisher)p.push(m.publisher)}if(r.media_type==='disc'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.physical_formats?.length)p.push(m.physical_formats.join(' / '));if(m.runtime_minutes)p.push(m.runtime_minutes+' min')}if(r.media_type==='news'){if(m.source_name)p.push(m.source_name)}if(m.streaming){const sn=Object.keys(m.streaming).slice(0,3);if(sn.length)p.push('\uD83D\uDCFA '+sn.join(', '))}return p.join('<span class="s">\u00B7</span>')}
 function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie;if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
@@ -707,7 +708,7 @@ function renderFeed(){
         h+='<div class="hero-card" onclick="openD('+ri+')">';
         h+='<div class="hero-card-bg" style="background-image:url('+esc(r.poster_url)+');background-color:'+c.c+'22"></div>';
         h+='<div class="hero-card-info"><span class="mb '+r.media_type+'" style="margin-bottom:4px;display:inline-block">'+c.l+'</span>';
-        h+='<h4>'+esc(r.title)+'</h4>';
+        h+='<h4>'+esc(r.title)+tvBadge(r)+'</h4>';
         h+='<p>'+(flags?flags+' ':'')+esc(r.synopsis)+'</p></div></div>';
       });
       h+='</div></div>';
@@ -814,7 +815,7 @@ async function openD(i){
   const wl=isWatchlisted(rk);
   const subbed=user&&isSubbed('media_type',r.media_type);
 
-  let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+r.media_type+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o'+(wl?' active':'')+'" onclick="toggleWL()" id="wl-btn">'+(wl?'\u2705 Watchlisted':'\u2B50 Watchlist')+'</button><button class="o'+(isWatched(rk)?' active':'')+'" onclick="toggleWatched(\''+rk.replace(/'/g,"\\'")+'\',\''+esc(r.title).replace(/'/g,"\\'")+'\',\''+r.media_type+'\')"><span id="watched-btn">'+(isWatched(rk)?'\u2705 Watched':'\uD83D\uDC41 Mark Watched')+'</span></button>'+((r.metadata||{}).trailer_key?'<a href="https://www.youtube.com/watch?v='+r.metadata.trailer_key+'" target="_blank" rel="noopener" class="o" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none">\u25B6 Trailer</a>':'')+'</div></div></div>';
+  let h='<button class="dbk" onclick="go(\'feed\')">\u2190 Back</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+tvBadge(r)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+r.media_type+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o'+(wl?' active':'')+'" onclick="toggleWL()" id="wl-btn">'+(wl?'\u2705 Watchlisted':'\u2B50 Watchlist')+'</button><button class="o'+(isWatched(rk)?' active':'')+'" onclick="toggleWatched(\''+rk.replace(/'/g,"\\'")+'\',\''+esc(r.title).replace(/'/g,"\\'")+'\',\''+r.media_type+'\')"><span id="watched-btn">'+(isWatched(rk)?'\u2705 Watched':'\uD83D\uDC41 Mark Watched')+'</span></button>'+((r.metadata||{}).trailer_key?'<a href="https://www.youtube.com/watch?v='+r.metadata.trailer_key+'" target="_blank" rel="noopener" class="o" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none">\u25B6 Trailer</a>':'')+'</div></div></div>';
   h+='<div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div>';
 
   // Trailer embed
@@ -1193,7 +1194,7 @@ async function toggleStreamSub(name){await toggleSub('stream',name)}
 // ═══════ TRENDING ═══════
 let TR=D.trending||[];
 function openTr(i){cr=TR[i];rv=new Set();ccf='all';selSpoiler='none';const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};const rk=(r.first_seen||vd)+':'+r.media_type+':'+(r.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,80);
-let h='<button class="dbk" onclick="go(\'trending\')">\u2190 Back to Trending</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'</div></div>'+(r.first_seen?'<p style="font-size:12px;color:var(--td);margin-bottom:16px">First seen: '+fmtD(r.first_seen)+(r.days_seen>1?' \u00B7 Appeared '+r.days_seen+' days':'')+'</p>':'');
+let h='<button class="dbk" onclick="go(\'trending\')">\u2190 Back to Trending</button><div class="dh">'+poster(r,150,210,48)+'<div style="flex:1"><span class="mb '+r.media_type+'">'+c.l+'</span><h1 class="dn">'+esc(r.title)+tvBadge(r)+'</h1><div class="rm">'+meta(r)+(r.genres?.length?'<span class="s">\u00B7</span>'+r.genres.map(esc).join(', '):'')+'</div>'+(r.synopsis?'<p class="dd">'+esc(r.synopsis)+'</p>':'')+'</div></div>'+(r.first_seen?'<p style="font-size:12px;color:var(--td);margin-bottom:16px">First seen: '+fmtD(r.first_seen)+(r.days_seen>1?' \u00B7 Appeared '+r.days_seen+' days':'')+'</p>':'');
 h+='<div class="st" id="cmt-count">Discussion</div>';
 if(user){h+='<div class="cmp"><textarea id="cmt-body" placeholder="Share your thoughts..."></textarea><div class="cmpf"><div class="spp"><span>Spoiler level:</span><button class="slb" data-sl="none" style="border:1px solid var(--brd);color:var(--td);background:var(--el)" onclick="pickSp(this)">No Spoilers</button><button class="slb" data-sl="light" style="border:1px solid var(--slr);color:var(--sl)" onclick="pickSp(this)">\uD83D\uDFE2 Light</button><button class="slb" data-sl="medium" style="border:1px solid var(--smr);color:var(--sm)" onclick="pickSp(this)">\uD83D\uDFE1 Medium</button><button class="slb" data-sl="heavy" style="border:1px solid var(--shr);color:var(--sh)" onclick="pickSp(this)">\uD83D\uDD34 Heavy</button></div><button class="bps" id="post-btn" onclick="postComment()">Post</button></div></div>'}else{h+='<div class="login-prompt"><a onclick="showAuth(\'signup\')">Sign up</a> or <a onclick="showAuth(\'login\')">log in</a> to comment</div>'}
 h+='<div class="cfs"><span>Show:</span><button class="cfb on" onclick="fCmt(\'all\',this)">All</button><button class="cfb" onclick="fCmt(\'none\',this)">No Spoilers</button><button class="cfb" onclick="fCmt(\'light\',this)">\uD83D\uDFE2 Light</button><button class="cfb" onclick="fCmt(\'medium\',this)">\uD83D\uDFE1 Medium</button><button class="cfb" onclick="fCmt(\'heavy\',this)">\uD83D\uDD34 Heavy</button></div><div id="cml"><p style="color:var(--td);font-size:13px">Loading...</p></div>';
@@ -2098,7 +2099,7 @@ function openWatchlistItem(rk,title,mtype){
   const wl=true;
   const subbed=user&&isSubbed('media_type',mtype);
 
-  let h='<button class="dbk" onclick="go(\'account\')">\u2190 Back</button><div class="dh">'+poster(cr,150,210,48)+'<div style="flex:1"><span class="mb '+mtype+'">'+c.l+'</span><h1 class="dn">'+esc(title)+'</h1><div class="rm">'+meta(cr)+(cr.genres.length?'<span class="s">\u00B7</span>'+cr.genres.map(esc).join(', '):'')+'</div>'+(cr.synopsis?'<p class="dd">'+esc(cr.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+mtype+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o active" onclick="toggleWL()" id="wl-btn">\u2705 Watchlisted</button></div></div></div>';
+  let h='<button class="dbk" onclick="go(\'account\')">\u2190 Back</button><div class="dh">'+poster(cr,150,210,48)+'<div style="flex:1"><span class="mb '+mtype+'">'+c.l+'</span><h1 class="dn">'+esc(title)+tvBadge(cr)+'</h1><div class="rm">'+meta(cr)+(cr.genres.length?'<span class="s">\u00B7</span>'+cr.genres.map(esc).join(', '):'')+'</div>'+(cr.synopsis?'<p class="dd">'+esc(cr.synopsis)+'</p>':'')+'<div class="da"><button class="p'+(subbed?' active':'')+'" onclick="toggleSub(\'media_type\',\''+mtype+'\')">\uD83D\uDCE1 '+(subbed?'Following '+c.l:'Follow '+c.l)+'</button><button class="o" onclick="shareRelease()">\uD83D\uDD17 Share</button><button class="o active" onclick="toggleWL()" id="wl-btn">\u2705 Watchlisted</button></div></div></div>';
   h+='<div class="spb"><div class="sps sl"><em>'+(sp.light||0)+'</em><small>Light</small></div><div class="sps sm"><em>'+(sp.medium||0)+'</em><small>Medium</small></div><div class="sps sv"><em>'+(sp.heavy||0)+'</em><small>Heavy</small></div></div>';
 
   // Streaming availability
@@ -2374,28 +2375,20 @@ async function saveUsername(){
   toast('Username updated to '+un+'!');
 }
 
-// Prompt users with obvious placeholder usernames to choose a username
+// Prompt Google users with auto-generated names to choose a username
 function checkUsernamePrompt(){
   if(!user||!profile)return;
-
-  const un=(profile.username||'').trim();
-
-  // Only treat explicit placeholder usernames as auto-generated.
-  // Valid usernames like "Movie_Lover" or "Neil_Smith" should not re-trigger the prompt.
-  const isAutoGen=typeof un==='string'&&un.toLowerCase().startsWith('user_');
-
-  if(!isAutoGen)return;
-  if(sessionStorage.getItem('unreeled-un-prompted'))return;
-
-  sessionStorage.setItem('unreeled-un-prompted','1');
-
-  setTimeout(()=>{
-    const box=document.getElementById('auth-box');
-    if(!box)return;
-    box.innerHTML='<button class="close" onclick="closeModal()">✕</button><h2>Choose Your Username</h2><p class="ms">Pick a display name for your comments and reviews. This is what other users will see.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20" value="'+esc(profile.username)+'"><button class="fbtn" id="a-btn" onclick="saveUsernameFromPrompt()">Save Username</button><p class="flink"><a onclick="closeModal()">Skip for now</a></p>';
-    const modal=document.getElementById('auth-modal');
-    if(modal)modal.classList.add('show');
-  },1000);
+  const un=profile.username||'';
+  // Detect auto-generated names: contain underscores with random chars, or match Google name patterns with spaces replaced
+  const isAutoGen=un.startsWith('user_')||un.match(/^[A-Z][a-z]+_[A-Z][a-z]+$/);
+  if(isAutoGen&&!sessionStorage.getItem('unreeled-un-prompted')){
+    sessionStorage.setItem('unreeled-un-prompted','1');
+    setTimeout(()=>{
+      const box=document.getElementById('auth-box');
+      box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Choose Your Username</h2><p class="ms">Pick a display name for your comments and reviews. This is what other users will see.</p><div class="ferr" id="aerr"></div><input class="finput" id="a-user" placeholder="Username (3-20 chars)" maxlength="20" value="'+esc(profile.username)+'"><button class="fbtn" id="a-btn" onclick="saveUsernameFromPrompt()">Save Username</button><p class="flink"><a onclick="closeModal()">Skip for now</a></p>';
+      document.getElementById('auth-modal').classList.add('show');
+    },1000);
+  }
 }
 
 async function saveUsernameFromPrompt(){
