@@ -281,6 +281,13 @@ def build():
     }
 
     json_str = json.dumps(inject_data, ensure_ascii=False, separators=(",", ":"))
+json_str = (
+    json_str
+    .replace("</", "<\\/")
+    .replace("<!--", "<\\!--")
+    .replace("\u2028", "\\u2028")
+    .replace("\u2029", "\\u2029")
+)
 
     # Read the template and inject a single JSON blob for the frontend app.
     if not template_file.exists():
