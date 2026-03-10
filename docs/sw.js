@@ -1,5 +1,5 @@
 const CACHE_NAME = 'unreeled-v5';
-const STATIC_ASSETS = [
+const STATIC_ASSETS =[
   '/',
   '/index.html',
   '/manifest.json',
@@ -32,8 +32,8 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // Cache successful responses
-        if (response.ok) {
+        // Cache successful responses (and avoid chrome-extension:// errors)
+        if (response.ok && event.request.url.startsWith('http')) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
