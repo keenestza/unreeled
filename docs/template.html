@@ -686,129 +686,143 @@ function takeSectionItems(list, used, limit, predicate){
   return out;
 }
 
-function renderFeedSection(title, subtitle, items){
-  if(!items||!items.length)return'';
-  let h='<section style="margin:0 0 22px"><div style="display:flex;justify-content:space-between;align-items:end;gap:10px;margin:0 0 10px"><div><h2 style="font-family:\'Fraunces\',serif;font-size:20px;letter-spacing:-0.5px;margin:0 0 2px;color:var(--text)">'+title+'</h2>'+(subtitle?'<p style="font-size:11px;color:var(--td);margin:0">'+subtitle+'</p>':'')+'</div><span style="font-size:11px;color:var(--accent);font-weight:700">'+items.length+' shown</span></div>';
-  items.forEach((r,i)=>{const ri=R.indexOf(r);h+=card(r,i,ri>=0?'openD('+ri+')':'openD(feedFiltered['+i+'])')});
-  h+='</section>';
-  return h;
-}
-
 function buildHomepageSections(list){
-  const used=new Set();
+  const used = new Set();
 
-  const tvMoments=takeSectionItems(
-    list,used,10,
-    r=>r.media_type==='tv'&&['series_premiere','season_premiere','new_episode'].includes(((r.metadata||{}).tv_release_kind||'').toLowerCase())
+  const tvMoments = takeSectionItems(
+    list, used, 10,
+    function(r){
+      const kind = (((r.metadata || {}).tv_release_kind) || '').toLowerCase();
+      return r.media_type === 'tv' && (
+        kind === 'series_premiere' ||
+        kind === 'season_premiere' ||
+        kind === 'new_episode'
+      );
+    }
   );
 
-  const movieNight=takeSectionItems(
-    list,used,10,
-    r=>r.media_type==='movie'||r.media_type==='disc'
+  const movieNight = takeSectionItems(
+    list, used, 10,
+    function(r){
+      return r.media_type === 'movie' || r.media_type === 'disc';
+    }
   );
 
-  const cultureMix=takeSectionItems(
-    list,used,12,
-    r=>['game','book','music','podcast','anime','boardgame'].includes(r.media_type)
+  const cultureMix = takeSectionItems(
+    list, used, 12,
+    function(r){
+      return ['game','book','music','podcast','anime','boardgame'].includes(r.media_type);
+    }
   );
 
-  const newsNow=takeSectionItems(
-    list,used,6,
-    r=>r.media_type==='news'
+  const newsNow = takeSectionItems(
+    list, used, 6,
+    function(r){
+      return r.media_type === 'news';
+    }
   );
 
-  const moreToday=takeSectionItems(list,used,18,_=>true);
+  const moreToday = takeSectionItems(
+    list, used, 18,
+    function(){ return true; }
+  );
 
-  const typeLabel=(t)=>{
-    const map={
-      game:'Games',
-      book:'Books',
-      music:'Music',
-      podcast:'Podcasts',
-      anime:'Anime',
-      boardgame:'Board Games'
+  function typeLabel(t){
+    const map = {
+      game: 'Games',
+      book: 'Books',
+      music: 'Music',
+      podcast: 'Podcasts',
+      anime: 'Anime',
+      boardgame: 'Board Games'
     };
-    return map[t]||t;
-  };
+    return map[t] || t;
+  }
 
-  const countTypes=(items)=>{
-    const c={};
-    items.forEach(r=>{
-      const t=r.media_type||'other';
-      c[t]=(c[t]||0)+1;
+  function countTypes(items){
+    const c = {};
+    items.forEach(function(r){
+      const t = r.media_type || 'other';
+      c[t] = (c[t] || 0) + 1;
     });
     return c;
-  };
+  }
 
-  const topTypes=(items)=>{
-    const counts=countTypes(items);
+  function topTypes(items){
+    const counts = countTypes(items);
     return Object.entries(counts)
-      .sort((a,b)=>b[1]-a[1])
-      .map(([t])=>t);
-  };
+      .sort(function(a,b){ return b[1] - a[1]; })
+      .map(function(x){ return x[0]; });
+  }
 
-  let cultureTitle='Culture Picks';
-  let cultureSubtitle='Automatically selected highlights from games, books, music, podcasts, anime and more.';
+  let cultureTitle = 'Culture Picks';
+  let cultureSubtitle = 'Automatically selected highlights from games, books, music, podcasts, anime and more.';
+
   if(cultureMix.length){
-    const tops=topTypes(cultureMix).slice(0,3);
-    if(tops.length===1){
-      cultureTitle=typeLabel(tops[0])+' Today';
-      cultureSubtitle='The biggest '+typeLabel(tops[0]).toLowerCase()+' releases in today’s feed.';
-    }else if(tops.length===2){
-      cultureTitle=typeLabel(tops[0])+' & '+typeLabel(tops[1]);
-      cultureSubtitle='A mixed shelf of today’s strongest '+typeLabel(tops[0]).toLowerCase()+' and '+typeLabel(tops[1]).toLowerCase()+'.';
-    }else if(tops.length>=3){
-      cultureTitle=typeLabel(tops[0])+', '+typeLabel(tops[1])+' & '+typeLabel(tops[2]);
-      cultureSubtitle='A mixed shelf of standout non-film releases for today.';
+    const tops = topTypes(cultureMix).slice(0,3);
+
+    if(tops.length === 1){
+      cultureTitle = typeLabel(tops[0]) + ' Today';
+      cultureSubtitle = 'The biggest ' + typeLabel(tops[0]).toLowerCase() + ' releases in today\'s feed.';
+    } else if(tops.length === 2){
+      cultureTitle = typeLabel(tops[0]) + ' & ' + typeLabel(tops[1]);
+      cultureSubtitle = 'A mixed shelf of today\'s strongest ' + typeLabel(tops[0]).toLowerCase() + ' and ' + typeLabel(tops[1]).toLowerCase() + '.';
+    } else if(tops.length >= 3){
+      cultureTitle = typeLabel(tops[0]) + ', ' + typeLabel(tops[1]) + ' & ' + typeLabel(tops[2]);
+      cultureSubtitle = 'A mixed shelf of standout non-film releases for today.';
     }
   }
 
-  let tvTitle='TV Premieres, New Seasons & Episodes';
-  let tvSubtitle='Automatically grouped from TV releases with premiere and episode metadata.';
+  let tvTitle = 'TV Premieres, New Seasons & Episodes';
+  let tvSubtitle = 'Automatically grouped from TV releases with premiere and episode metadata.';
+
   if(tvMoments.length){
-    const counts={series:0,season:0,episode:0};
-    tvMoments.forEach(r=>{
-      const k=((r.metadata||{}).tv_release_kind||'').toLowerCase();
-      if(k==='series_premiere') counts.series++;
-      else if(k==='season_premiere') counts.season++;
-      else if(k==='new_episode') counts.episode++;
+    const counts = {series:0, season:0, episode:0};
+
+    tvMoments.forEach(function(r){
+      const k = (((r.metadata || {}).tv_release_kind) || '').toLowerCase();
+      if(k === 'series_premiere') counts.series++;
+      else if(k === 'season_premiere') counts.season++;
+      else if(k === 'new_episode') counts.episode++;
     });
+
     if(counts.series && !counts.season && !counts.episode){
-      tvTitle='Brand New Series';
-      tvSubtitle='Fresh TV launches starting today.';
-    }else if(counts.season && !counts.series && !counts.episode){
-      tvTitle='New Seasons Starting';
-      tvSubtitle='Returning shows kicking off fresh seasons.';
-    }else if(counts.episode && !counts.series && !counts.season){
-      tvTitle='New Episodes Tonight';
-      tvSubtitle='Today’s strongest scheduled episode drops.';
+      tvTitle = 'Brand New Series';
+      tvSubtitle = 'Fresh TV launches starting today.';
+    } else if(counts.season && !counts.series && !counts.episode){
+      tvTitle = 'New Seasons Starting';
+      tvSubtitle = 'Returning shows kicking off fresh seasons.';
+    } else if(counts.episode && !counts.series && !counts.season){
+      tvTitle = 'New Episodes Tonight';
+      tvSubtitle = 'Today\'s strongest scheduled episode drops.';
     }
   }
 
-  let movieTitle='Movie Night';
-  let movieSubtitle='Top films and physical releases for the day.';
+  let movieTitle = 'Movie Night';
+  let movieSubtitle = 'Top films and physical releases for the day.';
+
   if(movieNight.length){
-    const hasDisc=movieNight.some(r=>r.media_type==='disc');
-    const hasMovie=movieNight.some(r=>r.media_type==='movie');
+    const hasDisc = movieNight.some(function(r){ return r.media_type === 'disc'; });
+    const hasMovie = movieNight.some(function(r){ return r.media_type === 'movie'; });
+
     if(hasMovie && !hasDisc){
-      movieTitle='Big Movies Today';
-      movieSubtitle='Today’s biggest film releases.';
-    }else if(hasDisc && !hasMovie){
-      movieTitle='Physical Media Picks';
-      movieSubtitle='Standout Blu-ray, DVD and physical releases.';
+      movieTitle = 'Big Movies Today';
+      movieSubtitle = 'Today\'s biggest film releases.';
+    } else if(hasDisc && !hasMovie){
+      movieTitle = 'Physical Media Picks';
+      movieSubtitle = 'Standout Blu-ray, DVD and physical releases.';
     }
   }
 
-  const sections=[];
-  if(tvMoments.length>=3) sections.push({key:'tvMoments',title:tvTitle,subtitle:tvSubtitle,items:tvMoments});
-  if(movieNight.length>=3) sections.push({key:'movieNight',title:movieTitle,subtitle:movieSubtitle,items:movieNight});
-  if(cultureMix.length>=4) sections.push({key:'cultureMix',title:cultureTitle,subtitle:cultureSubtitle,items:cultureMix});
-  if(newsNow.length>=3) sections.push({key:'newsNow',title:'Entertainment News',subtitle:'Latest entertainment headlines and updates.',items:newsNow});
-  if(moreToday.length>=6) sections.push({key:'moreToday',title:'More Releases Today',subtitle:'Everything else that did not fit the headline shelves.',items:moreToday});
+  const sections = [];
+  if(tvMoments.length >= 3) sections.push({key:'tvMoments', title:tvTitle, subtitle:tvSubtitle, items:tvMoments});
+  if(movieNight.length >= 3) sections.push({key:'movieNight', title:movieTitle, subtitle:movieSubtitle, items:movieNight});
+  if(cultureMix.length >= 4) sections.push({key:'cultureMix', title:cultureTitle, subtitle:cultureSubtitle, items:cultureMix});
+  if(newsNow.length >= 3) sections.push({key:'newsNow', title:'Entertainment News', subtitle:'Latest entertainment headlines and updates.', items:newsNow});
+  if(moreToday.length >= 6) sections.push({key:'moreToday', title:'More Releases Today', subtitle:'Everything else that did not fit the headline shelves.', items:moreToday});
 
   return sections;
 }
-
 function renderFeed(){
   feedPage=0;
   const{fl,cn}=getFilteredFeed();
@@ -955,10 +969,10 @@ function renderFeed(){
   if(!fl.length){
     h+='<div class="empty"><span class="empty-icon">'+(searchQ?'🔍':'🎬')+'</span><h2>'+(searchQ?'No matches found':'No releases today')+'</h2><p>'+(searchQ?'Try a different search term or clear your filters.':'Try a different filter or browse another date.')+'</p></div>';
   } else if(sectionedHome){
-const sections=buildHomepageSections(fl);
+const sections = buildHomepageSections(fl);
 h+='<div style="padding:12px 14px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:18px"><p style="font-size:12px;color:var(--ts);line-height:1.6;margin:0">The homepage is automatically grouped into smarter sections using media type, popularity, TV premiere status, and available metadata. Use the filters above to browse every release for the day.</p></div>';
-sections.forEach(s=>{
-  h+=renderFeedSection(s.title,s.subtitle,s.items);
+sections.forEach(function(s){
+  h += renderFeedSection(s.title, s.subtitle, s.items);
 });
   } else {
     const page=fl.slice(0,FEED_PAGE_SIZE);
