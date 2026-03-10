@@ -2,410 +2,970 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>UNREELED — Daily Media Releases</title>
-    <link>https://keenestza.github.io/unreeled/</link>
+    <link>https://unreeled.co.za/</link>
     <description>Daily releases across movies, TV, books, games, anime, music and podcasts.</description>
     <language>en</language>
-    <lastBuildDate>2026-03-06</lastBuildDate>
-    <atom:link href="https://keenestza.github.io/unreeled/feed.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>Mon, 09 Mar 2026 17:16:01 +0000</lastBuildDate>
+    <atom:link href="https://unreeled.co.za/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
-      <title>JUJUTSU KAISEN</title>
-      <description>[TV] Yuji Itadori is a boy with tremendous physical strength, though he lives a completely ordinary high school life. One day, to save a classmate who has been attacked by curses, he eats the finger of Ryomen Sukuna, taking the curse into his own soul. From then on, he shares one body with Ryomen Sukuna. — Genres: Animation, Action &amp; Adventure, Sci-Fi &amp; Fantasy</description>
+      <title>Watch What Happens Live with Andy Cohen</title>
+      <description>[TV] Bravo network executive Andy Cohen discusses pop culture topics with celebrities and reality show personalities. — Genres: Talk, Comedy</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-jujutsu-kaisen</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-watch-what-happens-live-with-andy-cohen</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Secret Lives</title>
-      <description>[TV] Salatut elämät (Secret Lives) is a Finnish television soap opera that premiered on MTV3 on 25 January 1999. The series' storylines follow the daily lives of several families who live in the same apartment block in Helsinki. — Genres: Soap, Drama</description>
+      <title>The Rookie</title>
+      <description>[TV] Starting over isn&#x27;t easy, especially for small-town guy John Nolan who, after a life-altering incident, is pursuing his dream of being an LAPD officer. As the force&#x27;s oldest rookie, he’s met with skepticism from some higher-ups who see him as just a walking midlife crisis. — Genres: Crime, Drama, Comedy</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-secret-lives</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-rookie</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Late Show with Stephen Colbert</title>
+      <description>[TV] Stephen Colbert brings his signature satire and comedy to The Late Show with Stephen Colbert, the #1 show in late night, where he talks with an eclectic mix of guests about what is new and relevant in the worlds of politics, entertainment, business, music, technology, and more. F — Genres: Comedy, Talk</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-late-show-with-stephen-colbert</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
       <title>Gute Zeiten, schlechte Zeiten</title>
-      <description>[TV] Gute Zeiten, schlechte Zeiten is a long-running German television soap opera, first broadcast on RTL in 1992. The programme concerns the lives of a fictional neighborhood in Germany's capital city Berlin. Over the years the soap opera tends to have an overhaul of young people in their late teens and — Genres: Drama, Soap</description>
+      <description>[TV] Gute Zeiten, schlechte Zeiten is a long-running German television soap opera, first broadcast on RTL in 1992. The programme concerns the lives of a fictional neighborhood in Germany&#x27;s capital city Berlin. Over the years the soap opera tends to have an overhaul of young people in  — Genres: Drama, Soap</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-gute-zeiten,-schlechte-zeiten</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-gute-zeiten--schlechte-zeiten</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
       <title>Binnelanders</title>
       <description>[TV] A South African Afrikaans soap opera. It is set in and around the fictional private hospital, Binneland Kliniek, in Pretoria, and the storyline follows the trials, trauma and tribulations of the staff and patients of the hospital. — Genres: Soap</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-binnelanders</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-binnelanders</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Death in Paradise</title>
-      <description>[TV] Murders and mojitos. Fresh off the plane, a British detective joins the police force on the luscious Caribbean island of Saint Marie. — Genres: Drama, Crime, Mystery</description>
+      <title>EastEnders</title>
+      <description>[TV] The everyday lives of working-class residents of Albert Square, a traditional Victorian square of terrace houses surrounding a park in the East End of London&#x27;s Walford borough. — Genres: Soap, Drama, Crime</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-death-in-paradise</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-eastenders</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Monarch: Legacy of Monsters</title>
-      <description>[TV] After surviving Godzilla's attack on San Francisco, Cate is shaken yet again by a shocking secret. Amid monstrous threats, she embarks on a globetrotting adventure to learn the truth about her family—and the mysterious organization known as Monarch. — Genres: Action, Adventure, Science-Fiction</description>
+      <title>Na Wspólnej</title>
+      <description>[TV] Na Wspólnej is a Polish soap opera. It has been running since 2003 on the TVN channel as its flagship primetime weekday soap opera. It is loosely based on the German production Unter Uns and it follows the lives of the inhabitants of an apartment block in Wspólna Street, Warsaw.  — Genres: Soap</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-monarch:-legacy-of-monsters</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-na-wspólnej</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>RuPaul's Drag Race</title>
-      <description>[TV] RuPaul's Drag Race is a Primetime Emmy Award winning American reality competition television series, hosted by five time Emmy Award Winning Host and international Drag superstar RuPaul. The show features drag queen contestants competing in weekly challenges such as photo shoots, comedy performances </description>
+      <title>DMV</title>
+      <description>[TV] DMV is set at the place everyone dreads going most: the DMV. Our quirky and lovable characters are making minimum wage, doing a thankless job where customers are annoyed before they even walk in the door. Good thing they have each other. — Genres: Comedy</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-rupaul's-drag-race</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-dmv</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Happy's Place</title>
-      <description>[TV] Happy's Place follows Bobbie who inherits her father's restaurant and is less than thrilled to discover that she has a new business partner in the half-sister she never knew she had. — Genres: Comedy</description>
+      <title>The Tonight Show Starring Jimmy Fallon</title>
+      <description>[TV] Emmy Award and Grammy Award winner Jimmy Fallon brought NBC&#x27;s &quot;The Tonight Show&quot; back to its New York origins when he launched The Tonight Show Starring Jimmy Fallon from Rockefeller Center. Fallon puts his own stamp on the storied NBC late-night franchise with his unique comedic — Genres: Comedy</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-happy's-place</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-tonight-show-starring-jimmy-fallon</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Gold Rush</title>
-      <description>[TV] Gold Rush follows six men who, in the face of an economic meltdown, risk everything - their families, their dignity, and in some cases, their lives - to strike it rich mining for gold in the wilds of Alaska. Inspired by his father Jack, Todd Hoffman of Sandy, Oregon, leads a group of greenhorn miner — Genres: Action, Adventure, Nature</description>
+      <title>Below Deck Down Under</title>
+      <description>[TV] Below Deck Down Under follows yachties as they work and play on a super-yacht sailing around Australia. The series also showcases a unique additional challenge for the crew as the guests expect not only an adventure on the water but also underwater with scuba diving and other act</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-gold-rush</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-below-deck-down-under</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Boston Blue</title>
-      <description>[TV] In Boston Blue, NYPD Detective Danny Reagan takes a position with Boston PD. Once in Boston, he is paired with Detective Lena Silver, the eldest daughter of a prominent law enforcement family. — Genres: Drama, Crime</description>
+      <title>The Fall and Rise of Reggie Dinkins</title>
+      <description>[TV] The Fall and Rise of Reggie Dinkins focuses on a disgraced former football player, who is on a mission to rehabilitate his image. — Genres: Comedy</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-boston-blue</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-fall-and-rise-of-reggie-dinkins</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>The Last Thing He Told Me</title>
-      <description>[TV] The Last Thing He Told Me follows Hannah, a woman who must forge a relationship with her sixteen-year-old stepdaughter Bailey in order to find the truth about why her husband has mysteriously disappeared. — Genres: Drama, Mystery</description>
+      <title>History&#x27;s Greatest Mysteries</title>
+      <description>[TV] History&#x27;s Greatest Mysteries will investigate a wide range of historically compelling topics and the mysteries surrounding each including the Titanic, D.B. Cooper, Roswell, John Wilkes Booth, and more. Each program within the franchise will showcase fresh, new evidence and perspe — Genres: Thriller, Mystery, History</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-the-last-thing-he-told-me</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-history-s-greatest-mysteries</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Blue Skies</title>
-      <description>[TV] The series follows Jodi Larsen, a National Park Investigator, and her four-legged partner, a dog named Blue, as they solve crimes in the wilderness. — Genres: Drama, Action, Mystery</description>
+      <title>Jimmy Kimmel Live</title>
+      <description>[TV] Jimmy Kimmel Live features a diverse lineup of guests that include celebrities, athletes, musical acts, comedians and human-interest subjects, along with comedy bits and a house band. — Genres: Comedy</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-blue-skies</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-jimmy-kimmel-live</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Stumble</title>
-      <description>[TV] An elite cheerleading coach has her life flipped upside down when she's forced to start over with a new squad of lovable misfits. But to win the championship, they have no choice but to kick it into high cheer. — Genres: Comedy, Sports</description>
+      <title>Coronation Street</title>
+      <description>[TV] The residents of Coronation Street are ordinary, working-class people, and the show follows them through regular social and family interactions at home, in the workplace, and in their local pub, the Rovers Return Inn. Britain&#x27;s longest-running soap. — Genres: Soap</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-stumble</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-coronation-street</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Gold Rush: Mine Rescue with Freddy &amp; Juan</title>
-      <description>[TV] Freddy Dodge is no stranger when it comes to gold mining. With nearly 40 years of mining under his belt, he's known around the world as the "Gold Guru" and the person struggling mine owners call when they're striking out. Now he's going on the road to help struggling mine owners to hit the motherlod — Genres: Adventure, Nature</description>
+      <title>General Hospital</title>
+      <description>[TV] General Hospital, which celebrated its golden anniversary on April 1, 2013, continues its tradition of passion, intrigue and adventure that takes place in the fictional town of Port Charles in upstate New York. The glamour and excitement of those who have come to find their desti — Genres: Drama, Medical</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-gold-rush:-mine-rescue-with-freddy-&amp;amp;-juan</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-general-hospital</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Diners, Drive-Ins and Dives</title>
-      <description>[TV] With roadside diners, vintage drive-ins and out-of-the-way "dives" enjoying a resurgence of hipness among foodies, host Guy Fieri travels across America in search of some of the best "greasy spoon" eateries. The restaurants that Guy visits are usually well-known among locals and other people in the  — Genres: Food, Travel</description>
+      <title>People Magazine Investigates</title>
+      <description>[TV] Ripped from the pages of one of the nation&#x27;s top weekly magazines, People Magazine Investigates goes beyond the headlines to uncover the heart-wrenching stories of lives and families ripped apart. These are crime stories that transcended news and became part of popular culture. I — Genres: Drama, Crime, Mystery</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-diners,-drive-ins-and-dives</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-people-magazine-investigates</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>The Proof Is Out There</title>
-      <description>[TV] The Proof Is Out There takes an in-depth look at some of the most incredible and thought provoking videos of unexplained phenomena and mysterious must-see moments of all time. Each half-hour episode explores and analyzes the full story of each irregularity in question from bizarre footage of people  — Genres: Mystery, Nature, Supernatural</description>
+      <title>WWE Monday Night RAW</title>
+      <description>[TV] WWE Monday Night RAW is World Wrestling Entertainment&#x27;s (formerly the WWF and the WWWF before that) premiere wrestling event and brand. Since its launch in 1993, WWE Monday Night RAW continues to air live on Monday nights. It is generally seen as the company&#x27;s flagship program du</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-the-proof-is-out-there</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-wwe-monday-night-raw</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>The Dinosaurs</title>
-      <description>[TV] From the creators of Life on Our Planet, this new documentary series will tell the story of the rise and fall of the dinosaurs — where they came from, why they mattered, how they evolved and how they met their ultimate fate. — Genres: Nature</description>
+      <title>90 Day: The Single Life</title>
+      <description>[TV] The latest spinoff is a fresh twist to the 90 Day franchise as all cast members will be single and re-entering the dating scene after their reality TV breakups. — Genres: Romance</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-the-dinosaurs</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-90-day--the-single-life</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>The Loud House</title>
-      <description>[TV] Welcome to the Loud House, where life can get pretty crazy. One boy, TEN girls?! Lincoln Loud wouldn't change it for the world! — Genres: Comedy, Children, Family</description>
+      <title>Maine Cabin Masters</title>
+      <description>[TV] In Maine Cabin Masters, builder Chase Morrill is teaming up with his sister, brother-in-law and best friend to save and transform abandoned cabins buried deep in the remote woods of Maine. From historic cottages nearly a century old, to camp cabins in need of some major TLC, they — Genres: DIY</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-the-loud-house</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-maine-cabin-masters</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>The UnBelievable with Dan Aykroyd</title>
-      <description>[TV] Did you know that a brown bear became a war hero for the Allies during WWII? Or that a flying lawnmower once killed a spectator at a football game? What about the story of the 19th century doctor who ate vomit to understand how yellow fever is transmitted?If you haven't, then brace yourself for The  — Genres: Mystery, History, Supernatural</description>
+      <title>Watch What Happens Live</title>
+      <description>[TV] Watch What Happens Live is an interactive series hosted by Bravo programming executive Andy Cohen, Bravo&#x27;s Senior Vice President of Original Programming and Development, is best known to viewers as the host of the network&#x27;s often explosive Watch What Happens reunion specials. Wat</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-the-unbelievable-with-dan-aykroyd</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-watch-what-happens-live</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Neighbors</title>
-      <description>[TV] Neighbors examines stories of absurd, outrageous, and dramatic real-life residential conflicts from a wide range of larger-than-life characters across the United States, opening a verité portal into the lives of contemporary Americans. Each episode introduces a new set of neighbors in the heat of th — Genres: Drama</description>
+      <title>Raw</title>
+      <description>[TV] A regularly scheduled, live, year-round program featuring some of the biggest WWE Superstars. — Genres: Reality</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-neighbors</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-raw</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>On Patrol: Live</title>
-      <description>[TV] Hosting and executive producing On Patrol: Live is Dan Abrams, CEO and Founder of Abrams Media, host of Dan Abrams Live on NewsNation, Chief Legal Analyst for ABC News, and former host of Live PD. Joining Abrams is Sgt. Sean "Sticks" Larkin, retired Tulsa Police Department lieutenant with nearly 25  — Genres: Crime</description>
+      <title>The View</title>
+      <description>[TV] The View is a live, one-hour daily talk show from ABC co-hosted by Whoopi Goldberg, Joy Behar, Sunny Hostin, Sara Haines, and Meghan McCain. It is the original forum in which real women discuss everyday issues, share their opinions and engage in colorful conversations.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-on-patrol:-live</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-view</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Gogglebox</title>
-      <description>[TV] Gogglebox is a British observational documentary television show which has aired on Channel 4 since 2013. The show focuses on families, friends and couples from around the country in their living rooms watching the last week's of British television.</description>
+      <title>The Curious Case Of…</title>
+      <description>[TV] The Curious Case Of… will dive into some of the most shocking true crime cases and unbelievable scandals. From a con man with multiple identities whose crimes stretch across the globe to a religious doomsday cult centered around worshipping cats, each episode will go inside these — Genres: Crime, Legal</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-gogglebox</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-curious-case-of</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Days of Our Lives</title>
-      <description>[TV] Days of our Lives is set in the fictitious Midwestern town of Salem. The core families are the Bradys, the Hortons and the DiMeras, and the multi-layered storylines involve elements of romance, adventure, mystery, comedy and drama.Beginning on September 12, 2022, DAYS became exclusive to streaming o — Genres: Drama, Family, Romance</description>
+      <title>Contraband: Seized at the Airport</title>
+      <description>[TV] Follows Dept of Homeland Security officers at five different airports across the country, from San Francisco, Detroit, Newark, Atlanta, and Honolulu, as they search for contraband both leaving and coming into the US. — Genres: Crime</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-days-of-our-lives</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-contraband--seized-at-the-airport</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Beyond the Gates</title>
-      <description>[TV] Beyond the Gates is set in a leafy Maryland suburb just outside of Washington D.C., and in one the most affluent African American counties in the United States. Here you'll find a posh gated community with winding tree-lined streets and luxurious mansions to call home. At the center of this communit — Genres: Drama</description>
+      <title>History&#x27;s Deadliest with Ving Rhames</title>
+      <description>[TV] Historoy&#x27;s Deadliest will reveal the stranger than truth facts behind some of the world&#x27;s most prolific and powerful killers. — Genres: History</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-beyond-the-gates</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-history-s-deadliest-with-ving-rhames</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>My Lottery Dream Home</title>
-      <description>[TV] David Bromstad takes recent lottery winners on over-the-top house hunts for their new dream homes. Whether they win hundreds of thousands or hundreds of millions, lucky lottery winners everywhere are jumping headfirst into the real estate market. Will they spend all their winnings on an extravagant </description>
+      <title>Countdown</title>
+      <description>[TV] The show in which two contestants engage in a battle of wits, competing against the clock in games of lexical dexterity and numerical agility.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-my-lottery-dream-home</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-countdown</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>RuPaul's Drag Race: Untucked!</title>
-      <description>[TV] Get all the behind-the-scenes drama, tears and laughter of RuPaul's Drag Race as the queens anxiously await their fates backstage every week after the runway critiques.</description>
+      <title>Panorama</title>
+      <description>[TV] Panorama is a current affairs programme, featuring interviews and investigative reports on a wide variety of subjects.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-rupaul's-drag-race:-untucked!</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-panorama</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Judy Justice</title>
-      <description>[TV] The Honorable Judy Sheindlin, retired Judge of the Manhattan family Court, brings her signature blend of sharp wit and wisdom, hilarious candor and unwavering honesty that has made her America's favorite judge for over 25 years, as she presides over real cases, arbitrates binding decisions and deliv — Genres: Legal</description>
+      <title>ABC World News Tonight with David Muir</title>
+      <description>[TV] With unparalleled resources, World News Tonight with David Muir provides the latest information and analysis of major events from around the country and the world.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-judy-justice</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-abc-world-news-tonight-with-david-muir</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Вампиры средней полосы</title>
-      <description>[TV] Grandpa Slava is the oldest of the Midland vampire family. They live quietly. They live by the law. They live the unremarkable life of an ordinary Russian family and they never kill humans – ever. Although, of course, everyone knows they drink blood. And when some lifeless corpses are found in a bir — Genres: Comedy, Mystery, Supernatural</description>
+      <title>NBC Nightly News</title>
+      <description>[TV] NBC Nightly News is the most-watched evening newscast in America, providing the very latest on the day&#x27;s top stories and going beyond the headlines to add context and analysis to the most pressing issues of our time, both at home and abroad. We go to the heart of breaking news st</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-вампиры-средней-полосы</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-nbc-nightly-news</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Boyfriend on Demand</title>
-      <description>[TV] Seo Mi-rae is worn out by work. Love? It's the last thing on her mind. But a virtual dating service sparks feelings - and maybe a real shot at romance. — Genres: Drama, Comedy, Fantasy</description>
+      <title>Unexpected</title>
+      <description>[TV] Pulling back the curtain on the complicated family affair that is teenage pregnancy, Unexpected will look at various stages of each pregnancy and the first few weeks of parenthood with teens who happened to have been raised by teens. The series focuses on three teen couples who a</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-boyfriend-on-demand</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-unexpected</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>On Patrol: First Shift</title>
-      <description>[TV] On Patrol: Live's Dan Abrams, Sean "Sticks" Larkin, and Curtis Wilson provide a sneak peek at tonight's On Patrol: Live and share favorite moments from previous programs. — Genres: Crime</description>
+      <title>Fatal Attraction</title>
+      <description>[TV] Each pulse-pounding hour-long episode of Fatal Attraction centers around an incredible and dangerous romance. Shocking crime, kidnapping or even murder is only half of the story! In the end, the &quot;true love&quot; that draws these couples together isn&#x27;t the kind that celebrates silver a — Genres: Drama, Crime, Thriller</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-on-patrol:-first-shift</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-fatal-attraction</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Friends Like These: The Murder of Skylar Neese</title>
-      <description>[TV] Three teenage girls share an unbreakable bond until terrible secrets threaten to emerge on social media. When one friend vanishes, the search for answers unearths a web of lies, betrayal, and murder - sending shockwaves through an unsuspecting community. — Genres: Crime</description>
+      <title>Good Morning America</title>
+      <description>[TV] Good Morning America is a two-hour, live program anchored by Robin Roberts, George Stephanopoulos and Michael Strahan. Lara Spencer is the entertainmnt anchor, and Ginger Zee is the chief meteorologist.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-friends-like-these:-the-murder-of-skylar-neese</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-good-morning-america</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Good Mythical Morning</title>
-      <description>[TV] Two "Internetainers" (Rhett &amp;amp; Link) go far out and do the weirdest things, giving you a daily dose of casual comedy every Monday-Friday. — Genres: Comedy</description>
+      <title>Anderson Cooper 360°</title>
+      <description>[TV] Anderson Cooper 360° (commonly shortened to either AC-360 or 360) is a television news show on CNN, hosted by the American journalist Anderson Cooper. The program covers a number of news stories of the day, usually through live or taped reports from the network&#x27;s correspondents. </description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-good-mythical-morning</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-anderson-cooper-360</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>SuperKitties</title>
-      <description>[TV] Set in the city of Kittydale, each SuperKitties episode features two stories as the four kittens, cuddled up at the Purr 'N' Play playspace or out playing around town, receive a "SuperKitty Call" from one of their animal friends with a problem that only the SuperKitties can help with, usually caused</description>
+      <title>The Last Word with Lawrence O&#x27;Donnell</title>
+      <description>[TV] Drawing upon his experience as a former chief of staff on the Senate Finance Committee and as an Emmy-winning executive producer and writer of The West Wing, O&#x27;Donnell gives the last word and rewrites the most compelling stories of the day on The Last Word with Lawrence O&#x27;Donnell</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-superkitties</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-last-word-with-lawrence-o-donnell</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Wylde Pak</title>
-      <description>[TV] Wylde Pak follows half-siblings Jack and Lily as they are pushed outside their comfort zones and learn to coexist while navigating new family dynamics, friends, and endless hijinks, all while helping run the family's pet grooming and boarding business. With guidance from their parents and grandmothe — Genres: Comedy, Family</description>
+      <title>Today</title>
+      <description>[TV] Today is an American news and talk morning television show that airs on NBC. The program debuted on January 14, 1952. It was the first of its genre on American television and in the world, and is the fifth-longest-running American television series.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-wylde-pak</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-today</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Love During Lockup</title>
-      <description>[TV] Love During Lockup follows even more riveting firsts through the early stages of love, with plenty of romance, suspicion, and investigation, all long before a scheduled prison release. Every non-con has a unique strategy for finding love behind bars - whether they only seek drug offenders who are be — Genres: Romance</description>
+      <title>Neighborhood Watch</title>
+      <description>[TV] Neighborhood Watch, revealing the raw, unfiltered and sometimes shocking footage straight from security cameras, smart doorbells, nanny cams and baby monitors across America. From neighbors and postal workers to uninvited guests and animal visitors, the network will tap into the </description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-love-during-lockup</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-neighborhood-watch</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Soul Land 2: The Unrivaled Tang Sect</title>
-      <description>[TV] The Tang Sect in a turbulent world. There is nothing but martial spirit here. Ten thousand years after the founding of the Tang Sect, it is in relative decline. An extremely talented man was born. Can the new Shrek Seven Monsters revive the Tang Sect and bring it back to glory? A soul beast of over  — Genres: Anime</description>
+      <title>The Motorway Cops: Catching Britain&#x27;s Speeders</title>
+      <description>[TV] Nicky Campbell narrates a look at how the nation&#x27;s roads are policed, joining Cheshire&#x27;s elite team of motorway officers as they crack down on Britain&#x27;s worst drivers.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-soul-land-2:-the-unrivaled-tang-sect</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-motorway-cops--catching-britain-s-speeders</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Belle Collective</title>
-      <description>[TV] Belle Collective centers on the personal and professional lives of five successful, glamourous boss women who are redefining what it means to be a southern belle in Jackson, Mississippi. These dynamic women represent Mississippi's finest Black female entrepreneurs, determined to break ceilings–glass</description>
+      <title>CBS Evening News</title>
+      <description>[TV] The CBS Evening News, a daily evening broadcast featuring news reports, feature stories and interviews by CBS News correspondents and reporters covering events across world.</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-belle-collective</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-cbs-evening-news</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Crimewatch Live</title>
-      <description>[TV] Presented by former Metropolitan Police detective Rav Wilding, the show appeals directly to the public for help with unsolved cases from all over the UK. He's joined by Michelle Ackerley, who will be hitting the road, finding out how police forces up and down the country are tackling the everyday so — Genres: Crime</description>
+      <title>The Ultimate Baking Championship</title>
+      <description>[TV] The Ultimate Baking Championship tests the competitors on the core techniques that outstanding pastry chefs must master, from laminated dough and pâte à choux to chocolate work and sugar artistry. Duff Goldman is joined every week on the judging panel by a baking legend to determ — Genres: Food</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-crimewatch-live</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-ultimate-baking-championship</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>The Heat</title>
-      <description>[TV] The Heat sees ten ambitious chefs travel to Barcelona, working under multi Michelin Star award-winning chef Jean-Christophe Novelli, who is opening an exclusive summer restaurant at the glamorous Port Vell Marina and on a mission to find the next rising star.But this isn't just a straight-forward co — Genres: Food</description>
+      <title>The Five</title>
+      <description>[TV] The Five is an American news and talk show on Fox News Channel featuring a rotating panel who discuss current stories, political issues, and pop culture. The show premiered in July 2011, replacing the Glenn Beck program, and airs on weekdays at 5:00 p.m. ET with replays at 4:00 a</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-the-heat</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-five</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Four in a Bed</title>
-      <description>[TV] Four in a Bed is a British reality television game show that has been airing on Channel 4 since 22 November 2010. The show involves four B&amp;amp;amp;B owners, who take turns to stay with one another - and pay what they consider fair for their stay. The winner is the establishment named best value for mone</description>
+      <title>120 Hours Behind Bars</title>
+      <description>[TV] Over five intense days, 120 Hours Behind Bars delivers an unfiltered look inside America&#x27;s toughest jails, where officers are outnumbered, cellblocks are overcrowded, and violence erupts without warning. — Genres: Drama, Crime</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-four-in-a-bed</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-120-hours-behind-bars</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>His Man</title>
-      <description>[TV] As South Korea's very first gay dating reality series, His Man brings together a group of eight hot, sexy, free and single gay men to a shared house where they are to live, interact and open up to each other in their quest for "true love". — Genres: Romance</description>
+      <title>Deadline: White House</title>
+      <description>[TV] Hosted by Nicolle Wallace, this program provides in-depth reporting and dynamic discussions on the political stories driving the news cycle. Nicolle Wallace brings viewers the latest political developments of the day, in addition to interviews with leading newsmakers and influent</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-his-man</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-deadline--white-house</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Tribunal Justice</title>
-      <description>[TV] Tribunal Justice features a panel of three judges adjudicating real and compelling cases and engaging in a lively and spirited deliberation, where the judges don't always see eye-to-eye, which makes for an exciting verdict. — Genres: Legal</description>
+      <title>The Beat with Ari Melber</title>
+      <description>[TV] The Beat with Ari Melber delivers the biggest political and news stories of the day, with interviews and original reporting from around the nation. An Emmy-winning journalist, attorney and former Senate staffer, Melber cuts through the spin and the noise to tell you what&#x27;s really</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-tribunal-justice</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-beat-with-ari-melber</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Bachelor Mansion Takeover</title>
+      <description>[TV] For more than 40 seasons, zealous fans have watched singletons find love within the iconic walls of the recurring Bachelor(ette) Mansion. Now, HGTV shines the light on this recognizable estate, giving the property the facelift it finally deserves. In the new competition twist fro — Genres: DIY</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-bachelor-mansion-takeover</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Murder UK</title>
+      <description>[TV] Criminologist David Wilson investigate UK murder cases, revealing motives, patterns, and the psychology of killers.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-murder-uk</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Morning Joe</title>
+      <description>[TV] On Morning Joe, the hosts Joe Scarborough, Mika Brzezinski, and Willie Geist engage in dynamic discussion about political news and issues important to all Americans. Morning Joe attracts a variety of guests, including top newsmakers, politicians and cultural influencers.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-morning-joe</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Special Report</title>
+      <description>[TV] Special Report with Bret Baier (formerly Special Report with Brit Hume) is an American television news and political commentary program appearing on Fox News Channel, currently hosted by Bret Baier. It airs live each Monday through Friday at 6:00 PM ET. The show focuses on both r</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-special-report</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Gutfeld!</title>
+      <description>[TV] Late night show with author, comedian and television host and producer Greg Gutfeld, offering up satirical political and social commentary with a weekly panel of guests.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-gutfeld</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Repair Shop on the Road</title>
+      <description>[TV] The Repair Shop experts are off on a road trip across the UK fixing historical treasures and precious objects that can&#x27;t be brought to the barn.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-repair-shop-on-the-road</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Goede Tijden, Slechte Tijden</title>
+      <description>[TV] In Goede Tijden, Slechte Tijden, we follow the adventures of a group of friends and families in the fictional Dutch town called Meerdijk. — Genres: Drama, Romance</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-goede-tijden--slechte-tijden</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Lead with Jake Tapper</title>
+      <description>[TV] CNN&#x27;s chief Washington correspondent, Jake Tapper, hosts this hourlong weekday afternoon program, which mixes Tapper&#x27;s interests with headlines from around the country and the world, headlines that span politics, money, sports and popular culture. The Lead with Jake Tapper also c</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-lead-with-jake-tapper</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Ingraham Angle</title>
+      <description>[TV] The Ingraham Angle cuts through the Washington chatter to speak directly with unexpected voices and the actual people who are impacted by the news of the day.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-ingraham-angle</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Hannity</title>
+      <description>[TV] Sean Hannity interviews political figures and newsmakers and offers his own perspective.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-hannity</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Alle mot alle</title>
+      <description>[TV] Who are the smartest celebrities that Norway has to offer? Norwegian celebs meet for a very hard and entertaining educational battle, led by Henriette Steenstrup and Jon Almaas. — Genres: Comedy</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-alle-mot-alle</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Tomorrow Is Ours</title>
+      <description>[TV] The story revolves around the people of Sète, France. Their lives are punctuated by family rivalries, romance and scenes from daily life, but also by plots involving police investigations, secrets and betrayals. — Genres: Crime, Drama, Soap</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-tomorrow-is-ours</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>First Take</title>
+      <description>[TV] First Take (aka: ESPN First Take) is a weekday sports talk show co-hosted by Stephen A. Smith, Max Kellerman and Molly Qerim who are joined by regular contributors and special guests. The show includes daily sports news, interviews with sports journalists, athletes and personalit — Genres: Sports</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-first-take</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Handcuffed: Last Pair Standing</title>
+      <description>[TV] Could you survive being handcuffed to a total stranger 24/7? In a brand-new social experiment, Jonathan Ross challenges 18 brave Brits to stay together, as they compete to win £100,000.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-handcuffed--last-pair-standing</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Jeopardy!</title>
+      <description>[TV] America&#x27;s favorite quiz show where contestants are presented with general knowledge clues in the form of answers, and must phrase their responses in question form. — Genres: Reality, Family</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-jeopardy</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Situation Room</title>
+      <description>[TV] The Situation Room with Wolf Blitzer and Pamela Brown: The command center for breaking news, politics and extraordinary reports from around the world.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-situation-room</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Sesame Street</title>
+      <description>[TV] On a special inner city street, the inhabitants—human and muppet—teach preschoolers basic educational and social concepts using comedy, cartoons, games, and songs. — Genres: Kids, Comedy</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-sesame-street</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Amanda Murphy, the enduring muse</title>
+      <description>[NEWS] For Vogue Singapore&#x27;s March digital cover, Amanda Murphy steps onto the runway that helped define her—still the timeless embodiment of Miuccia Prada’s intellectual womanThe post Amanda Murphy, the enduring muse appeared first on Vogue Singapore. — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-amanda-murphy--the-enduring-muse</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>LISTEN: Fantasy lockout week tips, locks, cash cows</title>
+      <description>[NEWS] Opening Round gave us plenty of answers, but just as many questions — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-listen--fantasy-lockout-week-tips--locks--cash-cows</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Taylor Swift sleuths expose her relentless &#x27;scheming and plotting&#x27;: Fans revolt as singer and Travis Kelce desperately try to contain the fallout</title>
+      <description>[NEWS] Swift, 36, has long been defended against critics by devoted fans who will go above and beyond to explain away anything problematic, but the rose-tinted glasses have started to come off of late. — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-taylor-swift-sleuths-expose-her-relentless--scheming-and-plotting---fans-revolt-</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Ramadan 2026 Day 19: Check Today’s Iftar Time In Major Cities Including Delhi, Mumbai And Lucknow</title>
+      <description>[NEWS] During the holy month of Ramadan, Muslims observe a fast every day from sunrise to sunset. Fasting during Ramadan is considered a symbol of devotion, discipline, charity and spiritual purification. The fast begins with Sehri, the pre-dawn meal, and is broken in the evening with I — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-ramadan-2026-day-19--check-today-s-iftar-time-in-major-cities-including-delhi--m</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>&#x27;I Am On His Side&#x27;: Vishal Dadlani Backs Arijit Singh In Decision To Retire From Playback Singing</title>
+      <description>[NEWS] Vishal Dadlani has backed Arijit Singh’s decision to retire from playback singing, calling him a musical genius and saying he fully supports whatever makes the singer happy. — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-i-am-on-his-side---vishal-dadlani-backs-arijit-singh-in-decision-to-retire-from-</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>‘Sinners,’ ‘Frankenstein,’ and ‘Sirât’ Among 2026 Golden Reel Award Winners from MPSE</title>
+      <description>[NEWS] Kathleen Kennedy and &quot;Mad Max: Fury Road&quot; supervising sound editor Mark Mangini both won honorary awards. — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-sinners----frankenstein---and--sira-t--among-2026-golden-reel-award-winners-from</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Jennifer Runyon Corman, &#x27;Charles in Charge&#x27; actress, dies at 65</title>
+      <description>[NEWS] Jennifer Runyon Corman,who played Scott Baio&#x27;s girlfriend in &quot;Charles in Charge&quot; and Cindy in &quot;A Very Brady Christmas,&quot; has died. — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-jennifer-runyon-corman---charles-in-charge--actress--dies-at-65</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Rosie Huntington-Whiteley flashes her toned abs in a skimpy bra as she puts on a chic display in a white suit during Paris Fashion Week</title>
+      <description>[NEWS] The model, 38, has been in the French capital this week for a number of shows, including Tom Ford, Saint Laurent and Burberry. — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-rosie-huntington-whiteley-flashes-her-toned-abs-in-a-skimpy-bra-as-she-puts-on-a</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Britney Spears 2007 breakdown to 2026 DUI</title>
+      <description>[NEWS] Trigger warning: This photo feature references to alcohol and drug addiction. Reader discretion is advised.Britney Spears’ recent arrest for suspected driving under the influence has thrust her back into the spotlight echoing a series of legal troubles from nearly two decades ago — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-britney-spears-2007-breakdown-to-2026-dui</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>This Morning</title>
+      <description>[TV] A long-running daytime magazine show co-hosted by two presenters live on weekdays since 1988. Features news and topical items, celebrity guests, expert advice, real life stories, competitions and a mix of cookery, health, beauty, lifestyle and more.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-this-morning</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>America&#x27;s Newsroom</title>
+      <description>[TV] Watch &#x27;America&#x27;s Newsroom&#x27; on Fox News Channel - follow Bill Hemmer and Dana Perino Weekdays 9 a.m. - 11 a.m. ET as they bring you the news that matters to you.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-america-s-newsroom</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Story</title>
+      <description>[TV] The Story with Martha MacCallum, anchored by Martha MacCallum, focuses on the stories that are most important to Americans with insight from top newsmakers and analysts.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-story</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Celebrity Puzzling</title>
+      <description>[TV] Get ready for Celebrity Puzzling, where your favourite celebrities battle tricky puzzles in a showdown of logic, speed and sheer determination.Hosted by the ever-charismatic Jeremy Vine, every night sees quiz queen Carol Vorderman and beloved actor Sally Lindsay lead two celebrit</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-celebrity-puzzling</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Outnumbered</title>
+      <description>[TV] Featuring an ensemble of four female panelists and one rotating male, Outnumbered examines the top news stories as well as the leading pop culture and relationship issues dominating the headlines. FNC&#x27;s Harris Faulkner, Kayleigh McEnany and Emily Compagno lead the program&#x27;s cover</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-outnumbered</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Adam Richman Eats Italy</title>
+      <description>[TV] Globally famous superfoodie Adam Richman is back with his next delicious adventure and this time he&#x27;s in Italy. — Genres: Food, Travel</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-adam-richman-eats-italy</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Erin Burnett OutFront</title>
+      <description>[TV] Erin Burnett OutFront is an hour-long television news program hosted by Erin Burnett on CNN. The show premiered on October 3, 2011 in the 7PM and 11PM time slot to replace John King, USA. CNN said in 2011 they hoped Burnett&#x27;s expected popularity would provide an &quot;attractive&quot; open</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-erin-burnett-outfront</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
       <title>Bedtime Stories with Ryan</title>
       <description>[TV] Ryan Reynolds reads new and classic bedtime stories as the tales magically come to life around him – creating a warm, playful and imaginative wind-down experience for kids and parents to enjoy together. — Genres: Children</description>
       <category>TV</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#tv-bedtime-stories-with-ryan</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-bedtime-stories-with-ryan</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>9-1-1 &amp; 9-1-1: Nashville Stars on the Crossover’s Big Bobby Reveal</title>
-      <description>[News] The recent crossover event between 9-1-1 and 9-1-1: Nashville reeled off action, humor, and emotional moments. But the most touching beat centered on someone who never even appeared on screen: the late Bobby Nash. Actors from both shows opened up about why the late captain’s presence loomed so large — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-9-1-1-&amp;amp;-9-1-1:-nashville-stars-on-the-crossover’s-big-bobby-reveal</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>Guz Khan&#x27;s Custom Cars</title>
+      <description>[TV] Guz Khan revs up for a wild ride in the world of car modification. — Genres: Comedy</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-guz-khan-s-custom-cars</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>From newsroom storyteller to the President’s voice: Meet Vincent Magwenya</title>
-      <description>[News] Vincent Magwenya reflects on his journey from newsroom storyteller to becoming President Cyril Ramaphosa’s spokesperson. — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-from-newsroom-storyteller-to-the-president’s-voice:-meet-vincent-magwenya</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>Way Too Early</title>
+      <description>[TV] The fast-paced program brings viewers everything they need to know to start their days--from news and politics to sports and pop culture.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-way-too-early</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>OPHANIM — Album by Voices Of Fire &amp; Pharrell Williams</title>
-      <description>[News] The gospel album is now available on all streaming platforms.The post OPHANIM — Album by Voices Of Fire &amp;amp; Pharrell Williams appeared first on HotNewHipHop. — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-ophanim-—-album-by-voices-of-fire-&amp;amp;-pharrell-williams</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>Good Morning Football</title>
+      <description>[TV] Prior to the start of the 2016 NFL regular season, NFL Network has announced a new daily morning show, Good Morning Football, premiering Monday, August 1. Hosted by Kay Adams, Nate Burleson, Peter Schrager and Kyle Brandt, and Executive Produced by Michael Davies, Good Morning Fo — Genres: Sports</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-good-morning-football</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>GLAAD Media Awards 2026: Full Winners List Revealed for Best in LGBTQ Storytelling!</title>
-      <description>[News] The full winners list has been revealed for the 2026 GLAAD Media Awards. The annual event honors “those in the media who have shown exemplary achievements for fair, accurate, and inclusive representation of the LGBTQ community and the issues that affect our lives.” Hallmark Channel actor Jonathan Be — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-glaad-media-awards-2026:-full-winners-list-revealed-for-best-in-lgbtq-storytelling!</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>The 11th Hour with Stephanie Ruhle</title>
+      <description>[TV] On The 11th Hour with Stephanie Ruhle, Stephanie looks at the major political stories of the day and breaking campaign news.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-11th-hour-with-stephanie-ruhle</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Oscars 2026: Priyanka Chopra Jonas To Present Alongside Robert Downey Jr and Anne Hathaway (View Post)</title>
-      <description>[News] Priyanka Chopra Jonas is set to represent India on the global stage as a presenter for the 98th Academy Awards on March 15, 2026. Joining stars like Robert Downey Jr. and Gwyneth Paltrow, the actor returns to the Oscar stage after a decade. Discover the full list of presenters and what to expect fro — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-oscars-2026:-priyanka-chopra-jonas-to-present-alongside-robert-downey-jr-and-anne-hathaway-(view-post)</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>FOX &amp; Friends First</title>
+      <description>[TV] Kicking off the day, FOX &amp;amp; Friends First delivers all the headlines viewers may have missed overnight, along with a preview of upcoming news events. Presented two hours before FOX &amp;amp; Friends, the first hour of the program is hosted by Todd Piro and Carley Shimkus</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-fox---friends-first</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>US Pop Star Britney Spears Arrested for Alleged Drunk Driving</title>
-      <description>[News] American pop star Britney Spears has been arrested in Ventura County, California, on suspicion of driving under the influence (DUI). According to reports, the singer was pulled over by the California Highway Patrol on Wednesday evening and was subsequently handcuffed at the scene. She was later take — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-us-pop-star-britney-spears-arrested-for-alleged-drunk-driving</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>Great British Castle Rescue</title>
+      <description>[TV] Great British Castle Rescue follows Rick Edwards as he ventures inside some of the UK&#x27;s most spectacular and endangered castles. From crumbling medieval towers to collapsing royal chambers, engineers and historians battle to stabilise these epic structures with help from National</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-great-british-castle-rescue</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
     <item>
-      <title>Vladimir TV show on Netflix: Rachel Weisz’s erotic series is more thorny than sexy</title>
-      <description>[News] Sexual fantasies abound in Vladimir but the real driver of this Rachel Weisz-starring series is power. — Genres: Entertainment News</description>
-      <category>News</category>
-      <pubDate>2026-03-06</pubDate>
-      <guid>https://keenestza.github.io/unreeled/#news-vladimir-tv-show-on-netflix:-rachel-weisz’s-erotic-series-is-more-thorny-than-sexy</guid>
-      <link>https://keenestza.github.io/unreeled/</link>
+      <title>FBI</title>
+      <description>[TV] The New York office of the FBI brings to bear all their talents, intellect and technical expertise on major cases in order to keep their city and the country safe. — Genres: Crime, Action &amp; Adventure, Drama</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-fbi</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Today 3rd Hour</title>
+      <description>[TV] A news program intended to inform, entertain, inspire and set the agenda each morning. Each daily live broadcast provides current domestic and international news, weather reports, and interviews with newsmakers from the worlds of politics, business, media, entertainment and sport</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-today-3rd-hour</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>GMA3</title>
+      <description>[TV] GMA3 is a news, health, lifestyle and shopping program. — Genres: Family, Travel, Medical</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-gma3</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Jesse Watters Primetime</title>
+      <description>[TV] Jesse Watters brings his fresh take to Primetime. Each night, he&#x27;ll speak with newsmakers from across the country and give Americans a show where straight talk is the only talk, and the obvious will never be left unsaid.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-jesse-watters-primetime</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>CNN NewsNight with Abby Phillip</title>
+      <description>[TV] In CNN NewsNight with Abby Phillip, she delivers a thoughtful, sharp approach to the day&#x27;s biggest stories.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-cnn-newsnight-with-abby-phillip</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>90 Day: The Single Life - Between the Sheets</title>
+      <description>[TV] 90 Day: The Single Life - Between the Sheets will air after each episode as a companion show, serving up all the juicy extras. Cast members, their former spouses/exes, plus family and friends spill behind-the-scenes drama, share unfiltered reactions, and say what everyone else is</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-90-day--the-single-life---between-the-sheets</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>5 News at Lunchtime</title>
+      <description>[TV] The latest national and international news, sport and weather.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-5-news-at-lunchtime</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>16 ukers helvete</title>
+      <description>[TV] 16 ukers helvete is a Norwegian entertainment program, based on the Swedish program Den stora hälsoresan. — Genres: Sports</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-16-ukers-helvete</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Un prophète</title>
+      <description>[TV] Marseille, Present Day. Malik, a 17-year-old Comorian orphan is the sole survivor of a building collapse that housed an important drug deal. In the rubble, Malik is found with bags of cocaine planted on his body. He is directly sent to prison. Frail and illiterate, he must now fi — Genres: Crime, Thriller</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-un-prophète</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>CBS Mornings</title>
+      <description>[TV] CBS Mornings offers a thoughtful, substantive and insightful source of news and information to a daily audience of 3 million viewers. The Emmy Award-winning broadcast presents a mix of daily news, coverage of developing stories of national and global significance, and interviews </description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-cbs-mornings</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Kateikyoushi no Kishi Naito Desu</title>
+      <description>[TV] The story is a heartwarming comedy about &quot;sparkling prince&quot; private tutor Kishi Naito and the hot-headed delinquent Takasugi Toru. Toru&#x27;s mother, worried about her son&#x27;s constant fighting and rock-bottom test scores, hires Kishi as his tutor. Though Toru is bewildered by Kishi&#x27;s  — Genres: Comedy, Romance</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-kateikyoushi-no-kishi-naito-desu</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Dom Chinea&#x27;s Cornish Workshop</title>
+      <description>[TV] Dom Chinea and his wife Maria (plus their dog Wendy) are moving to Cornwall, having bought an old rundown stone farmhouse, a two-acre field, including a large agricultural barn that Dom is going to turn into his Cornish Workshop. The new series follows Dom as he carves out a new </description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-dom-chinea-s-cornish-workshop</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Police Interceptors: Taking Down the Shoplifting Gangs</title>
+      <description>[TV] Officers tackle the thieves terrorising supermarkets and shops, with organised international crime groups stealing eye-watering amounts in increasingly industrial, brazen and sophisticated ways. — Genres: Crime</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-police-interceptors--taking-down-the-shoplifting-gangs</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Laura Coates Live</title>
+      <description>[TV] In Laura Coates Live, Laura goes inside the story with a relentless pursuit of the facts. She is CNN&#x27;s chief legal analyst, playing a central role in the network&#x27;s extensive legal programming.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-laura-coates-live</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Batch from Scratch: Cooking for Less</title>
+      <description>[TV] Can batch cooking truly transform our dinnertimes? In this brand-new series, Joe Swash and batch cooking expert Suzanne Mulholland, aka The Batch Lady, dish out a proper helping of inspiration as they help families with great time-saving tips and easy-to-follow recipes, and prove</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-batch-from-scratch--cooking-for-less</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>NBC News Daily</title>
+      <description>[TV] NBC News provides viewers with up-to-the-minute national and international news.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-nbc-news-daily</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Ross Kemp: Lost Boys, Deadly Men</title>
+      <description>[TV] Ross Kemp: Lost Boys, Deadly Men blends true crime with an investigation into the crisis in masculinity affecting young men in Britain, emerging at a time when violence against women and girls has been declared a national emergency. While high-profile tragedies often spark public</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-ross-kemp--lost-boys--deadly-men</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Paradise</title>
+      <description>[TV] The tranquility in a serene, wealthy community inhabited by some of the world&#x27;s most prominent individuals explodes when a shocking murder occurs and a high stakes investigation unfolds. — Genres: Crime, Drama</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-paradise</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Source with Kaitlan Collins</title>
+      <description>[TV] The Source with Kaitlan Collins - Kaitlan Collins chases the facts, asks the tough questions, and connects with her sources in primetime.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-source-with-kaitlan-collins</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Home and Away</title>
+      <description>[TV] Home and Away is set in the fictional town of Summer Bay, a coastal town in New South Wales, and follows the personal and professional lives of the people living in the area. The show initially focused on the Fletcher family, Pippa and Tom Fletcher and their five foster children  — Genres: Drama, Soap</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-home-and-away</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Katy Tur Reports</title>
+      <description>[TV] The latest breaking news, reporting and live coverage of the day&#x27;s important stories; hosted by trusted NBC News journalists, these dynamic hours offer discussions with newsmakers, journalists and politicians.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-katy-tur-reports</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Finish Line</title>
+      <description>[TV] The Finish Line will see contestants battle it out on an iconic racetrack set, as they speed along the studio floor in a series of thrilling quick-fire, quiz races - and all that matters is they cross the finish line.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-the-finish-line</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>5 News at 5</title>
+      <description>[TV] National and international news.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-5-news-at-5</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Frank &amp; Kastaniegaarden</title>
+      <description>[TV] Follow Frank the farmer as he takes you with him on his journey towards a simpler life on his farm.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-frank---kastaniegaarden</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Death in Paradise</title>
+      <description>[TV] A brilliant but idiosyncratic British detective and his resourceful local team solve baffling murder mysteries on the fictional Caribbean island of Saint Marie. — Genres: Comedy, Crime, Drama</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-death-in-paradise</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Swallowed Star</title>
+      <description>[TV] On the Earth, a catastrophe triggered the variation of all kinds of species. The superior survived and the inferior were extinct. Under this circumstance, Luo Feng inherited from the owner of Yunmo Star and became one of the three strongest people on the Earth. He lost his flesh  — Genres: Animation, Sci-Fi &amp; Fantasy, Action &amp; Adventure</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-swallowed-star</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>CNN News Central (PM)</title>
+      <description>[TV] News from around the world with Brianna Keilar and Boris Sanchez.</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-cnn-news-central--pm</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>10 NEWS+</title>
+      <description>[TV] 10 NEWS+ will follow Network 10&#x27;s 5pm local news bulletins across the country, offering viewers extended context and deeper reporting on the day&#x27;s biggest stories. The 5pm bulletin remains a cornerstone of the network&#x27;s trusted news offering, delivering the latest breaking news a</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-10-news</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Jimmy Kimmel Live!</title>
+      <description>[TV] Jimmy Kimmel Live! is an American late-night talk show, created and hosted by Jimmy Kimmel and broadcast on ABC. — Genres: Talk, Comedy</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-jimmy-kimmel-live</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Siren&#x27;s Kiss</title>
+      <description>[TV] Ace insurance investigator Cha Woo-seok hunts a fraud ring tied to mysterious deaths and becomes dangerously entangled with Han Seol-ah, a flawless art auctioneer whose lovers all seem to die. As attraction and suspicion blur, he must uncover whether she’s a killer or a victim, b — Genres: Drama, Crime, Mystery</description>
+      <category>TV</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#tv-siren-s-kiss</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Quick News: Smile 3, WGA, Ronstadt, Corman - Dark Horizons</title>
+      <description>[NEWS] Quick News: Smile 3, WGA, Ronstadt, Corman Dark HorizonsRumor: Parker Finn Might Wipe the Smile Off ‘Smile 3’ IMDb — Genres: Entertainment News</description>
+      <category>NEWS</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#news-quick-news--smile-3--wga--ronstadt--corman---dark-horizons</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>One Mile: Chapter One</title>
+      <description>[MOVIE] After being released from prison, a father tries to reconnect with his daughter by taking her on a tour of college, but they soon find themselves fighting for more than their lost relationship when a murderous cult pursues them. — Genres: Action, Crime</description>
+      <category>MOVIE</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#movie-one-mile--chapter-one</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Lookout</title>
+      <description>[MOVIE] Seeking peace away from her turbulent life, a young woman accepts a job as a fire lookout at a remote wilderness tower. As she settles into her new role, eerie disturbances and strange occurrences begin to unfold, and she must uncover the chilling secrets that disrupt her isolati — Genres: Thriller, Science Fiction, Horror</description>
+      <category>MOVIE</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#movie-lookout</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Old Woman with the Knife</title>
+      <description>[MOVIE] Aging assassin Hornclaw has seen it all, but she never expected to mentor a reckless rookie like Bullfight. As their unlikely bond deepens, cracks form in the underworld they navigate together. When Hornclaw discovers someone wants her dead, she&#x27;s thrust into a deadly game of dec — Genres: Action, Mystery, Drama</description>
+      <category>MOVIE</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#movie-the-old-woman-with-the-knife</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Old Woman with the Knife</title>
+      <description>[DISC] Aging assassin Hornclaw has seen it all, but she never expected to mentor a reckless rookie like Bullfight. As their unlikely bond deepens, cracks form in the underworld they navigate together. When Hornclaw discovers someone wants her dead, she&#x27;s thrust into a deadly game of dec — Genres: Action, Mystery, Drama</description>
+      <category>DISC</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#disc-the-old-woman-with-the-knife</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>The Occult Rejects</title>
+      <description>[PODCAST] Occultists, Rejects, and Mystics trying to educate others about magick and occultism so others can figure out who they are and the world around them. — Genres: Religion, Spirituality, Education</description>
+      <category>PODCAST</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#podcast-the-occult-rejects</guid>
+      <link>https://unreeled.co.za/</link>
+    </item>
+    <item>
+      <title>Bass Cast Radio</title>
+      <description>[PODCAST] &lt;b&gt;Bass Cast Radio is an exhilarating podcast that dives deep into the world of bass fishing, delivering engaging discussions, expert interviews, and actionable insights for anglers of all levels. Each episode explores the sport’s mental and competitive aspects, offering tips on  — Genres: Sports, Education, News</description>
+      <category>PODCAST</category>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 +0000</pubDate>
+      <guid>https://unreeled.co.za/#podcast-bass-cast-radio</guid>
+      <link>https://unreeled.co.za/</link>
     </item>
   </channel>
 </rss>

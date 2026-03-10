@@ -1265,7 +1265,7 @@ class MusicBrainzSource:
 
     BASE_URL = "https://musicbrainz.org/ws/2"
     COVER_ART_URL = "https://coverartarchive.org/release"
-    APP_CONTACT = "unreeled-bot/1.0 (https://unreeled.netlify.app)"
+    APP_CONTACT = "unreeled-bot/1.0 (https://unreeled.co.za)"
 
     # Format IDs we care about — maps MusicBrainz format names to our labels
     FORMAT_MAP = {

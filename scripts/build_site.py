@@ -24,6 +24,8 @@ import glob
 from pathlib import Path
 from datetime import datetime, timezone
 from collections import Counter
+from email.utils import format_datetime
+from html import escape
 
 
 # Keep the first paint fast by limiting how much older release data is embedded
@@ -294,6 +296,9 @@ def build():
     # Generate individual SEO release pages
     generate_release_pages(all_data, docs_dir)
 
+    # Generate RSS feed with canonical domain + fresh build date
+    generate_feed(latest_date, latest_releases, docs_dir)
+
     return True
 
 
@@ -395,7 +400,8 @@ h1{{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}}
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     sitemap_xml += '  <url><loc>https://unreeled.co.za</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
-    for url in sitemap_entries[:5000]:  # Sitemap limit
+    unique_entries = list(dict.fromkeys(sitemap_entries))
+    for url in unique_entries[:5000]:  # Sitemap limit
         sitemap_xml += f'  <url><loc>{url}</loc><changefreq>weekly</changefreq></url>\n'
     sitemap_xml += '</urlset>'
     
@@ -409,6 +415,57 @@ h1{{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}}
     
     print(f"Generated {count} release pages + sitemap.xml + robots.txt")
     return count
+
+
+def generate_feed(latest_date, latest_releases, docs_dir):
+    """Generate RSS feed for latest releases with canonical domain URLs."""
+    channel_link = "https://unreeled.co.za/"
+    feed_link = "https://unreeled.co.za/feed.xml"
+
+    try:
+        latest_dt = datetime.strptime(latest_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        latest_dt = datetime.now(timezone.utc)
+
+    rss = []
+    rss.append('<?xml version="1.0" encoding="UTF-8"?>')
+    rss.append('<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">')
+    rss.append('  <channel>')
+    rss.append('    <title>UNREELED — Daily Media Releases</title>')
+    rss.append(f'    <link>{channel_link}</link>')
+    rss.append('    <description>Daily releases across movies, TV, books, games, anime, music and podcasts.</description>')
+    rss.append('    <language>en</language>')
+    rss.append(f'    <lastBuildDate>{format_datetime(datetime.now(timezone.utc))}</lastBuildDate>')
+    rss.append(f'    <atom:link href="{feed_link}" rel="self" type="application/rss+xml"/>')
+
+    for r in latest_releases[:120]:
+        title = escape(r.get("title", "Untitled"))
+        media_type = (r.get("media_type", "other") or "other").upper()
+        synopsis = (r.get("synopsis", "") or "").strip()
+        desc_core = escape(synopsis[:280]) if synopsis else f"New {media_type.lower()} release."
+        genres = ", ".join(r.get("genres", [])[:3])
+        desc = f"[{media_type}] {desc_core}" + (f" — Genres: {escape(genres)}" if genres else "")
+
+        guid_slug = ''.join(ch.lower() if ch.isalnum() else '-' for ch in r.get("title", "")).strip('-')[:80]
+        guid = f"https://unreeled.co.za/#{r.get('media_type','other')}-{guid_slug}"
+
+        rss.append('    <item>')
+        rss.append(f'      <title>{title}</title>')
+        rss.append(f'      <description>{desc}</description>')
+        rss.append(f'      <category>{media_type}</category>')
+        rss.append(f'      <pubDate>{format_datetime(latest_dt)}</pubDate>')
+        rss.append(f'      <guid>{guid}</guid>')
+        rss.append(f'      <link>{channel_link}</link>')
+        rss.append('    </item>')
+
+    rss.append('  </channel>')
+    rss.append('</rss>')
+
+    with open(docs_dir / "feed.xml", "w", encoding="utf-8") as f:
+        f.write("\n".join(rss) + "\n")
+
+    print(f"Generated feed.xml with {min(len(latest_releases), 120)} items")
+
 
 # Executable block moved to the very bottom
 if __name__ == "__main__":

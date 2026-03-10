@@ -22,6 +22,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
 <link rel="alternate" type="application/rss+xml" title="UNREELED Daily Releases" href="/feed.xml">
+<link rel="canonical" href="https://unreeled.co.za/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"UNREELED","url":"https://unreeled.co.za/","description":"Track daily releases across movies, TV, books, games, anime, music and podcasts."}</script>
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23ff6b35'/><text x='45' y='135' font-size='120' font-weight='bold' fill='white'>U</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -383,7 +385,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
       <button class="tab" data-p="streams" onclick="go('streams')">Streams</button>
     </div>
   </div>
-  <div class="nav-r"><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" class="theme-btn" title="Support us on Ko-fi" style="text-decoration:none;font-size:14px;color:#ff5e5b">&#9829;</a><a href="/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button><span id="nav-r"></span></div>
+  <div class="nav-r"><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" class="theme-btn" title="Support us on Ko-fi" style="text-decoration:none;font-size:14px;color:#ff5e5b">&#9829;</a><a href="/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" aria-label="Open RSS feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle light or dark theme">&#127769;</button><span id="nav-r"></span></div>
 </nav>
 <div class="umenu" id="umenu"></div>
 <!-- AUTH MODAL -->
@@ -616,6 +618,18 @@ function isSubbed(type,value){return userSubs.some(s=>s.subscription_type===type
 function isWatchlisted(key){return userWatchlist.some(w=>w.release_key===key)}
 function releaseKey(r){return vd+':'+r.media_type+':'+(r.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,80)}
 function isAdmin(){return profile&&(profile.role==='admin'||profile.role==='moderator')}
+async function ensureAuthUser(){
+  if(user)return user;
+  try{
+    const{data,error}=await sb.auth.getUser();
+    if(error){console.error('Auth lookup error:',error);return null}
+    user=data?.user||null;
+    return user;
+  }catch(e){
+    console.error('Auth lookup exception:',e);
+    return null;
+  }
+}
 
 // ═══════ HELPERS ═══════
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -628,7 +642,7 @@ function countryFlag(code){if(!code||code.length!==2)return'';const c=code.toUpp
 function countryFlags(m){const cc=(m.countries||[]).filter(Boolean).slice(0,3);if(!cc.length)return'';return cc.map(c=>countryFlag(c)).join('')}
 const CN={US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',FR:'France',DE:'Germany',IT:'Italy',ES:'Spain',JP:'Japan',KR:'South Korea',CN:'China',IN:'India',BR:'Brazil',MX:'Mexico',RU:'Russia',SE:'Sweden',NO:'Norway',DK:'Denmark',FI:'Finland',NL:'Netherlands',BE:'Belgium',AT:'Austria',CH:'Switzerland',IE:'Ireland',NZ:'New Zealand',ZA:'South Africa',AR:'Argentina',CL:'Chile',CO:'Colombia',PE:'Peru',PL:'Poland',CZ:'Czechia',HU:'Hungary',RO:'Romania',TR:'Turkey',TH:'Thailand',PH:'Philippines',ID:'Indonesia',MY:'Malaysia',SG:'Singapore',TW:'Taiwan',HK:'Hong Kong',IL:'Israel',AE:'UAE',SA:'Saudi Arabia',EG:'Egypt',NG:'Nigeria',KE:'Kenya',GH:'Ghana',PT:'Portugal',GR:'Greece',UA:'Ukraine',RS:'Serbia',HR:'Croatia',BG:'Bulgaria',LT:'Lithuania',LV:'Latvia',EE:'Estonia',IS:'Iceland',LU:'Luxembourg',MT:'Malta',CY:'Cyprus',SK:'Slovakia',SI:'Slovenia',BA:'Bosnia',MK:'North Macedonia',AL:'Albania',VN:'Vietnam',MM:'Myanmar',KH:'Cambodia',LA:'Laos',BD:'Bangladesh',PK:'Pakistan',LK:'Sri Lanka',NP:'Nepal',UZ:'Uzbekistan',KZ:'Kazakhstan',GE:'Georgia',AM:'Armenia',BY:'Belarus',MD:'Moldova',PA:'Panama',CR:'Costa Rica',EC:'Ecuador',UY:'Uruguay',PY:'Paraguay',BO:'Bolivia',VE:'Venezuela',DO:'Dominican Republic',GT:'Guatemala',CU:'Cuba',PR:'Puerto Rico',JM:'Jamaica',TT:'Trinidad',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',HT:'Haiti',BB:'Barbados',LC:'Saint Lucia',MA:'Morocco',TN:'Tunisia',DZ:'Algeria',LB:'Lebanon',JO:'Jordan',QA:'Qatar',KW:'Kuwait',BH:'Bahrain',OM:'Oman',IQ:'Iraq',SY:'Syria',AF:'Afghanistan',IR:'Iran',LY:'Libya',SD:'Sudan',TZ:'Tanzania',UG:'Uganda',ZW:'Zimbabwe',ZM:'Zambia',MW:'Malawi',MZ:'Mozambique',AO:'Angola',CM:'Cameroon',SN:'Senegal',CI:"Ivory Coast",ML:'Mali',BF:'Burkina Faso',NE:'Niger',TD:'Chad',MG:'Madagascar',MU:'Mauritius',FJ:'Fiji',PG:'Papua New Guinea',WS:'Samoa',TO:'Tonga',MN:'Mongolia',BT:'Bhutan',MV:'Maldives',BN:'Brunei',TL:'Timor-Leste',LA:'Laos'};
 function meta(r){const m=r.metadata||{},p=[];if(r.media_type==='movie'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language&&!(m.countries||[]).length)p.push(m.original_language.toUpperCase());if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes);if(m.ratings?.metacritic)p.push('MC: '+m.ratings.metacritic)}if(r.media_type==='tv'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.season_number&&m.episode_number)p.push('S'+m.season_number+'E'+m.episode_number);else if(m.total_seasons)p.push(m.total_seasons+' season'+(m.total_seasons!==1?'s':''));if(m.networks?.length)p.push(m.networks[0]);if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes)}if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}if(r.media_type==='podcast'){if(m.author)p.push(m.author);if(m.episode_count)p.push(m.episode_count+' eps')}if(r.media_type==='boardgame'){if(m.players)p.push(m.players+' players');if(m.playtime_minutes)p.push(m.playtime_minutes+' min')}if(r.media_type==='comic'){if(m.volume)p.push(m.volume);if(m.publisher)p.push(m.publisher)}if(r.media_type==='disc'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.physical_formats?.length)p.push(m.physical_formats.join(' / '));if(m.runtime_minutes)p.push(m.runtime_minutes+' min')}if(r.media_type==='news'){if(m.source_name)p.push(m.source_name)}if(m.streaming){const sn=Object.keys(m.streaming).slice(0,3);if(sn.length)p.push('\uD83D\uDCFA '+sn.join(', '))}return p.join('<span class="s">\u00B7</span>')}
-function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie;if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
+function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie,alt=(r.title?'Poster for '+r.title:'Release poster');if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="'+esc(alt)+'" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
 function tvReleaseBadge(r){const kind=((r.metadata||{}).tv_release_kind||'').toLowerCase();if(r.media_type!=='tv'||!kind)return'';if(kind==='series_premiere')return'<span class="new-badge">Brand New Series</span>';if(kind==='season_premiere')return'<span class="new-badge">New Season</span>';if(kind==='new_episode')return'<span class="new-badge">New Episode</span>';return''}
 function fmtD(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}catch(e){return d}}
 function dayN(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}catch(e){return''}}
@@ -889,7 +903,7 @@ async function openD(i){
     related.forEach(rel=>{
       const rc=MC[rel.media_type]||MC.movie;
       const ri=R.indexOf(rel);
-      h+='<div onclick="openD('+ri+')" style="flex-shrink:0;width:100px;cursor:pointer;text-align:center"><div style="width:100px;height:140px;border-radius:8px;overflow:hidden;margin-bottom:6px">'+(rel.poster_url?'<img src="'+esc(rel.poster_url)+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;background:'+rc.c+'22;display:flex;align-items:center;justify-content:center;font-size:28px">'+rc.i+'</div>')+'</div><div style="font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(rel.title)+'</div><div style="font-size:10px;color:var(--td)">'+rc.l+'</div></div>';
+      h+='<div onclick="openD('+ri+')" style="flex-shrink:0;width:100px;cursor:pointer;text-align:center"><div style="width:100px;height:140px;border-radius:8px;overflow:hidden;margin-bottom:6px">'+(rel.poster_url?'<img src="'+esc(rel.poster_url)+'" alt="'+esc(rel.title?('Poster for ' + rel.title):'Related release poster')+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;background:'+rc.c+'22;display:flex;align-items:center;justify-content:center;font-size:28px">'+rc.i+'</div>')+'</div><div style="font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(rel.title)+'</div><div style="font-size:10px;color:var(--td)">'+rc.l+'</div></div>';
     });
     h+='</div></div>';
   }
@@ -1122,27 +1136,30 @@ async function modDismissReports(cid){
 
 // ═══════ WATCHLIST ═══════
 async function toggleWL(){
-  if(!user)return showAuth('login');
+  const au=await ensureAuthUser();
+  if(!au)return showAuth('login');
   const rk=releaseKey(cr);
   if(isWatchlisted(rk)){
-    const{error}=await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
+    const{error}=await sb.from('watchlist').delete().eq('user_id',au.id).eq('release_key',rk);
     if(error){console.error('Watchlist remove error:',error);toast('Error removing — try again');return}
     userWatchlist=userWatchlist.filter(w=>w.release_key!==rk);
     toast('Removed from watchlist');
   } else {
     const rd={synopsis:cr.synopsis||'',genres:cr.genres||[],metadata:cr.metadata||{},spoiler_counts:cr.spoiler_counts||{}};
-    const{data,error}=await sb.from('watchlist').insert({user_id:user.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,poster_url:cr.poster_url||'',release_data:rd}).select().single();
+    const{data,error}=await sb.from('watchlist').insert({user_id:au.id,release_key:rk,release_title:cr.title,media_type:cr.media_type,poster_url:cr.poster_url||'',release_data:rd}).select().single();
     if(error){console.error('Watchlist add error:',error);toast('Error adding — try again');return}
     if(data)userWatchlist.push(data);
     toast('Added to watchlist!');
   }
   const wl=isWatchlisted(rk);
   const btn=document.getElementById('wl-btn');
-  if(btn){btn.textContent=wl?'\u2705 Watchlisted':'\u2B50 Watchlist';btn.className=wl?'o active':'o'}
+  if(btn){btn.textContent=wl?'✅ Watchlisted':'⭐ Watchlist';btn.className=wl?'o active':'o'}
 }
 
 async function removeFromWL(rk){
-  const{error}=await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
+  const au=await ensureAuthUser();
+  if(!au)return showAuth('login');
+  const{error}=await sb.from('watchlist').delete().eq('user_id',au.id).eq('release_key',rk);
   if(error){console.error('Watchlist remove error:',error);toast('Error removing');return}
   userWatchlist=userWatchlist.filter(w=>w.release_key!==rk);
   toast('Removed from watchlist');
@@ -1175,13 +1192,16 @@ function shareRelease(){
 
 // ═══════ SUBSCRIPTIONS ═══════
 async function toggleSub(type,value){
-  if(!user)return showAuth('login');
+  const au=await ensureAuthUser();
+  if(!au)return showAuth('login');
   if(isSubbed(type,value)){
-    await sb.from('subscriptions').delete().eq('user_id',user.id).eq('subscription_type',type).eq('subscription_value',value);
+    const{error}=await sb.from('subscriptions').delete().eq('user_id',au.id).eq('subscription_type',type).eq('subscription_value',value);
+    if(error){console.error('Subscription remove error:',error);toast('Error unsubscribing — try again');return}
     userSubs=userSubs.filter(s=>!(s.subscription_type===type&&s.subscription_value===value));
     toast('Unsubscribed');
   } else {
-    const{data}=await sb.from('subscriptions').insert({user_id:user.id,subscription_type:type,subscription_value:value,email_digest:false}).select().single();
+    const{data,error}=await sb.from('subscriptions').insert({user_id:au.id,subscription_type:type,subscription_value:value,email_digest:false}).select().single();
+    if(error){console.error('Subscription add error:',error);toast('Error subscribing — try again');return}
     if(data)userSubs.push(data);
     toast('Subscribed! You\'ll get daily updates.');
   }

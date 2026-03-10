@@ -2,12 +2,15 @@
   "name": "UNREELED — Daily Media Releases",
   "short_name": "Unreeled",
   "description": "Track daily releases across movies, TV, books, games, anime, music and podcasts.",
-  "start_url": "/unreeled/",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#08090c",
   "theme_color": "#ff6b35",
   "orientation": "portrait-primary",
-  "categories": ["entertainment", "news"],
+  "categories": [
+    "entertainment",
+    "news"
+  ],
   "icons": [
     {
       "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%23ff6b35'/><text x='128' y='384' font-size='340' font-weight='bold' fill='white'>U</text></svg>",

@@ -2,7 +2,7 @@
 
 Track daily releases across movies, TV, books, games, anime, and music with community spoiler-tagged discussions.
 
-🌐 **Live site**: [unreeled.netlify.app](https://unreeled.netlify.app)
+🌐 **Live site**: [unreeled.co.za](https://unreeled.co.za)
 
 ## How it works
 
@@ -20,9 +20,9 @@ unreeled/
 ├── scripts/
 │   ├── unreeled_ingest.py  # Data ingestion pipeline
 │   └── build_site.py       # Builds static HTML from data + template
-├── public/
+├── docs/
 │   ├── template.html       # Site template (don't edit index.html directly)
-│   ├── index.html           # Built output (auto-generated)
+│   ├── index.html          # Built output (auto-generated)
 │   └── data/
 │       └── latest.json     # Latest release data (auto-generated)
 └── README.md
@@ -47,7 +47,7 @@ Go to your repo → **Settings → Secrets and variables → Actions** and add:
 ### 3. Connect Netlify
 
 - In Netlify, connect your GitHub repo
-- Set **publish directory** to `public`
+- Set **publish directory** to `docs`
 - No build command needed (the HTML is pre-built by GitHub Actions)
 
 ### 4. Enable GitHub Actions
@@ -72,11 +72,11 @@ python unreeled_ingest.py --date 2026-02-20
 
 # Build the site
 cd ..
-mkdir -p public/data
-cp scripts/output/releases_*.json public/data/latest.json
+mkdir -p docs/data
+cp scripts/output/releases_*.json docs/data/latest.json
 python scripts/build_site.py
 
-# Open public/index.html in your browser
+# Open docs/index.html in your browser
 ```
 
 ## Data Sources
