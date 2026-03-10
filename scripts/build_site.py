@@ -280,14 +280,17 @@ def build():
         "archive": archive,
     }
 
+    # Safely serialize JSON for embedding inside a <script> tag.
+    # This prevents content like </script>, <!--, or special separators
+    # from breaking the page and causing JS syntax errors.
     json_str = json.dumps(inject_data, ensure_ascii=False, separators=(",", ":"))
-json_str = (
-    json_str
-    .replace("</", "<\\/")
-    .replace("<!--", "<\\!--")
-    .replace("\u2028", "\\u2028")
-    .replace("\u2029", "\\u2029")
-)
+    json_str = (
+        json_str
+        .replace("</", "<\\/")
+        .replace("<!--", "<\\!--")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
 
     # Read the template and inject a single JSON blob for the frontend app.
     if not template_file.exists():
@@ -418,44 +421,12 @@ h1{{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}}
             sitemap_entries.append(f"https://unreeled.co.za/r/{page_slug}")
             count += 1
 
-    # Generate sitemap (improved SEO signals)
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-
+    # Generate sitemap
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-
-    # Homepage
-    sitemap_xml += (
-        f'  <url>'
-        f'<loc>https://unreeled.co.za</loc>'
-        f'<lastmod>{today}</lastmod>'
-        f'<changefreq>daily</changefreq>'
-        f'<priority>1.0</priority>'
-        f'</url>\n'
-    )
-
-    # Archive date pages (important for indexing daily releases)
-    for date_str in sorted(all_data.keys(), reverse=True):
-        sitemap_xml += (
-            f'  <url>'
-            f'<loc>https://unreeled.co.za/?date={date_str}</loc>'
-            f'<lastmod>{date_str}</lastmod>'
-            f'<changefreq>daily</changefreq>'
-            f'<priority>0.8</priority>'
-            f'</url>\n'
-        )
-
-    # Release pages
+    sitemap_xml += '  <url><loc>https://unreeled.co.za</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
     for url in sitemap_entries[:5000]:  # Sitemap limit
-        sitemap_xml += (
-            f'  <url>'
-            f'<loc>{url}</loc>'
-            f'<lastmod>{today}</lastmod>'
-            f'<changefreq>weekly</changefreq>'
-            f'<priority>0.9</priority>'
-            f'</url>\n'
-        )
-
+        sitemap_xml += f'  <url><loc>{url}</loc><changefreq>weekly</changefreq></url>\n'
     sitemap_xml += '</urlset>'
 
     with open(docs_dir / "sitemap.xml", "w", encoding="utf-8") as f:
