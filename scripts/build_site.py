@@ -59,7 +59,7 @@ def process_releases(releases, max_per_type=30, max_total=200):
 
     by_type = {}
     for r in releases:
-        by_type.setdefault(r.get("media_type", "other"),[]).append(r)
+        by_type.setdefault(r.get("media_type", "other"), []).append(r)
 
     def sort_key(r):
         score = r.get("metadata", {}).get("popularity", 0) or 0
@@ -73,8 +73,8 @@ def process_releases(releases, max_per_type=30, max_total=200):
         items.sort(key=sort_key, reverse=True)
 
     guaranteed_per_type = min(max_per_type, 15)
-    selected =[]
-    remaining =[]
+    selected = []
+    remaining = []
 
     for media_type, items in by_type.items():
         guaranteed = items[:guaranteed_per_type]
@@ -100,7 +100,7 @@ def compute_trending(all_data):
     title_info = {}
 
     for date_str, data in all_data.items():
-        for r in data.get("releases",[]):
+        for r in data.get("releases", []):
             key = (r.get("title", "").lower().strip(), r.get("media_type", ""))
             title_appearances[key] += 1
 
@@ -116,9 +116,18 @@ def compute_trending(all_data):
                     "spoiler_counts": r.get("spoiler_counts", {}),
                     "metadata": {
                         k: v for k, v in (r.get("metadata", {}) or {}).items()
-                        if k in ("artists", "authors", "studios", "networks",
-                                 "runtime_minutes", "score", "platforms",
-                                 "publisher", "formats", "labels")
+                        if k in (
+                            "artists",
+                            "authors",
+                            "studios",
+                            "networks",
+                            "runtime_minutes",
+                            "score",
+                            "platforms",
+                            "publisher",
+                            "formats",
+                            "labels",
+                        )
                     },
                     "first_seen": date_str,
                     "days_seen": title_appearances[key],
@@ -140,13 +149,13 @@ def compute_archive_stats(all_data):
     Build archive metadata: per-date stats for the date picker,
     weekly and monthly summaries.
     """
-    dates =[]
+    dates = []
     weekly = {}
     monthly = {}
 
     for date_str in sorted(all_data.keys()):
         data = all_data[date_str]
-        releases = data.get("releases",[])
+        releases = data.get("releases", [])
         stats = data.get("source_stats", {})
 
         # Per-type counts
@@ -194,7 +203,7 @@ def compute_archive_stats(all_data):
 def build():
     project_root = Path(__file__).parent.parent
     docs_dir = project_root / "docs"
-    
+
     # Build only from docs/, which is the published GitHub Pages output tree.
     data_dir = docs_dir / "data"
     template_file = docs_dir / "template.html"
@@ -218,7 +227,7 @@ def build():
             "date": today,
             "total_releases": 0,
             "source_stats": {},
-            "releases":[],
+            "releases": [],
         }
 
     # ── Find the latest date ──
@@ -227,7 +236,7 @@ def build():
     print(f"Latest date: {latest_date} ({latest_data.get('total_releases', 0)} releases)")
 
     # ── Process latest releases for display ──
-    latest_releases = process_releases(latest_data.get("releases",[]))
+    latest_releases = process_releases(latest_data.get("releases", []))
 
     # ── Process only a recent slice of historical dates for inline browsing ──
     # Older dates still remain in docs/data and are reflected in archive stats,
@@ -251,7 +260,9 @@ def build():
 
     # ── Compute archive stats ──
     archive = compute_archive_stats(all_data)
-    print(f"Archive: {len(archive['dates'])} days, {len(archive['weekly'])} weeks, {len(archive['monthly'])} months")
+    print(
+        f"Archive: {len(archive['dates'])} days, {len(archive['weekly'])} weeks, {len(archive['monthly'])} months"
+    )
 
     # ── Build injection payload ──
     inject_data = {
@@ -301,38 +312,47 @@ def generate_release_pages(all_data, docs_dir):
     """Generate individual SEO-friendly HTML pages for each release."""
     releases_dir = docs_dir / "r"
     releases_dir.mkdir(exist_ok=True)
-    
+
     count = 0
-    sitemap_entries =[]
-    
+    sitemap_entries = []
+
     for date_str, data in all_data.items():
-        for r in data.get("releases",[]):
+        for r in data.get("releases", []):
             title = r.get("title", "")
             if not title:
                 continue
-            
+
             # Generate URL-safe slug
             slug = title.lower().strip()
             slug = "".join(c if c.isalnum() or c == " " else "" for c in slug)
             slug = "-".join(slug.split())[:80]
             if not slug:
                 continue
-            
+
             media_type = r.get("media_type", "movie")
             page_slug = f"{date_str}-{media_type}-{slug}"
-            
+
             synopsis = r.get("synopsis", "")
             genres = ", ".join(r.get("genres", [])[:5])
             poster = r.get("poster_url", "")
             meta = r.get("metadata", {})
-            
-            mc_labels = {"movie": "Film", "tv": "TV", "book": "Book", "game": "Game", 
-                        "anime": "Anime", "music": "Music", "podcast": "Podcast",
-                        "boardgame": "Board Game", "disc": "Physical", "news": "News"}
+
+            mc_labels = {
+                "movie": "Film",
+                "tv": "TV",
+                "book": "Book",
+                "game": "Game",
+                "anime": "Anime",
+                "music": "Music",
+                "podcast": "Podcast",
+                "boardgame": "Board Game",
+                "disc": "Physical",
+                "news": "News",
+            }
             type_label = mc_labels.get(media_type, media_type.title())
-            
+
             desc = synopsis[:160] if synopsis else f"New {type_label.lower()} release: {title}"
-            
+
             # Build minimal SEO page that redirects to main app
             html = f'''<!DOCTYPE html>
 <html lang="en">
@@ -383,32 +403,65 @@ h1{{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}}
 </div>
 </body>
 </html>'''
-            
+
             page_file = releases_dir / f"{page_slug}.html"
             with open(page_file, "w", encoding="utf-8") as f:
                 f.write(html)
-            
+
             sitemap_entries.append(f"https://unreeled.co.za/r/{page_slug}")
             count += 1
-    
-    # Generate sitemap
+
+    # Generate sitemap (improved SEO signals)
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
     sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    sitemap_xml += '  <url><loc>https://unreeled.co.za</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n'
+
+    # Homepage
+    sitemap_xml += (
+        f'  <url>'
+        f'<loc>https://unreeled.co.za</loc>'
+        f'<lastmod>{today}</lastmod>'
+        f'<changefreq>daily</changefreq>'
+        f'<priority>1.0</priority>'
+        f'</url>\n'
+    )
+
+    # Archive date pages (important for indexing daily releases)
+    for date_str in sorted(all_data.keys(), reverse=True):
+        sitemap_xml += (
+            f'  <url>'
+            f'<loc>https://unreeled.co.za/?date={date_str}</loc>'
+            f'<lastmod>{date_str}</lastmod>'
+            f'<changefreq>daily</changefreq>'
+            f'<priority>0.8</priority>'
+            f'</url>\n'
+        )
+
+    # Release pages
     for url in sitemap_entries[:5000]:  # Sitemap limit
-        sitemap_xml += f'  <url><loc>{url}</loc><changefreq>weekly</changefreq></url>\n'
+        sitemap_xml += (
+            f'  <url>'
+            f'<loc>{url}</loc>'
+            f'<lastmod>{today}</lastmod>'
+            f'<changefreq>weekly</changefreq>'
+            f'<priority>0.9</priority>'
+            f'</url>\n'
+        )
+
     sitemap_xml += '</urlset>'
-    
+
     with open(docs_dir / "sitemap.xml", "w", encoding="utf-8") as f:
         f.write(sitemap_xml)
-    
+
     # robots.txt
     robots = "User-agent: *\nAllow: /\nSitemap: https://unreeled.co.za/sitemap.xml\n"
     with open(docs_dir / "robots.txt", "w", encoding="utf-8") as f:
         f.write(robots)
-    
+
     print(f"Generated {count} release pages + sitemap.xml + robots.txt")
     return count
+
 
 # Executable block moved to the very bottom
 if __name__ == "__main__":
