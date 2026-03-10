@@ -21,7 +21,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.json">
-<link rel="alternate" type="application/rss+xml" title="UNREELED Daily Releases" href="/feed.xml">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23ff6b35'/><text x='45' y='135' font-size='120' font-weight='bold' fill='white'>U</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -383,7 +382,11 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
       <button class="tab" data-p="streams" onclick="go('streams')">Streams</button>
     </div>
   </div>
-  <div class="nav-r"><a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" class="theme-btn" title="Support us on Ko-fi" style="text-decoration:none;font-size:14px;color:#ff5e5b">&#9829;</a><a href="/feed.xml" target="_blank" class="theme-btn" title="RSS Feed" style="text-decoration:none;font-size:14px">&#128225;</a><button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button><span id="nav-r"></span></div>
+  <div class="nav-r">
+  <a href="https://ko-fi.com/ikhono" target="_blank" rel="noopener" class="theme-btn" title="Support us on Ko-fi" style="text-decoration:none;font-size:14px;color:#ff5e5b">&#9829;</a>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">&#127769;</button>
+  <span id="nav-r"></span>
+</div>
 </nav>
 <div class="umenu" id="umenu"></div>
 <!-- AUTH MODAL -->
