@@ -823,6 +823,19 @@ function buildHomepageSections(list){
 
   return sections;
 }
+  function renderFeedSection(title, subtitle, items){
+  let h='<div style="margin-bottom:24px">';
+  h+='<h2 style="font-family:\'Fraunces\',serif;font-size:20px;font-weight:700;margin-bottom:2px">'+esc(title)+'</h2>';
+  h+='<p style="font-size:12px;color:var(--td);margin-bottom:12px">'+esc(subtitle)+'</p>';
+  h+='<div style="display:grid;grid-template-columns:1fr;gap:8px">';
+  items.forEach((r, i) => {
+    const ri = R.indexOf(r);
+    // If we know the absolute index, pass it to openD. Otherwise pass the object itself.
+    h += card(r, i, ri >= 0 ? 'openD(' + ri + ')' : 'openD(feedFiltered[' + i + '])');
+  });
+  h+='</div></div>';
+  return h;
+}
 function renderFeed(){
   feedPage=0;
   const{fl,cn}=getFilteredFeed();
