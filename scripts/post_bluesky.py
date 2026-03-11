@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -81,22 +82,6 @@ def media_emoji(r: dict) -> str:
     }.get(media_type, "✨")
 
 
-def media_label(r: dict) -> str:
-    media_type = (r.get("media_type") or "").lower()
-    return {
-        "movie": "movie",
-        "tv": "tv",
-        "game": "game",
-        "book": "book",
-        "anime": "anime",
-        "music": "music",
-        "podcast": "podcast",
-        "news": "news",
-        "disc": "physical",
-        "boardgame": "board game",
-    }.get(media_type, "release")
-
-
 def normalize_group(r: dict) -> str:
     media_type = (r.get("media_type") or "").lower()
     if media_type == "disc":
@@ -126,7 +111,6 @@ def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
 
     picked: list[dict] = []
     used_titles: set[str] = set()
-    used_groups: set[str] = set()
 
     # First pass: one per category
     for group in preferred_order:
@@ -139,7 +123,6 @@ def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
                 continue
             picked.append(r)
             used_titles.add(title_key)
-            used_groups.add(norm_group)
             break
         if len(picked) >= limit:
             return picked[:limit]
@@ -193,7 +176,6 @@ def build_post(data: dict) -> str:
         trimmed.append(line)
 
     if len(trimmed) == 1:
-        # Very defensive fallback
         top = highlights[0]
         short = f"{media_emoji(top)} {(top.get('title') or '').strip()}"
         return f"Today on Unreeled:\n{short}\n\n🔗 https://unreeled.co.za/"
@@ -201,6 +183,42 @@ def build_post(data: dict) -> str:
     trimmed.append("")
     trimmed.append("🔗 https://unreeled.co.za/")
     return "\n".join(trimmed)
+
+
+def parse_url_facets(text: str) -> list[dict]:
+    """
+    Build Bluesky rich-text link facets so URLs become clickable.
+    Facet indexes must use UTF-8 byte offsets.
+    """
+    facets = []
+    text_bytes = text.encode("UTF-8")
+    url_regex = rb"(https?:\/\/[^\s]+)"
+
+    for m in re.finditer(url_regex, text_bytes):
+        url = m.group(1).decode("UTF-8")
+        facets.append({
+            "index": {
+                "byteStart": m.start(1),
+                "byteEnd": m.end(1),
+            },
+            "features": [
+                {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": url,
+                }
+            ],
+        })
+
+    return facets
+
+
+def build_post_record(text: str) -> dict:
+    return {
+        "$type": "app.bsky.feed.post",
+        "text": text,
+        "createdAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "facets": parse_url_facets(text),
+    }
 
 
 def create_session(handle: str, app_password: str) -> dict:
@@ -216,15 +234,13 @@ def create_session(handle: str, app_password: str) -> dict:
 
 def create_post(handle: str, access_jwt: str, text: str) -> dict:
     url = f"{BLUESKY_PDS}/xrpc/com.atproto.repo.createRecord"
+
     payload = {
         "repo": handle,
         "collection": "app.bsky.feed.post",
-        "record": {
-            "$type": "app.bsky.feed.post",
-            "text": text,
-            "createdAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        },
+        "record": build_post_record(text),
     }
+
     resp = requests.post(
         url,
         headers={
