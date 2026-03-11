@@ -25,7 +25,7 @@ def score_release(r: dict) -> float:
     if r.get("synopsis"):
         score += 30
 
-    media_type = r.get("media_type", "")
+    media_type = (r.get("media_type") or "").lower()
     if media_type == "movie":
         score += 18
     elif media_type == "game":
@@ -36,6 +36,12 @@ def score_release(r: dict) -> float:
         score += 10
     elif media_type == "tv":
         score += 8
+    elif media_type == "book":
+        score += 7
+    elif media_type == "podcast":
+        score += 6
+    elif media_type == "news":
+        score += 5
 
     tv_kind = (meta.get("tv_release_kind") or "").lower()
     if tv_kind == "series_premiere":
@@ -59,54 +65,114 @@ def tv_suffix(r: dict) -> str:
     return ""
 
 
+def media_emoji(r: dict) -> str:
+    media_type = (r.get("media_type") or "").lower()
+    return {
+        "movie": "🎬",
+        "tv": "📺",
+        "game": "🎮",
+        "book": "📚",
+        "anime": "🎌",
+        "music": "🎵",
+        "podcast": "🎙️",
+        "news": "📰",
+        "disc": "💿",
+        "boardgame": "🎲",
+    }.get(media_type, "✨")
+
+
+def media_label(r: dict) -> str:
+    media_type = (r.get("media_type") or "").lower()
+    return {
+        "movie": "movie",
+        "tv": "tv",
+        "game": "game",
+        "book": "book",
+        "anime": "anime",
+        "music": "music",
+        "podcast": "podcast",
+        "news": "news",
+        "disc": "physical",
+        "boardgame": "board game",
+    }.get(media_type, "release")
+
+
+def normalize_group(r: dict) -> str:
+    media_type = (r.get("media_type") or "").lower()
+    if media_type == "disc":
+        return "movie"
+    return media_type or "other"
+
+
 def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
-    by_type_limit = {
-        "tv": 2,
-        "movie": 1,
-        "game": 1,
-        "anime": 1,
-        "music": 1,
-        "book": 1,
-        "podcast": 1,
-        "news": 1,
-        "disc": 1,
-    }
-
-    picked: list[dict] = []
-    type_count: dict[str, int] = {}
-
+    """
+    Prefer one different highlight per category where possible.
+    Falls back to strongest remaining releases if needed.
+    """
     candidates = [r for r in releases if r.get("title")]
     candidates.sort(key=score_release, reverse=True)
 
+    preferred_order = [
+        "tv",
+        "movie",
+        "game",
+        "music",
+        "anime",
+        "book",
+        "podcast",
+        "news",
+        "boardgame",
+    ]
+
+    picked: list[dict] = []
+    used_titles: set[str] = set()
+    used_groups: set[str] = set()
+
+    # First pass: one per category
+    for group in preferred_order:
+        for r in candidates:
+            title_key = (r.get("title") or "").strip().lower()
+            norm_group = normalize_group(r)
+            if not title_key or title_key in used_titles:
+                continue
+            if norm_group != group:
+                continue
+            picked.append(r)
+            used_titles.add(title_key)
+            used_groups.add(norm_group)
+            break
+        if len(picked) >= limit:
+            return picked[:limit]
+
+    # Second pass: strongest remaining, still avoiding duplicate titles
     for r in candidates:
         if len(picked) >= limit:
             break
-        media_type = r.get("media_type", "other")
-        allowed = by_type_limit.get(media_type, 1)
-        if type_count.get(media_type, 0) >= allowed:
+        title_key = (r.get("title") or "").strip().lower()
+        if not title_key or title_key in used_titles:
             continue
-        type_count[media_type] = type_count.get(media_type, 0) + 1
         picked.append(r)
+        used_titles.add(title_key)
 
-    return picked
+    return picked[:limit]
 
 
 def build_post(data: dict) -> str:
     releases = data.get("releases", [])
-    date_str = data.get("date", "")
     highlights = pick_highlights(releases, limit=4)
 
     if not highlights:
-        return "Today on Unreeled:\nSee all today's releases:\nhttps://unreeled.co.za/"
+        return "Today on Unreeled:\n✨ See all today's releases:\nhttps://unreeled.co.za/"
 
     lines = ["Today on Unreeled:"]
     for r in highlights:
         title = (r.get("title") or "").strip()
         suffix = tv_suffix(r)
-        lines.append(f"• {title}{suffix}")
+        emoji = media_emoji(r)
+        lines.append(f"{emoji} {title}{suffix}")
 
     lines.append("")
-    lines.append("See all today's releases:")
+    lines.append("🔗 See all today's releases:")
     lines.append("https://unreeled.co.za/")
 
     post = "\n".join(lines)
@@ -114,19 +180,26 @@ def build_post(data: dict) -> str:
     if len(post) <= 300:
         return post
 
-    # Trim gracefully for Bluesky character limits
+    # If too long, trim gracefully and keep category variety
     trimmed = ["Today on Unreeled:"]
     for r in highlights:
         title = (r.get("title") or "").strip()
         suffix = tv_suffix(r)
-        line = f"• {title}{suffix}"
-        candidate = "\n".join(trimmed + [line, "", "https://unreeled.co.za/"])
+        emoji = media_emoji(r)
+        line = f"{emoji} {title}{suffix}"
+        candidate = "\n".join(trimmed + [line, "", "🔗 https://unreeled.co.za/"])
         if len(candidate) > 300:
             break
         trimmed.append(line)
 
+    if len(trimmed) == 1:
+        # Very defensive fallback
+        top = highlights[0]
+        short = f"{media_emoji(top)} {(top.get('title') or '').strip()}"
+        return f"Today on Unreeled:\n{short}\n\n🔗 https://unreeled.co.za/"
+
     trimmed.append("")
-    trimmed.append("https://unreeled.co.za/")
+    trimmed.append("🔗 https://unreeled.co.za/")
     return "\n".join(trimmed)
 
 
