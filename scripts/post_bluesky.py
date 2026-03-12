@@ -8,6 +8,7 @@ import requests
 
 
 BLUESKY_PDS = "https://bsky.social"
+STATE_FILE = Path(__file__).resolve().parent / "output" / "bluesky_post_history.json"
 
 
 def load_latest_data() -> dict:
@@ -17,7 +18,98 @@ def load_latest_data() -> dict:
         return json.load(f)
 
 
-def score_release(r: dict) -> float:
+def normalize_title(title: str) -> str:
+    return (title or "").strip().lower()
+
+
+def normalize_artist_or_author(r: dict) -> str:
+    meta = r.get("metadata", {}) or {}
+    for key in ("artists", "authors"):
+        vals = meta.get(key) or []
+        if vals:
+            return " | ".join(str(v).strip().lower() for v in vals[:2] if v)
+    return ""
+
+
+def load_history() -> list[dict]:
+    if not STATE_FILE.exists():
+        return []
+    try:
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        if isinstance(data, list):
+            return data
+    except Exception as e:
+        print(f"Warning: could not read Bluesky history: {e}")
+    return []
+
+
+def save_history_entry(date_str: str, highlights: list[dict]) -> None:
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    entry = {
+        "date": date_str,
+        "titles": [r.get("title", "") for r in highlights if r.get("title")],
+        "groups": [normalize_group(r) for r in highlights],
+        "artist_keys": [normalize_artist_or_author(r) for r in highlights if normalize_artist_or_author(r)],
+    }
+
+    history = load_history()
+    history = [entry] + history
+    history = history[:7]  # keep the last week
+
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+
+def was_posted_recently(title: str, history: list[dict], days: int) -> bool:
+    title_key = normalize_title(title)
+    if not title_key:
+        return False
+    for entry in history[:days]:
+        for t in entry.get("titles", []):
+            if normalize_title(t) == title_key:
+                return True
+    return False
+
+
+def artist_was_posted_recently(r: dict, history: list[dict], days: int) -> bool:
+    key = normalize_artist_or_author(r)
+    if not key:
+        return False
+    for entry in history[:days]:
+        if key in entry.get("artist_keys", []):
+            return True
+    return False
+
+
+def is_routine_tv_title(title: str) -> bool:
+    t = normalize_title(title)
+    routine_patterns = [
+        "watch what happens live",
+        "the daily show",
+        "the tonight show",
+        "late night",
+        "good morning america",
+        "today",
+        "newsnight",
+        "sportscenter",
+        "cnn newsroom",
+        "fox and friends",
+        "morning joe",
+        "meet the press",
+        "real time with",
+        "jimmy kimmel live",
+        "the late show",
+        "the late late show",
+        "last week tonight",
+    ]
+    return any(p in t for p in routine_patterns)
+
+
+def score_release(r: dict, history: list[dict] | None = None) -> float:
+    history = history or []
+
     meta = r.get("metadata", {}) or {}
     score = float(meta.get("popularity", 0) or 0)
 
@@ -51,6 +143,24 @@ def score_release(r: dict) -> float:
         score += 24
     elif tv_kind == "new_episode":
         score += 10
+
+    # Prefer genuinely fresh items over repeats from yesterday / recent days
+    title = r.get("title", "")
+    if was_posted_recently(title, history, 1):
+        score -= 120
+    elif was_posted_recently(title, history, 3):
+        score -= 45
+
+    # Artist/author cooldown helps music/books avoid repeating the same act
+    if media_type in {"music", "book"}:
+        if artist_was_posted_recently(r, history, 1):
+            score -= 60
+        elif artist_was_posted_recently(r, history, 3):
+            score -= 20
+
+    # Push routine TV episodes down so better premieres/season launches win
+    if media_type == "tv" and tv_kind == "new_episode" and is_routine_tv_title(title):
+        score -= 55
 
     return score
 
@@ -89,13 +199,13 @@ def normalize_group(r: dict) -> str:
     return media_type or "other"
 
 
-def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
+def pick_highlights(releases: list[dict], history: list[dict], limit: int = 4) -> list[dict]:
     """
     Prefer one different highlight per category where possible.
     Falls back to strongest remaining releases if needed.
     """
     candidates = [r for r in releases if r.get("title")]
-    candidates.sort(key=score_release, reverse=True)
+    candidates.sort(key=lambda r: score_release(r, history), reverse=True)
 
     preferred_order = [
         "tv",
@@ -115,7 +225,7 @@ def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
     # First pass: one per category
     for group in preferred_order:
         for r in candidates:
-            title_key = (r.get("title") or "").strip().lower()
+            title_key = normalize_title(r.get("title", ""))
             norm_group = normalize_group(r)
             if not title_key or title_key in used_titles:
                 continue
@@ -131,7 +241,7 @@ def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
     for r in candidates:
         if len(picked) >= limit:
             break
-        title_key = (r.get("title") or "").strip().lower()
+        title_key = normalize_title(r.get("title", ""))
         if not title_key or title_key in used_titles:
             continue
         picked.append(r)
@@ -140,12 +250,15 @@ def pick_highlights(releases: list[dict], limit: int = 4) -> list[dict]:
     return picked[:limit]
 
 
-def build_post(data: dict) -> str:
+def build_post(data: dict, history: list[dict]) -> tuple[str, list[dict]]:
     releases = data.get("releases", [])
-    highlights = pick_highlights(releases, limit=4)
+    highlights = pick_highlights(releases, history, limit=4)
 
     if not highlights:
-        return "Today on Unreeled:\n✨ See all today's releases:\nhttps://unreeled.co.za/"
+        return (
+            "Today on Unreeled:\n✨ See all today's releases:\nhttps://unreeled.co.za/",
+            [],
+        )
 
     lines = ["Today on Unreeled:"]
     for r in highlights:
@@ -161,10 +274,12 @@ def build_post(data: dict) -> str:
     post = "\n".join(lines)
 
     if len(post) <= 300:
-        return post
+        return post, highlights
 
     # If too long, trim gracefully and keep category variety
     trimmed = ["Today on Unreeled:"]
+    kept: list[dict] = []
+
     for r in highlights:
         title = (r.get("title") or "").strip()
         suffix = tv_suffix(r)
@@ -174,15 +289,16 @@ def build_post(data: dict) -> str:
         if len(candidate) > 300:
             break
         trimmed.append(line)
+        kept.append(r)
 
     if len(trimmed) == 1:
         top = highlights[0]
         short = f"{media_emoji(top)} {(top.get('title') or '').strip()}"
-        return f"Today on Unreeled:\n{short}\n\n🔗 https://unreeled.co.za/"
+        return f"Today on Unreeled:\n{short}\n\n🔗 https://unreeled.co.za/", [top]
 
     trimmed.append("")
     trimmed.append("🔗 https://unreeled.co.za/")
-    return "\n".join(trimmed)
+    return "\n".join(trimmed), kept
 
 
 def parse_url_facets(text: str) -> list[dict]:
@@ -263,7 +379,8 @@ def main() -> int:
         return 0
 
     data = load_latest_data()
-    post_text = build_post(data)
+    history = load_history()
+    post_text, used_highlights = build_post(data, history)
 
     print("Posting to Bluesky:")
     print(post_text)
@@ -274,6 +391,8 @@ def main() -> int:
 
     print("Bluesky post created.")
     print(result.get("uri", ""))
+
+    save_history_entry(data.get("date", ""), used_highlights)
     return 0
 
 
