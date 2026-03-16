@@ -10,6 +10,11 @@ import requests
 BLUESKY_PDS = "https://bsky.social"
 STATE_FILE = Path(__file__).resolve().parent / "output" / "bluesky_post_history.json"
 
+# Titles here will never be chosen as Bluesky highlights.
+BLOCKED_TITLES = {
+    "ravepop",
+}
+
 
 def load_latest_data() -> dict:
     root = Path(__file__).resolve().parent.parent
@@ -20,6 +25,10 @@ def load_latest_data() -> dict:
 
 def normalize_title(title: str) -> str:
     return (title or "").strip().lower()
+
+
+def is_blocked_title(title: str) -> bool:
+    return normalize_title(title) in BLOCKED_TITLES
 
 
 def normalize_artist_or_author(r: dict) -> str:
@@ -56,7 +65,7 @@ def save_history_entry(date_str: str, highlights: list[dict]) -> None:
 
     history = load_history()
     history = [entry] + history
-    history = history[:7]  # keep the last week
+    history = history[:7]
 
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, ensure_ascii=False, indent=2)
@@ -110,6 +119,10 @@ def is_routine_tv_title(title: str) -> bool:
 def score_release(r: dict, history: list[dict] | None = None) -> float:
     history = history or []
 
+    title = r.get("title", "")
+    if is_blocked_title(title):
+        return -1000000
+
     meta = r.get("metadata", {}) or {}
     score = float(meta.get("popularity", 0) or 0)
 
@@ -144,21 +157,17 @@ def score_release(r: dict, history: list[dict] | None = None) -> float:
     elif tv_kind == "new_episode":
         score += 10
 
-    # Prefer genuinely fresh items over repeats from yesterday / recent days
-    title = r.get("title", "")
     if was_posted_recently(title, history, 1):
         score -= 120
     elif was_posted_recently(title, history, 3):
         score -= 45
 
-    # Artist/author cooldown helps music/books avoid repeating the same act
     if media_type in {"music", "book"}:
         if artist_was_posted_recently(r, history, 1):
             score -= 60
         elif artist_was_posted_recently(r, history, 3):
             score -= 20
 
-    # Push routine TV episodes down so better premieres/season launches win
     if media_type == "tv" and tv_kind == "new_episode" and is_routine_tv_title(title):
         score -= 55
 
@@ -204,7 +213,10 @@ def pick_highlights(releases: list[dict], history: list[dict], limit: int = 4) -
     Prefer one different highlight per category where possible.
     Falls back to strongest remaining releases if needed.
     """
-    candidates = [r for r in releases if r.get("title")]
+    candidates = [
+        r for r in releases
+        if r.get("title") and not is_blocked_title(r.get("title", ""))
+    ]
     candidates.sort(key=lambda r: score_release(r, history), reverse=True)
 
     preferred_order = [
@@ -222,7 +234,6 @@ def pick_highlights(releases: list[dict], history: list[dict], limit: int = 4) -
     picked: list[dict] = []
     used_titles: set[str] = set()
 
-    # First pass: one per category
     for group in preferred_order:
         for r in candidates:
             title_key = normalize_title(r.get("title", ""))
@@ -237,7 +248,6 @@ def pick_highlights(releases: list[dict], history: list[dict], limit: int = 4) -
         if len(picked) >= limit:
             return picked[:limit]
 
-    # Second pass: strongest remaining, still avoiding duplicate titles
     for r in candidates:
         if len(picked) >= limit:
             break
@@ -276,7 +286,6 @@ def build_post(data: dict, history: list[dict]) -> tuple[str, list[dict]]:
     if len(post) <= 300:
         return post, highlights
 
-    # If too long, trim gracefully and keep category variety
     trimmed = ["Today on Unreeled:"]
     kept: list[dict] = []
 
