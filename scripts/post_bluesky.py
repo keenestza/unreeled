@@ -13,6 +13,8 @@ STATE_FILE = Path(__file__).resolve().parent / "output" / "bluesky_post_history.
 # Titles here will never be chosen as Bluesky highlights.
 BLOCKED_TITLES = {
     "ravepop",
+    "eastenders",
+    "watch what happens live with andy cohen",
 }
 
 
