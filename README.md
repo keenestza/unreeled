@@ -2,14 +2,14 @@
 
 Track daily releases across movies, TV, books, games, anime, and music with community spoiler-tagged discussions.
 
-🌐 **Live site**: [unreeled.netlify.app](https://unreeled.netlify.app)
+**Live site**: [unreeled.co.za](https://unreeled.co.za/)
 
 ## How it works
 
 1. **GitHub Actions** runs the ingestion script daily at 6 AM UTC
 2. The script pulls from 5 free APIs (TMDB, Open Library, IGDB, Jikan, MusicBrainz)
 3. A build script bakes the JSON data into a static HTML file
-4. The commit triggers **Netlify** to auto-deploy the updated site
+4. GitHub Pages publishes the updated `docs/` directory to [unreeled.co.za](https://unreeled.co.za/)
 
 ## Project Structure
 
@@ -20,11 +20,12 @@ unreeled/
 ├── scripts/
 │   ├── unreeled_ingest.py  # Data ingestion pipeline
 │   └── build_site.py       # Builds static HTML from data + template
-├── public/
-│   ├── template.html       # Site template (don't edit index.html directly)
-│   ├── index.html           # Built output (auto-generated)
+├── docs/
+│   ├── template.html       # Published site template (don't edit index.html directly)
+│   ├── index.html          # Built output (auto-generated)
 │   └── data/
 │       └── latest.json     # Latest release data (auto-generated)
+├── public/                 # Legacy static-site files
 └── README.md
 ```
 
@@ -44,11 +45,11 @@ Go to your repo → **Settings → Secrets and variables → Actions** and add:
 
 (Open Library, Jikan, and MusicBrainz don't need keys.)
 
-### 3. Connect Netlify
+### 3. Configure GitHub Pages
 
-- In Netlify, connect your GitHub repo
-- Set **publish directory** to `public`
-- No build command needed (the HTML is pre-built by GitHub Actions)
+- In the repository settings, configure GitHub Pages to deploy from the `main` branch and `/docs` folder
+- Configure `unreeled.co.za` as the custom domain
+- The HTML is pre-built and committed by GitHub Actions
 
 ### 4. Enable GitHub Actions
 
@@ -72,11 +73,11 @@ python unreeled_ingest.py --date 2026-02-20
 
 # Build the site
 cd ..
-mkdir -p public/data
-cp scripts/output/releases_*.json public/data/latest.json
+mkdir -p docs/data
+cp scripts/output/releases_*.json docs/data/
 python scripts/build_site.py
 
-# Open public/index.html in your browser
+# Open docs/index.html in your browser
 ```
 
 ## Data Sources

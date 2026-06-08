@@ -24,7 +24,7 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%23ff6b35'/><text x='45' y='135' font-size='120' font-weight='bold' fill='white'>U</text></svg>">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23ff6b35'/><text x='8' y='24' font-size='22' font-weight='bold' fill='white'>U</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.108.0/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#08090c;--card:#0f1014;--el:#16171d;--hov:#1c1d25;--accent:#ff6b35;--agl:rgba(255,107,53,0.12);--text:#e8e8ec;--ts:#a0a0ae;--td:#8888a0;--brd:#1e1f28;--bl:#282935;--sl:#3ec98c;--slb:rgba(62,201,140,0.08);--slr:rgba(62,201,140,0.25);--sm:#f0c038;--smb:rgba(240,192,56,0.08);--smr:rgba(240,192,56,0.25);--sh:#ef4444;--shb:rgba(239,68,68,0.08);--shr:rgba(239,68,68,0.25)}
@@ -2504,17 +2504,44 @@ function buildWeeklyRecap(){
 let deferredInstallPrompt=null;
 const deferNonCritical=(cb)=>('requestIdleCallback' in window)?requestIdleCallback(cb,{timeout:1200}):setTimeout(cb,16);
 
+async function initSupabase(){
+  if(!window.supabase){
+    console.warn('Supabase client failed to load; account features are unavailable.');
+    toast('Account features are temporarily unavailable');
+    return;
+  }
+  try{
+    sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+    await loadUser();
+    if(user)await loadFollowing();
+    if(user)await loadWatched();
+    renderNav();renderStreams();renderAccount();renderFeed();
+    sb.auth.onAuthStateChange(async(event)=>{
+      if(event==='SIGNED_IN'||event==='SIGNED_OUT'||event==='TOKEN_REFRESHED'){
+        await loadUser();
+        if(user){await loadFollowing();await loadWatched()}
+        renderNav();renderStreams();renderAccount();renderFeed();
+        if(event==='SIGNED_IN'&&user){
+          closeModal();
+          toast('Welcome'+(profile?' back, '+profile.username:'')+'!');
+        }
+      }
+    });
+  }catch(error){
+    console.error('Supabase initialization failed:',error);
+    toast('Account features are temporarily unavailable');
+  }
+}
+
 document.addEventListener('DOMContentLoaded',async()=>{
-  sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
   // Clean auth tokens from URL hash
   if(window.location.hash&&(window.location.hash.includes('access_token')||window.location.hash.includes('type=recovery'))){
     setTimeout(()=>{history.replaceState(null,'',window.location.pathname)},100);
   }
-  await loadUser();
-  if(user)await loadFollowing();
-  if(user)await loadWatched();
+  // Public content must render even when the optional auth service is unavailable.
   renderNav();renderFeed();
   deferNonCritical(()=>{renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount()});
+  await initSupabase();
   // Onboarding for new visitors
   if(!localStorage.getItem('unreeled-onboarded')){
     setTimeout(showOnboarding,500);
@@ -2525,17 +2552,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
   if(user&&userWatchlist.length)setTimeout(showWatchlistPopup,1500);
   // Prompt Google users to choose a username
   if(user)setTimeout(checkUsernamePrompt,2500);
-  sb.auth.onAuthStateChange(async(event)=>{
-    if(event==='SIGNED_IN'||event==='SIGNED_OUT'||event==='TOKEN_REFRESHED'){
-      await loadUser();
-      if(user){await loadFollowing();await loadWatched()}
-      renderNav();renderStreams();renderAccount();renderFeed();
-      if(event==='SIGNED_IN'&&user){
-        closeModal();
-        toast('Welcome'+(profile?' back, '+profile.username:'')+'!');
-      }
-    }
-  });
   // Register service worker for PWA
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/sw.js').catch(()=>{});
