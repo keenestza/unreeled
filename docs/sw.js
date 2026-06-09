@@ -1,8 +1,9 @@
-const CACHE_NAME = 'unreeled-v5';
+const CACHE_NAME = 'unreeled-v6';
 const STATIC_ASSETS =[
   '/',
   '/index.html',
   '/manifest.json',
+  '/vendor/supabase.min.js',
 ];
 
 // Install: cache static assets
