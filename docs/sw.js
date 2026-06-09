@@ -1,4 +1,4 @@
-const CACHE_NAME = 'unreeled-v6';
+const CACHE_NAME = 'unreeled-v7';
 const STATIC_ASSETS =[
   '/',
   '/index.html',
