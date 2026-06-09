@@ -678,6 +678,7 @@ function isAdmin(){return profile&&(profile.role==='admin'||profile.role==='mode
 
 // ═══════ HELPERS ═══════
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function escAttr(s){return esc(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function amazonLink(title,mediaType){
   const q=encodeURIComponent(title);
   const cat=mediaType==='disc'?'&i=movies-tv':mediaType==='movie'||mediaType==='tv'?'&i=movies-tv':mediaType==='book'?'&i=stripbooks':mediaType==='game'?'&i=videogames':mediaType==='music'?'&i=music':'';
@@ -700,7 +701,7 @@ function countryFlag(code){if(!code||code.length!==2)return'';const c=code.toUpp
 function countryFlags(m){const cc=(m.countries||[]).filter(Boolean).slice(0,3);if(!cc.length)return'';return cc.map(c=>countryFlag(c)).join('')}
 const CN={US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',FR:'France',DE:'Germany',IT:'Italy',ES:'Spain',JP:'Japan',KR:'South Korea',CN:'China',IN:'India',BR:'Brazil',MX:'Mexico',RU:'Russia',SE:'Sweden',NO:'Norway',DK:'Denmark',FI:'Finland',NL:'Netherlands',BE:'Belgium',AT:'Austria',CH:'Switzerland',IE:'Ireland',NZ:'New Zealand',ZA:'South Africa',AR:'Argentina',CL:'Chile',CO:'Colombia',PE:'Peru',PL:'Poland',CZ:'Czechia',HU:'Hungary',RO:'Romania',TR:'Turkey',TH:'Thailand',PH:'Philippines',ID:'Indonesia',MY:'Malaysia',SG:'Singapore',TW:'Taiwan',HK:'Hong Kong',IL:'Israel',AE:'UAE',SA:'Saudi Arabia',EG:'Egypt',NG:'Nigeria',KE:'Kenya',GH:'Ghana',PT:'Portugal',GR:'Greece',UA:'Ukraine',RS:'Serbia',HR:'Croatia',BG:'Bulgaria',LT:'Lithuania',LV:'Latvia',EE:'Estonia',IS:'Iceland',LU:'Luxembourg',MT:'Malta',CY:'Cyprus',SK:'Slovakia',SI:'Slovenia',BA:'Bosnia',MK:'North Macedonia',AL:'Albania',VN:'Vietnam',MM:'Myanmar',KH:'Cambodia',LA:'Laos',BD:'Bangladesh',PK:'Pakistan',LK:'Sri Lanka',NP:'Nepal',UZ:'Uzbekistan',KZ:'Kazakhstan',GE:'Georgia',AM:'Armenia',BY:'Belarus',MD:'Moldova',PA:'Panama',CR:'Costa Rica',EC:'Ecuador',UY:'Uruguay',PY:'Paraguay',BO:'Bolivia',VE:'Venezuela',DO:'Dominican Republic',GT:'Guatemala',CU:'Cuba',PR:'Puerto Rico',JM:'Jamaica',TT:'Trinidad',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',HT:'Haiti',BB:'Barbados',LC:'Saint Lucia',MA:'Morocco',TN:'Tunisia',DZ:'Algeria',LB:'Lebanon',JO:'Jordan',QA:'Qatar',KW:'Kuwait',BH:'Bahrain',OM:'Oman',IQ:'Iraq',SY:'Syria',AF:'Afghanistan',IR:'Iran',LY:'Libya',SD:'Sudan',TZ:'Tanzania',UG:'Uganda',ZW:'Zimbabwe',ZM:'Zambia',MW:'Malawi',MZ:'Mozambique',AO:'Angola',CM:'Cameroon',SN:'Senegal',CI:"Ivory Coast",ML:'Mali',BF:'Burkina Faso',NE:'Niger',TD:'Chad',MG:'Madagascar',MU:'Mauritius',FJ:'Fiji',PG:'Papua New Guinea',WS:'Samoa',TO:'Tonga',MN:'Mongolia',BT:'Bhutan',MV:'Maldives',BN:'Brunei',TL:'Timor-Leste',LA:'Laos'};
 function meta(r){const m=r.metadata||{},p=[];if(r.media_type==='movie'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.runtime_minutes)p.push(m.runtime_minutes+' min');if(m.original_language&&!(m.countries||[]).length)p.push(m.original_language.toUpperCase());if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes);if(m.ratings?.metacritic)p.push('MC: '+m.ratings.metacritic)}if(r.media_type==='tv'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.season_number&&m.episode_number)p.push('S'+m.season_number+'E'+m.episode_number);else if(m.total_seasons)p.push(m.total_seasons+' season'+(m.total_seasons!==1?'s':''));if(m.networks?.length)p.push(m.networks[0]);if(m.ratings?.rotten_tomatoes)p.push('\uD83C\uDF45 '+m.ratings.rotten_tomatoes)}if(r.media_type==='game'&&m.platforms?.length)p.push(m.platforms[0]);if(r.media_type==='anime'){if(m.studios?.length)p.push(m.studios[0]);if(m.score)p.push('\u2605 '+m.score)}if(r.media_type==='book'){if(m.authors?.length)p.push(m.authors[0]);if(m.publisher)p.push(m.publisher);if(m.page_count)p.push(m.page_count+'pp')}if(r.media_type==='music'){if(m.artists?.length)p.push(m.artists[0]);if(m.formats?.length)p.push(m.formats.join(', '));if(m.labels?.length&&m.labels[0]!=='[no label]')p.push(m.labels[0]);if(m.track_count)p.push(m.track_count+' tracks')}if(r.media_type==='podcast'){if(m.author)p.push(m.author);if(m.episode_count)p.push(m.episode_count+' eps')}if(r.media_type==='boardgame'){if(m.players)p.push(m.players+' players');if(m.playtime_minutes)p.push(m.playtime_minutes+' min')}if(r.media_type==='comic'){if(m.volume)p.push(m.volume);if(m.publisher)p.push(m.publisher)}if(r.media_type==='disc'){const cf=countryFlags(m);if(cf)p.push(cf);if(m.physical_formats?.length)p.push(m.physical_formats.join(' / '));if(m.runtime_minutes)p.push(m.runtime_minutes+' min')}if(r.media_type==='news'){if(m.source_name)p.push(m.source_name)}if(m.streaming){const sn=Object.keys(m.streaming).slice(0,3);if(sn.length)p.push('\uD83D\uDCFA '+sn.join(', '))}return p.join('<span class="s">\u00B7</span>')}
-function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie;if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
+function poster(r,w,h,fs){const t=r.media_type,c=MC[t]||MC.movie;if(r.poster_url)return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px"><img src="'+esc(r.poster_url)+'" alt="'+escAttr(r.title||'Release')+'" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML=\''+c.i+'\';this.remove()"></div>';return'<div class="pb '+t+'" style="width:'+w+'px;height:'+h+'px;font-size:'+fs+'px">'+c.i+'</div>'}
 function tvReleaseBadge(r){const kind=((r.metadata||{}).tv_release_kind||'').toLowerCase();if(r.media_type!=='tv'||!kind)return'';if(kind==='series_premiere')return'<span class="new-badge">Brand New Series</span>';if(kind==='season_premiere')return'<span class="new-badge">New Season</span>';if(kind==='new_episode')return'<span class="new-badge">New Episode</span>';return''}
 function fmtD(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}catch(e){return d}}
 function dayN(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}catch(e){return''}}
@@ -734,6 +735,8 @@ function card(r,i,oc){const c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{}
 
 // ═══════ FEED ═══════
 let searchQ='',sortBy='popularity',feedPage=0,feedFiltered=[],FEED_PAGE_SIZE=30,feedObserver=null,globalSearch=false,filterGenre='',filterHasPoster=false,filterHasSynopsis=false,filterCountry='';
+const HOMEPAGE_SECTION_PREVIEW=4;
+const homepageExpandedSections=new Set();
 
 function getFilteredFeed(){
   const cn={};R.forEach(r=>cn[r.media_type]=(cn[r.media_type]||0)+1);
@@ -915,17 +918,28 @@ function buildHomepageSections(list){
 
   return sections;
 }
-  function renderFeedSection(title, subtitle, items){
+function toggleHomepageSection(key){
+  if(homepageExpandedSections.has(key))homepageExpandedSections.delete(key);
+  else homepageExpandedSections.add(key);
+  renderFeed();
+}
+function renderFeedSection(key, title, subtitle, items){
+  const expanded=homepageExpandedSections.has(key);
+  const visibleItems=expanded?items:items.slice(0,HOMEPAGE_SECTION_PREVIEW);
   let h='<div style="margin-bottom:24px">';
-  h+='<h2 style="font-family:\'Fraunces\',serif;font-size:20px;font-weight:700;margin-bottom:2px">'+esc(title)+'</h2>';
+  h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:2px"><h2 style="font-family:\'Fraunces\',serif;font-size:20px;font-weight:700">'+esc(title)+'</h2><span style="font-size:11px;color:var(--td);white-space:nowrap">'+items.length+' releases</span></div>';
   h+='<p style="font-size:12px;color:var(--td);margin-bottom:12px">'+esc(subtitle)+'</p>';
   h+='<div style="display:grid;grid-template-columns:1fr;gap:8px">';
-  items.forEach((r, i) => {
+  visibleItems.forEach((r, i) => {
     const ri = R.indexOf(r);
     // If we know the absolute index, pass it to openD. Otherwise pass the object itself.
     h += card(r, i, ri >= 0 ? 'openD(' + ri + ')' : 'openD(feedFiltered[' + i + '])');
   });
-  h+='</div></div>';
+  h+='</div>';
+  if(items.length>HOMEPAGE_SECTION_PREVIEW){
+    h+='<button aria-expanded="'+expanded+'" aria-label="'+(expanded?'Show fewer ':'View all ')+escAttr(title)+'" onclick="toggleHomepageSection(\''+key+'\')" style="display:block;width:100%;padding:9px 14px;margin-top:8px;background:var(--el);border:1px solid var(--brd);border-radius:8px;color:var(--ts);font-size:12px;font-weight:600">'+(expanded?'Show less':'View all '+items.length+' releases')+'</button>';
+  }
+  h+='</div>';
   return h;
 }
 function renderFeed(){
@@ -1026,7 +1040,7 @@ function renderFeed(){
       h+='<div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none">';
       recs.forEach(({r,idx})=>{
         const rc=MC[r.media_type]||MC.movie;
-        h+='<div style="flex-shrink:0;width:110px;text-align:center;position:relative"><button onclick="event.stopPropagation();dismissRec(\''+esc(r.title).replace(/'/g,"\\'")+'\')" style="position:absolute;top:2px;right:2px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.7;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✕</button><div onclick="openD('+idx+')" style="cursor:pointer"><div style="width:110px;height:150px;border-radius:10px;overflow:hidden;margin-bottom:6px;border:1px solid var(--brd)">'+(r.poster_url?'<img src="'+esc(r.poster_url)+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">':'<div style="width:100%;height:100%;background:'+rc.c+'22;display:flex;align-items:center;justify-content:center;font-size:28px">'+rc.i+'</div>')+'</div><div style="font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.title)+'</div><div style="font-size:10px;color:var(--ts)">'+rc.l+'</div></div></div>';
+        h+='<div style="flex-shrink:0;width:110px;text-align:center;position:relative"><button onclick="event.stopPropagation();dismissRec(\''+esc(r.title).replace(/'/g,"\\'")+'\')" style="position:absolute;top:2px;right:2px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0.7;transition:opacity .15s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✕</button><div onclick="openD('+idx+')" style="cursor:pointer"><div style="width:110px;height:150px;border-radius:10px;overflow:hidden;margin-bottom:6px;border:1px solid var(--brd)">'+(r.poster_url?'<img src="'+esc(r.poster_url)+'" alt="'+escAttr(r.title||'Release')+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">':'<div style="width:100%;height:100%;background:'+rc.c+'22;display:flex;align-items:center;justify-content:center;font-size:28px">'+rc.i+'</div>')+'</div><div style="font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.title)+'</div><div style="font-size:10px;color:var(--ts)">'+rc.l+'</div></div></div>';
       });
       h+='</div></div>';
     }
@@ -1085,7 +1099,7 @@ function renderFeed(){
 const sections = buildHomepageSections(fl);
 h+='<div style="padding:12px 14px;background:var(--card);border:1px solid var(--brd);border-radius:12px;margin-bottom:18px"><p style="font-size:12px;color:var(--ts);line-height:1.6;margin:0">The homepage is automatically grouped into smarter sections using media type, popularity, TV premiere status, and available metadata. Use the filters above to browse every release for the day.</p></div>';
 sections.forEach(function(s){
-  h += renderFeedSection(s.title, s.subtitle, s.items);
+  h += renderFeedSection(s.key, s.title, s.subtitle, s.items);
 });
   } else {
     const page=fl.slice(0,FEED_PAGE_SIZE);
@@ -1231,7 +1245,7 @@ async function openD(i){
     related.forEach(rel=>{
       const rc=MC[rel.media_type]||MC.movie;
       const ri=R.indexOf(rel);
-      h+='<div onclick="openD('+ri+')" style="flex-shrink:0;width:100px;cursor:pointer;text-align:center"><div style="width:100px;height:140px;border-radius:8px;overflow:hidden;margin-bottom:6px">'+(rel.poster_url?'<img src="'+esc(rel.poster_url)+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;background:'+rc.c+'22;display:flex;align-items:center;justify-content:center;font-size:28px">'+rc.i+'</div>')+'</div><div style="font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(rel.title)+'</div><div style="font-size:10px;color:var(--td)">'+rc.l+'</div></div>';
+      h+='<div onclick="openD('+ri+')" style="flex-shrink:0;width:100px;cursor:pointer;text-align:center"><div style="width:100px;height:140px;border-radius:8px;overflow:hidden;margin-bottom:6px">'+(rel.poster_url?'<img src="'+esc(rel.poster_url)+'" alt="'+escAttr(rel.title||'Release')+'" style="width:100%;height:100%;object-fit:cover">':'<div style="width:100%;height:100%;background:'+rc.c+'22;display:flex;align-items:center;justify-content:center;font-size:28px">'+rc.i+'</div>')+'</div><div style="font-size:11px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(rel.title)+'</div><div style="font-size:10px;color:var(--td)">'+rc.l+'</div></div>';
     });
     h+='</div></div>';
   }
