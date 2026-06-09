@@ -2511,7 +2511,7 @@ async function initSupabase(){
     return;
   }
   try{
-    sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",lock:false,autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+    sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"sb-unreeled-auth",autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
     await loadUser();
     if(user)await loadFollowing();
     if(user)await loadWatched();
