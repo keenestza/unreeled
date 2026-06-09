@@ -1,9 +1,10 @@
-const CACHE_NAME = 'unreeled-v7';
+const CACHE_NAME = 'unreeled-v8';
 const STATIC_ASSETS =[
   '/',
   '/index.html',
   '/manifest.json',
   '/vendor/supabase.min.js',
+  '/assets/merchshake-mark-square.png',
 ];
 
 // Install: cache static assets

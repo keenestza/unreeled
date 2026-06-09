@@ -627,6 +627,19 @@ function amazonLink(title,mediaType){
   const cat=mediaType==='disc'?'&i=movies-tv':mediaType==='movie'||mediaType==='tv'?'&i=movies-tv':mediaType==='book'?'&i=stripbooks':mediaType==='game'?'&i=videogames':mediaType==='music'?'&i=music':'';
   return'https://www.amazon.com/s?k='+q+cat+'&tag='+AMAZON_TAG;
 }
+function merchShakeLink(title){
+  const campaign='utm_source=unreeled&utm_medium=referral&utm_campaign=physical_media';
+  return title
+    ?'https://merchshake.co.za/search?q='+encodeURIComponent(title)+'&'+campaign
+    :'https://merchshake.co.za/collections/home?'+campaign;
+}
+function merchShakeBanner(){
+  return '<a href="'+merchShakeLink('')+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 20px;margin:0 0 20px;background:linear-gradient(135deg,#fff 0%,#f3f4f6 100%);border:1px solid #d8dbe2;border-radius:14px;color:#171923;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.16)">'
+    +'<div style="width:76px;height:76px;padding:7px;border-radius:14px;background:#fff;border:1px solid #d8dbe2;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="/assets/merchshake-mark-square.png" alt="MerchShake" style="display:block;width:100%;height:100%;object-fit:contain"></div>'
+    +'<div style="flex:1;min-width:210px"><div style="font-size:10px;font-weight:700;letter-spacing:1.4px;color:#6b7280;margin-bottom:3px">FROM MERCHSHAKE</div><div style="font-family:\'Fraunces\',serif;font-size:19px;font-weight:700;line-height:1.2;margin-bottom:4px">Love owning the real thing?</div><div style="font-size:12px;line-height:1.5;color:#555b68">Shop Blu-rays, DVDs, vinyl, video games, music and collectibles.</div><div style="font-size:11px;font-weight:700;color:#b91c1c;margin-top:5px">🇿🇦 Delivery within South Africa only</div></div>'
+    +'<span style="padding:9px 15px;border-radius:8px;background:#171923;color:#fff;font-size:12px;font-weight:700;white-space:nowrap">Explore MerchShake →</span>'
+    +'</a>';
+}
 function countryFlag(code){if(!code||code.length!==2)return'';const c=code.toUpperCase();return String.fromCodePoint(...[...c].map(ch=>0x1F1E6+ch.charCodeAt(0)-65))}
 function countryFlags(m){const cc=(m.countries||[]).filter(Boolean).slice(0,3);if(!cc.length)return'';return cc.map(c=>countryFlag(c)).join('')}
 const CN={US:'United States',GB:'United Kingdom',CA:'Canada',AU:'Australia',FR:'France',DE:'Germany',IT:'Italy',ES:'Spain',JP:'Japan',KR:'South Korea',CN:'China',IN:'India',BR:'Brazil',MX:'Mexico',RU:'Russia',SE:'Sweden',NO:'Norway',DK:'Denmark',FI:'Finland',NL:'Netherlands',BE:'Belgium',AT:'Austria',CH:'Switzerland',IE:'Ireland',NZ:'New Zealand',ZA:'South Africa',AR:'Argentina',CL:'Chile',CO:'Colombia',PE:'Peru',PL:'Poland',CZ:'Czechia',HU:'Hungary',RO:'Romania',TR:'Turkey',TH:'Thailand',PH:'Philippines',ID:'Indonesia',MY:'Malaysia',SG:'Singapore',TW:'Taiwan',HK:'Hong Kong',IL:'Israel',AE:'UAE',SA:'Saudi Arabia',EG:'Egypt',NG:'Nigeria',KE:'Kenya',GH:'Ghana',PT:'Portugal',GR:'Greece',UA:'Ukraine',RS:'Serbia',HR:'Croatia',BG:'Bulgaria',LT:'Lithuania',LV:'Latvia',EE:'Estonia',IS:'Iceland',LU:'Luxembourg',MT:'Malta',CY:'Cyprus',SK:'Slovakia',SI:'Slovenia',BA:'Bosnia',MK:'North Macedonia',AL:'Albania',VN:'Vietnam',MM:'Myanmar',KH:'Cambodia',LA:'Laos',BD:'Bangladesh',PK:'Pakistan',LK:'Sri Lanka',NP:'Nepal',UZ:'Uzbekistan',KZ:'Kazakhstan',GE:'Georgia',AM:'Armenia',BY:'Belarus',MD:'Moldova',PA:'Panama',CR:'Costa Rica',EC:'Ecuador',UY:'Uruguay',PY:'Paraguay',BO:'Bolivia',VE:'Venezuela',DO:'Dominican Republic',GT:'Guatemala',CU:'Cuba',PR:'Puerto Rico',JM:'Jamaica',TT:'Trinidad',HN:'Honduras',SV:'El Salvador',NI:'Nicaragua',HT:'Haiti',BB:'Barbados',LC:'Saint Lucia',MA:'Morocco',TN:'Tunisia',DZ:'Algeria',LB:'Lebanon',JO:'Jordan',QA:'Qatar',KW:'Kuwait',BH:'Bahrain',OM:'Oman',IQ:'Iraq',SY:'Syria',AF:'Afghanistan',IR:'Iran',LY:'Libya',SD:'Sudan',TZ:'Tanzania',UG:'Uganda',ZW:'Zimbabwe',ZM:'Zambia',MW:'Malawi',MZ:'Mozambique',AO:'Angola',CM:'Cameroon',SN:'Senegal',CI:"Ivory Coast",ML:'Mali',BF:'Burkina Faso',NE:'Niger',TD:'Chad',MG:'Madagascar',MU:'Mauritius',FJ:'Fiji',PG:'Papua New Guinea',WS:'Samoa',TO:'Tonga',MN:'Mongolia',BT:'Bhutan',MV:'Maldives',BN:'Brunei',TL:'Timor-Leste',LA:'Laos'};
@@ -918,6 +931,10 @@ function renderFeed(){
     }
   }
 
+  if(isL&&!searchQ&&cf==='all'&&!filterGenre&&!filterCountry){
+    h+=merchShakeBanner();
+  }
+
   // Personalized recommendations
   if(isL&&user&&!searchQ&&cf==='all'&&!filterGenre&&!filterCountry){
     const recs=getRecommendations(6);
@@ -1087,6 +1104,10 @@ async function openD(i){
       if(pm.physical_note)h+='<p style="font-size:11px;color:var(--ts);margin-top:8px">'+esc(pm.physical_note)+'</p>';
       h+='</div>';
     }
+  }
+
+  if(['movie','tv','disc','game','music'].includes(r.media_type)){
+    h+='<a href="'+merchShakeLink(r.title)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;background:linear-gradient(135deg,#fff,#f3f4f6);border:1px solid #d8dbe2;border-radius:12px;margin-bottom:16px;color:#171923;text-decoration:none"><span style="width:48px;height:48px;padding:4px;border-radius:10px;background:#fff;border:1px solid #d8dbe2;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="/assets/merchshake-mark-square.png" alt="MerchShake" style="display:block;width:100%;height:100%;object-fit:contain"></span><span style="flex:1;min-width:180px"><strong style="display:block;font-size:13px;margin-bottom:2px">Find physical media on MerchShake</strong><span style="display:block;font-size:11px;color:#626875">Search for '+esc(r.title)+' · Delivery within South Africa only</span></span><strong style="font-size:11px;white-space:nowrap">Search MerchShake →</strong></a>';
   }
 
     // Streaming availability
