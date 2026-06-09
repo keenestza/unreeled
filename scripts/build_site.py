@@ -21,16 +21,10 @@ Usage:
 
 import json
 import glob
+import argparse
 from pathlib import Path
 from datetime import datetime, timezone
 from collections import Counter
-
-
-# Keep the first paint fast by limiting how much older release data is embedded
-# directly into index.html. Archive stats still include the full dataset.
-INLINE_RECENT_DAYS = 45
-HISTORICAL_MAX_PER_TYPE = 12
-HISTORICAL_MAX_TOTAL = 90
 
 
 def utcnow_iso():
@@ -200,7 +194,7 @@ def compute_archive_stats(all_data):
     }
 
 
-def build():
+def build(generate_seo=True):
     project_root = Path(__file__).parent.parent
     docs_dir = project_root / "docs"
 
@@ -238,21 +232,9 @@ def build():
     # ── Process latest releases for display ──
     latest_releases = process_releases(latest_data.get("releases", []))
 
-    # ── Process only a recent slice of historical dates for inline browsing ──
-    # Older dates still remain in docs/data and are reflected in archive stats,
-    # but we do not embed the full archive into index.html anymore.
-    historical = {}
+    # Keep the full date index available without embedding historical releases.
+    # The browser fetches each archive date from docs/data only when requested.
     sorted_dates_desc = sorted(all_data.keys(), reverse=True)
-    recent_dates = sorted_dates_desc[:INLINE_RECENT_DAYS]
-
-    for date_str in recent_dates:
-        data = all_data[date_str]
-        processed = process_releases(
-            data.get("releases", []),
-            max_per_type=HISTORICAL_MAX_PER_TYPE,
-            max_total=HISTORICAL_MAX_TOTAL,
-        )
-        historical[date_str] = processed
 
     # ── Compute trending ──
     trending = compute_trending(all_data)
@@ -268,14 +250,14 @@ def build():
     inject_data = {
         "latest_date": latest_date,
         "built_at": utcnow_iso(),
-        "dates_available": recent_dates,
+        "dates_available": sorted_dates_desc,
         "latest": {
             "date": latest_date,
             "total_releases": latest_data.get("total_releases", len(latest_releases)),
             "source_stats": latest_data.get("source_stats", {}),
             "releases": latest_releases,
         },
-        "historical": historical,
+        "historical": {},
         "trending": trending,
         "archive": archive,
     }
@@ -309,11 +291,11 @@ def build():
     file_size = output_file.stat().st_size / 1024
     print(f"Built {output_file} ({file_size:.0f} KB)")
     print(f"  Latest: {len(latest_releases)} releases from {latest_date}")
-    print(f"  Inline historical dates: {len(historical)} of {len(all_data)} total")
+    print(f"  Inline historical dates: 0 of {len(all_data)} total")
     print(f"  Trending: {len(trending)} titles")
 
-    # Generate individual SEO release pages
-    generate_release_pages(all_data, docs_dir)
+    if generate_seo:
+        generate_release_pages(all_data, docs_dir)
 
     return True
 
@@ -443,5 +425,12 @@ h1{{font-size:24px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px}}
 
 # Executable block moved to the very bottom
 if __name__ == "__main__":
-    success = build()
+    parser = argparse.ArgumentParser(description="Build the Unreeled static site")
+    parser.add_argument(
+        "--homepage-only",
+        action="store_true",
+        help="Build index.html without regenerating individual SEO release pages",
+    )
+    args = parser.parse_args()
+    success = build(generate_seo=not args.homepage_only)
     exit(0 if success else 1)

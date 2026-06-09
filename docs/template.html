@@ -438,6 +438,7 @@ const STM=[{t:"Platforms & Studios",items:[{n:"Netflix Originals",i:"\uD83D\uDCF
 let cf="all",cr=null,ccf="all",rv=new Set(),curPage="feed",selSpoiler="none";
 let vd=D.latest_date||"",R=(D.latest?D.latest.releases:D.releases)||[];
 const dates=D.dates_available||[vd];
+D.historical=D.historical||{};
 
 // ═══════ TOAST ═══════
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
@@ -649,7 +650,30 @@ function tvReleaseBadge(r){const kind=((r.metadata||{}).tv_release_kind||'').toL
 function fmtD(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'})}catch(e){return d}}
 function dayN(d){try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}catch(e){return''}}
 function timeAgo(ts){const s=Math.floor((Date.now()-new Date(ts))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
-function loadDate(d){vd=d;R=(D.historical&&D.historical[d])?D.historical[d]:(D.latest&&D.latest.date===d)?D.latest.releases:[];cf="all";renderFeed()}
+let dateLoadToken=0;
+async function loadDate(d){
+  const token=++dateLoadToken;
+  vd=d;cf="all";globalSearch=false;
+  if(D.latest&&D.latest.date===d){R=D.latest.releases||[];renderFeed();return}
+  if(D.historical[d]){R=D.historical[d];renderFeed();return}
+  R=[];
+  document.getElementById('p-feed').innerHTML='<div class="empty"><h2>Loading releases...</h2><p>'+fmtD(d)+'</p></div>';
+  try{
+    const response=await fetch('/data/releases_'+encodeURIComponent(d)+'.json');
+    if(!response.ok)throw new Error('Archive request failed ('+response.status+')');
+    const data=await response.json();
+    D.historical[d]=Array.isArray(data.releases)?data.releases:[];
+    if(token!==dateLoadToken)return;
+    R=D.historical[d];
+    renderFeed();
+  }catch(error){
+    if(token!==dateLoadToken)return;
+    console.error('Could not load archive date:',error);
+    R=[];
+    renderFeed();
+    toast('Could not load releases for '+fmtD(d));
+  }
+}
 function selectedDateTotal(){return R.length}
 function card(r,i,oc){const c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{},hs=(sp.light||0)+(sp.medium||0)+(sp.heavy||0)>0;let dots='';if(hs){dots='<span class="sds">';if(sp.light)dots+='<i class="l"></i>';if(sp.medium)dots+='<i class="m"></i>';if(sp.heavy)dots+='<i class="h"></i>';dots+='</span> Spoilers'}const gt=(r.genres||[]).slice(0,3).map(g=>'<span>'+esc(g)+'</span>').join('');const isNew=r.release_date===D.latest_date;const nbadge=r.media_type==='tv'?tvReleaseBadge(r):(isNew?'<span class="new-badge">New</span>':'');const strbadge=(r.metadata||{}).digital_release?'<span style="display:inline-block;padding:2px 6px;background:rgba(14,165,233,0.15);color:#0ea5e9;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-left:4px;vertical-align:middle">\uD83D\uDCFA Streaming</span>':'';return'<div class="rc t-'+r.media_type+'" onclick="'+oc+'" style="animation-delay:'+Math.min(i*.03,.3)+'s">'+poster(r,68,95,24)+'<div class="ri"><div class="rt"><div class="rn">'+esc(r.title)+nbadge+strbadge+'</div><span class="mb '+r.media_type+'">'+c.l+'</span></div><div class="rm">'+meta(r)+'</div>'+(r.synopsis?'<p class="rs">'+esc(r.synopsis)+'</p>':'')+'<div class="rf"><div class="gt">'+gt+'</div><div class="rst"><span>\uD83D\uDCAC '+(r.comment_count||0)+'</span>'+(hs?'<span>'+dots+'</span>':'')+'</div></div></div></div>'}
 
@@ -659,11 +683,11 @@ let searchQ='',sortBy='popularity',feedPage=0,feedFiltered=[],FEED_PAGE_SIZE=30,
 function getFilteredFeed(){
   const cn={};R.forEach(r=>cn[r.media_type]=(cn[r.media_type]||0)+1);
   let baseList=R;
-  // Global search: combine all dates
-  if(globalSearch&&searchQ&&D.historical){
+  // Search the latest day plus archive dates already fetched this session.
+  if(globalSearch&&searchQ){
     baseList=[];
-    for(const d of dates){
-      const dayReleases=D.historical[d]||[];
+    const loadedDates={[D.latest_date]:(D.latest&&D.latest.releases)||[],...D.historical};
+    for(const[d,dayReleases]of Object.entries(loadedDates)){
       dayReleases.forEach(r=>{r._fromDate=d;baseList.push(r)});
     }
     baseList.forEach(r=>cn[r.media_type]=(cn[r.media_type]||0)+1);
@@ -963,7 +987,7 @@ function renderFeed(){
   h+='</div><p class="sub">'+dayN(vd)+' — <b>'+R.length+' releases</b></p>';
 
   // Search bar
-  h+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:180px;position:relative"><input class="finput" id="search-box" type="text" placeholder="🔍 Search releases..." value="'+esc(searchQ)+'" style="margin:0;padding-left:12px;padding-right:32px" oninput="searchQ=this.value;renderFeed()"><span onclick="searchQ=\'\';renderFeed()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--td);font-size:14px;display:'+(searchQ?'block':'none')+'">✕</span></div><select class="finput" style="width:auto;margin:0;min-width:130px" onchange="sortBy=this.value;renderFeed()"><option value="popularity"'+(sortBy==='popularity'?' selected':'')+'>Popular first</option><option value="rating"'+(sortBy==='rating'?' selected':'')+'>Highest rated</option><option value="alpha"'+(sortBy==='alpha'?' selected':'')+'>A → Z</option><option value="alpha-z"'+(sortBy==='alpha-z'?' selected':'')+'>Z → A</option><option value="type"'+(sortBy==='type'?' selected':'')+'>By type</option></select><label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap"><input type="checkbox" id="global-search" '+(globalSearch?'checked':'')+' onchange="globalSearch=this.checked;renderFeed()" style="accent-color:var(--accent)">All dates</label></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:180px;position:relative"><input class="finput" id="search-box" type="text" placeholder="🔍 Search releases..." value="'+esc(searchQ)+'" style="margin:0;padding-left:12px;padding-right:32px" oninput="searchQ=this.value;renderFeed()"><span onclick="searchQ=\'\';renderFeed()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--td);font-size:14px;display:'+(searchQ?'block':'none')+'">✕</span></div><select class="finput" style="width:auto;margin:0;min-width:130px" onchange="sortBy=this.value;renderFeed()"><option value="popularity"'+(sortBy==='popularity'?' selected':'')+'>Popular first</option><option value="rating"'+(sortBy==='rating'?' selected':'')+'>Highest rated</option><option value="alpha"'+(sortBy==='alpha'?' selected':'')+'>A → Z</option><option value="alpha-z"'+(sortBy==='alpha-z'?' selected':'')+'>Z → A</option><option value="type"'+(sortBy==='type'?' selected':'')+'>By type</option></select><label title="Search today and archive dates opened in this session" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap"><input type="checkbox" id="global-search" '+(globalSearch?'checked':'')+' onchange="globalSearch=this.checked;renderFeed()" style="accent-color:var(--accent)">Loaded dates</label></div>';
 
   // Advanced filters row
   const allGenres=new Set();R.forEach(r=>(r.genres||[]).forEach(g=>allGenres.add(g)));
