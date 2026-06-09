@@ -32,6 +32,7 @@
 [data-theme="light"]{--bg:#f5f5f7;--card:#ffffff;--el:#f0f0f3;--hov:#e8e8ec;--accent:#e85d2a;--agl:rgba(232,93,42,0.1);--text:#1a1a2e;--ts:#4a4a5e;--td:#8a8a9e;--brd:#dddde5;--bl:#c8c8d4;--sl:#2aa66e;--slb:rgba(42,166,110,0.08);--slr:rgba(42,166,110,0.2);--sm:#c8960a;--smb:rgba(200,150,10,0.08);--smr:rgba(200,150,10,0.2);--sh:#dc2626;--shb:rgba(220,38,38,0.06);--shr:rgba(220,38,38,0.2)}
 [data-theme="light"] .nav{background:rgba(245,245,247,0.92)}
 [data-theme="light"] .bnav{background:rgba(245,245,247,0.96)}
+[data-theme="light"] .mobile-search{background:rgba(245,245,247,0.92)}
 [data-theme="light"] .modal-bg{background:rgba(0,0,0,0.3)}
 [data-theme="light"] .pb img{box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 /* THEME TOGGLE */
@@ -254,6 +255,7 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .bnav button .bi{font-size:18px;line-height:1}
 .bnav button.on{color:var(--accent)}
 .bnav button.on .bi{transform:scale(1.1)}
+.mobile-search{display:none}
 /* DESIGN POLISH */
 .rc{background:var(--card);border:1px solid var(--brd);border-radius:12px;overflow:hidden;transition:all .25s ease}
 .rc:hover{border-color:var(--bl);background:var(--el);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
@@ -288,6 +290,12 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
   .nav{padding:0 12px;height:50px}
   .tabs{display:none}
   .bnav{display:flex}
+  .mobile-search{position:sticky;top:50px;z-index:999;display:flex;padding:7px 12px;background:rgba(8,9,12,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--brd)}
+  .mobile-search-inner{display:flex;align-items:center;gap:7px;width:100%;max-width:920px;margin:0 auto;padding:7px 10px;background:var(--el);border:1px solid var(--brd);border-radius:9px}
+  .mobile-search-inner:focus-within{border-color:var(--accent)}
+  .mobile-search-inner input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-size:13px}
+  .mobile-search-inner input::placeholder{color:var(--ts)}
+  .mobile-search-clear{display:none;color:var(--ts);font-size:13px;padding:1px 3px}
   .page{padding:14px 12px 80px}
   h1.hero{font-size:24px}
   .sub{font-size:13px;margin-bottom:16px}
@@ -388,6 +396,13 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
   <span id="nav-r"></span>
 </div>
 </nav>
+<div class="mobile-search">
+  <div class="mobile-search-inner">
+    <span aria-hidden="true">&#128269;</span>
+    <input id="mobile-search-box" type="search" placeholder="Search today's releases" aria-label="Search releases" oninput="mobileSearch(this.value)">
+    <button class="mobile-search-clear" id="mobile-search-clear" onclick="clearMobileSearch()" aria-label="Clear search">&#10005;</button>
+  </div>
+</div>
 <div class="umenu" id="umenu"></div>
 <!-- AUTH MODAL -->
 <div class="modal-bg" id="auth-modal" onclick="if(event.target===this)closeModal()">
@@ -442,6 +457,25 @@ D.historical=D.historical||{};
 
 // ═══════ TOAST ═══════
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+function syncMobileSearch(){
+  const input=document.getElementById('mobile-search-box'),clear=document.getElementById('mobile-search-clear');
+  if(input&&input.value!==searchQ)input.value=searchQ;
+  if(clear)clear.style.display=searchQ?'block':'none';
+}
+function mobileSearch(value){
+  searchQ=value;
+  if(curPage!=='feed')go('feed');
+  renderFeed();
+  syncMobileSearch();
+}
+function clearMobileSearch(){
+  searchQ='';
+  if(curPage!=='feed')go('feed');
+  renderFeed();
+  syncMobileSearch();
+  document.getElementById('mobile-search-box')?.focus();
+}
 
 // ═══════ THEME ═══════
 function toggleTheme(){
@@ -875,6 +909,7 @@ function buildHomepageSections(list){
 }
 function renderFeed(){
   feedPage=0;
+  syncMobileSearch();
   const{fl,cn}=getFilteredFeed();
   feedFiltered=fl;
   const isL=vd===D.latest_date;
