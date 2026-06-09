@@ -375,6 +375,9 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 .onboard-steps{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
 .onboard-steps span{width:8px;height:8px;border-radius:50%;background:var(--brd)}
 .onboard-steps span.on{background:var(--accent)}
+.today-compact{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;margin-bottom:18px;background:var(--card);border:1px solid var(--brd);border-radius:12px}
+.today-compact strong{font-family:'Fraunces',serif;font-size:18px}
+.today-compact span{font-size:12px;color:var(--ts)}
 </style>
 </head>
 <body>
@@ -454,6 +457,15 @@ let cf="all",cr=null,ccf="all",rv=new Set(),curPage="feed",selSpoiler="none";
 let vd=D.latest_date||"",R=(D.latest?D.latest.releases:D.releases)||[];
 const dates=D.dates_available||[vd];
 D.historical=D.historical||{};
+const previousVisitCount=parseInt(localStorage.getItem('unreeled-visit-count')||'0',10);
+const isNewVisit=!sessionStorage.getItem('unreeled-visit-active');
+const visitCount=isNewVisit?previousVisitCount+1:Math.max(previousVisitCount,1);
+const hasStoredSession=!!localStorage.getItem('sb-unreeled-auth');
+if(isNewVisit){
+  sessionStorage.setItem('unreeled-visit-active','1');
+  localStorage.setItem('unreeled-visit-count',String(visitCount));
+}
+let welcomeHeroExpanded=visitCount===1&&!hasStoredSession&&!localStorage.getItem('unreeled-welcome-collapsed');
 
 // ═══════ TOAST ═══════
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
@@ -475,6 +487,15 @@ function clearMobileSearch(){
   renderFeed();
   syncMobileSearch();
   document.getElementById('mobile-search-box')?.focus();
+}
+function collapseWelcomeHero(){
+  welcomeHeroExpanded=false;
+  localStorage.setItem('unreeled-welcome-collapsed','1');
+  renderFeed();
+}
+function expandWelcomeHero(){
+  welcomeHeroExpanded=true;
+  renderFeed();
 }
 
 // ═══════ THEME ═══════
@@ -915,10 +936,11 @@ function renderFeed(){
   const isL=vd===D.latest_date;
   let h='';
 
-  // Landing hero for non-logged-in visitors
-  if(!user&&isL&&!searchQ){
+  // Show the marketing introduction only during an anonymous visitor's first session.
+  if(!user&&isL&&!searchQ&&welcomeHeroExpanded){
     const totalTypes=Object.keys(cn).length;
-    h+='<div style="padding:32px 24px;background:linear-gradient(145deg,#0f1014,#1a1020);border:1px solid var(--brd);border-radius:16px;margin-bottom:24px;text-align:center">';
+    h+='<div style="position:relative;padding:32px 24px;background:linear-gradient(145deg,#0f1014,#1a1020);border:1px solid var(--brd);border-radius:16px;margin-bottom:24px;text-align:center">';
+    h+='<button onclick="collapseWelcomeHero()" style="position:absolute;top:10px;right:12px;padding:5px 9px;border-radius:6px;color:var(--ts);font-size:11px;background:var(--el);border:1px solid var(--brd)">Show less</button>';
     h+='<div style="font-size:36px;margin-bottom:8px">🎬📺📖🎮🎌🎵</div>';
     h+='<h1 style="font-family:\'Fraunces\',serif;font-size:28px;font-weight:700;letter-spacing:-1.2px;line-height:1.15;margin-bottom:10px">Your daily hub for<br><span style="background:linear-gradient(90deg,var(--accent),#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">new releases</span></h1>';
     h+='<p style="color:var(--ts);font-size:14px;line-height:1.6;max-width:420px;margin:0 auto 18px">Track <b style="color:var(--text)">'+R.length+'+ daily releases</b> across '+totalTypes+' media types. Watchlist titles, get email alerts, write reviews, and never miss a release.</p>';
@@ -932,6 +954,8 @@ function renderFeed(){
     h+='<span style="font-size:11px;color:var(--td)">⭐ Watchlist & reviews</span>';
     h+='</div><div style="display:flex;gap:12px;justify-content:center;margin-top:14px"><a onclick="go(\'privacy\');renderPrivacy()" style="font-size:11px;color:var(--td);cursor:pointer;text-decoration:underline">Privacy Policy</a><a onclick="go(\'rules\');renderRules()" style="font-size:11px;color:var(--td);cursor:pointer;text-decoration:underline">Community Rules</a>';
     h+='</div></div>';
+  } else if(isL&&!searchQ) {
+    h+='<div class="today-compact"><div><strong>Today: '+R.length+'+ releases</strong><div><span>'+dayN(vd)+' across '+Object.keys(cn).length+' media types</span></div></div><div style="display:flex;gap:6px">'+(!user?'<button onclick="expandWelcomeHero()" style="padding:6px 10px;border-radius:7px;color:var(--ts);font-size:11px">About</button>':'')+'<button onclick="document.querySelector(\'.fbar\')?.scrollIntoView({behavior:\'smooth\'})" style="padding:6px 11px;border-radius:7px;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:11px;white-space:nowrap">Browse</button></div></div>';
   } else {
     h+='<h1 class="hero">'+(isL?'Today in Media':'Releases')+'</h1>';
   }
@@ -1123,6 +1147,7 @@ let detailComments=[];
 async function openD(i){
   cr=typeof i==='object'?i:R[i];
   if(!cr){toast('Release not found');return}
+  scheduleOnboarding(2500);
   rv=new Set();ccf='all';selSpoiler='none';
   const r=cr,c=MC[r.media_type]||MC.movie,sp=r.spoiler_counts||{};
   const rk=releaseKey(r);
@@ -1439,7 +1464,10 @@ async function modDismissReports(cid){
 
 // ═══════ WATCHLIST ═══════
 async function toggleWL(){
-  if(!user)return showAuth('login');
+  if(!user){
+    if(offerOnboarding())return;
+    return showAuth('login');
+  }
   const rk=releaseKey(cr);
   if(isWatchlisted(rk)){
     const{error}=await sb.from('watchlist').delete().eq('user_id',user.id).eq('release_key',rk);
@@ -2621,11 +2649,9 @@ document.addEventListener('DOMContentLoaded',async()=>{
   // Public content must render even when the optional auth service is unavailable.
   renderNav();renderFeed();
   deferNonCritical(()=>{renderTrending();renderGenres();renderArchive();renderCalendar();renderStreams();renderAccount()});
+  // Let first-time visitors browse uninterrupted; offer guidance on a return visit.
+  if(visitCount>1)scheduleOnboarding(5000);
   await initSupabase();
-  // Onboarding for new visitors
-  if(!localStorage.getItem('unreeled-onboarded')){
-    setTimeout(showOnboarding,500);
-  }
   // Check if any watchlisted items are trending
   if(user)setTimeout(checkTrendingWatchlist,2000);
   // Show watchlist quick summary
@@ -2933,6 +2959,7 @@ function getRecommendations(max){
 
 // ═══════ ONBOARDING ═══════
 let onboardStep=0;
+let onboardingTimer=null;
 const onboardSteps=[
   {icon:'\uD83C\uDF89',title:'Welcome to Unreeled!',body:'Your daily tracker for movies, TV, books, games, anime, music and podcasts. Let\'s get you set up in 30 seconds.'},
   {icon:'\uD83D\uDCE1',title:'Subscribe to Streams',body:'Pick your favorite media types to get personalized daily digests. Head to the Streams tab to subscribe.'},
@@ -2942,8 +2969,26 @@ const onboardSteps=[
 ];
 
 function showOnboarding(){
+  if(!shouldOfferOnboarding())return;
+  if(onboardingTimer){clearTimeout(onboardingTimer);onboardingTimer=null}
   onboardStep=0;
   renderOnboardStep();
+}
+
+function shouldOfferOnboarding(){
+  const authOpen=document.getElementById('auth-modal')?.classList.contains('show');
+  return !authOpen&&!localStorage.getItem('unreeled-onboarded')&&!(user&&profile&&profile.onboarding_complete);
+}
+
+function scheduleOnboarding(delay){
+  if(!shouldOfferOnboarding()||onboardingTimer)return;
+  onboardingTimer=setTimeout(()=>{onboardingTimer=null;showOnboarding()},delay||1500);
+}
+
+function offerOnboarding(){
+  if(!shouldOfferOnboarding())return false;
+  showOnboarding();
+  return true;
 }
 
 function renderOnboardStep(){
@@ -2959,6 +3004,7 @@ function renderOnboardStep(){
 }
 
 async function finishOnboarding(){
+  if(onboardingTimer){clearTimeout(onboardingTimer);onboardingTimer=null}
   document.getElementById('onboard-overlay').style.display='none';
   localStorage.setItem('unreeled-onboarded','1');
   if(user){
