@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "unreeled-analytics",
+  "main": "src/index.js",
+  "compatibility_date": "2026-06-10",
+  "d1_databases": [
+    {
+      "binding": "ANALYTICS_DB",
+      "database_name": "unreeled-analytics",
+      "database_id": "25c1db11-40be-4469-959f-01b63f5bfb7e"
+    }
+  ]
+}

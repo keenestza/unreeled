@@ -444,8 +444,47 @@ h1.hero{font-family:'Fraunces',serif;font-size:32px;font-weight:700;letter-spaci
 // ═══════ SUPABASE ═══════
 const SB_URL='https://zqxivnhfvhgphuqmahkg.supabase.co';
 const AMAZON_TAG='unreeled-20'; // Amazon Associates tag
+const ANALYTICS_URL='https://unreeled-analytics.keenest.workers.dev/event';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxeGl2bmhmdmhncGh1cW1haGtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMTA5OTQsImV4cCI6MjA4Nzc4Njk5NH0.GlgESEQPREYYJ5dglOLSi5NOGDEnINOJU8VpKrfSiLw';
 let sb,user=null,profile=null,userSubs=[],userWatchlist=[];
+let authIntent='login',searchAnalyticsTimer=null,analyticsSectionObserver=null;
+let reachedAnalyticsSections=new Set();
+try{reachedAnalyticsSections=new Set(JSON.parse(sessionStorage.getItem('unreeled-reached-sections')||'[]'))}catch(e){}
+
+function analyticsDevice(){
+  return innerWidth<640?'mobile':innerWidth<1024?'tablet':'desktop';
+}
+function trackEvent(event,properties){
+  const payload=JSON.stringify({event:event,page:location.pathname,device:analyticsDevice(),properties:properties||{}});
+  try{
+    if(navigator.sendBeacon&&navigator.sendBeacon(ANALYTICS_URL,new Blob([payload],{type:'text/plain;charset=UTF-8'})))return;
+    fetch(ANALYTICS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:payload,keepalive:true}).catch(()=>{});
+  }catch(e){}
+}
+function resultBucket(total){
+  return total===0?'0':total<=5?'1-5':total<=20?'6-20':total<=50?'21-50':'51+';
+}
+function trackSearchUsage(source){
+  clearTimeout(searchAnalyticsTimer);
+  searchAnalyticsTimer=setTimeout(()=>trackEvent('search_used',{source:source,has_query:!!searchQ,result_bucket:resultBucket(feedFiltered.length)}),700);
+}
+function applyFilter(filter,value){
+  trackEvent('filter_used',{filter:filter,value:String(value)});
+  renderFeed();
+}
+function observeAnalyticsSections(){
+  if(analyticsSectionObserver)analyticsSectionObserver.disconnect();
+  analyticsSectionObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+    if(!entry.isIntersecting)return;
+    const section=entry.target.dataset.analyticsSection;
+    if(!section||reachedAnalyticsSections.has(section))return;
+    reachedAnalyticsSections.add(section);
+    sessionStorage.setItem('unreeled-reached-sections',JSON.stringify([...reachedAnalyticsSections]));
+    trackEvent('section_reached',{section:section});
+    analyticsSectionObserver.unobserve(entry.target);
+  }),{threshold:.25});
+  document.querySelectorAll('[data-analytics-section]').forEach(el=>analyticsSectionObserver.observe(el));
+}
 
 // ═══════ DATA ═══════
 const D=__RELEASE_DATA_PLACEHOLDER__;
@@ -479,12 +518,14 @@ function mobileSearch(value){
   searchQ=value;
   if(curPage!=='feed')go('feed');
   renderFeed();
+  trackSearchUsage('mobile_header');
   syncMobileSearch();
 }
 function clearMobileSearch(){
   searchQ='';
   if(curPage!=='feed')go('feed');
   renderFeed();
+  trackSearchUsage('mobile_header');
   syncMobileSearch();
   document.getElementById('mobile-search-box')?.focus();
 }
@@ -569,6 +610,8 @@ function renderNav(){
 
 // ═══════ AUTH MODAL ═══════
 function showAuth(mode){
+  authIntent=mode;
+  if(mode==='signup')trackEvent('signup_started',{source:'auth_modal'});
   const box=document.getElementById('auth-box');
   if(mode==='signup'){
     box.innerHTML='<button class="close" onclick="closeModal()">\u2715</button><h2>Join Unreeled</h2><p class="ms">Track releases, build watchlists, and join the discussion.</p><div class="ferr" id="aerr"></div><div class="fok" id="aok"></div><button class="fbtn" onclick="doGoogleAuth()" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#fff;color:#333;border:1px solid var(--brd);margin-bottom:10px"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continue with Google</button><div style="display:flex;align-items:center;gap:12px;margin:14px 0"><div style="flex:1;height:1px;background:var(--brd)"></div><span style="font-size:11px;color:var(--td)">or</span><div style="flex:1;height:1px;background:var(--brd)"></div></div><input class="finput" id="a-email" placeholder="Email address" type="email"><input class="finput" id="a-user" placeholder="Choose a username" maxlength="20"><button class="fbtn" id="a-btn" onclick="doMagicSignup()">Send me a sign-in link</button><p class="flink">Already have an account? <a onclick="showAuth(\'login\')">Log in</a></p>';
@@ -582,11 +625,18 @@ function showErr(msg){const e=document.getElementById('aerr');if(e){e.textConten
 function showOk(msg){const e=document.getElementById('aok');if(e){e.textContent=msg;e.classList.add('show')}}
 
 async function doGoogleAuth(){
+  if(authIntent==='signup'){
+    localStorage.setItem('unreeled-signup-pending','google');
+    trackEvent('signup_submitted',{method:'google'});
+  }
   const{error}=await sb.auth.signInWithOAuth({
     provider:'google',
     options:{redirectTo:'https://unreeled.co.za/'}
   });
-  if(error)showErr(error.message);
+  if(error){
+    localStorage.removeItem('unreeled-signup-pending');
+    showErr(error.message);
+  }
 }
 
 async function doMagicSignup(){
@@ -607,6 +657,8 @@ async function doMagicSignup(){
   document.getElementById('a-btn').disabled=false;
   document.getElementById('a-btn').textContent='Send me a sign-in link';
   if(error)return showErr(error.message);
+  localStorage.setItem('unreeled-signup-pending','magic_link');
+  trackEvent('signup_submitted',{method:'magic_link'});
   showOk('\u2709\uFE0F Check your email! Click the link to sign in.');
 }
 
@@ -691,7 +743,7 @@ function merchShakeLink(title){
     :'https://merchshake.co.za/collections/home?'+campaign;
 }
 function merchShakeBanner(){
-  return '<a href="'+merchShakeLink('')+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 20px;margin:0 0 20px;background:linear-gradient(135deg,#fff 0%,#f3f4f6 100%);border:1px solid #d8dbe2;border-radius:14px;color:#171923;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.16)">'
+  return '<a href="'+merchShakeLink('')+'" target="_blank" rel="noopener" data-analytics-section="merchshake_banner" onclick="trackEvent(\'merchshake_click\',{placement:\'homepage_banner\'})" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 20px;margin:0 0 20px;background:linear-gradient(135deg,#fff 0%,#f3f4f6 100%);border:1px solid #d8dbe2;border-radius:14px;color:#171923;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.16)">'
     +'<div style="width:76px;height:76px;padding:7px;border-radius:14px;background:#fff;border:1px solid #d8dbe2;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="/assets/merchshake-mark-square.png" alt="MerchShake" style="display:block;width:100%;height:100%;object-fit:contain"></div>'
     +'<div style="flex:1;min-width:210px"><div style="font-size:10px;font-weight:700;letter-spacing:1.4px;color:#6b7280;margin-bottom:3px">FROM MERCHSHAKE</div><div style="font-family:\'Fraunces\',serif;font-size:19px;font-weight:700;line-height:1.2;margin-bottom:4px">Love owning the real thing?</div><div style="font-size:12px;line-height:1.5;color:#555b68">Shop Blu-rays, DVDs, vinyl, video games, music and collectibles.</div><div style="font-size:11px;font-weight:700;color:#b91c1c;margin-top:5px">🇿🇦 Delivery within South Africa only</div></div>'
     +'<span style="padding:9px 15px;border-radius:8px;background:#171923;color:#fff;font-size:12px;font-weight:700;white-space:nowrap">Explore MerchShake →</span>'
@@ -926,7 +978,7 @@ function toggleHomepageSection(key){
 function renderFeedSection(key, title, subtitle, items){
   const expanded=homepageExpandedSections.has(key);
   const visibleItems=expanded?items:items.slice(0,HOMEPAGE_SECTION_PREVIEW);
-  let h='<div style="margin-bottom:24px">';
+  let h='<div data-analytics-section="'+key+'" style="margin-bottom:24px">';
   h+='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:2px"><h2 style="font-family:\'Fraunces\',serif;font-size:20px;font-weight:700">'+esc(title)+'</h2><span style="font-size:11px;color:var(--td);white-space:nowrap">'+items.length+' releases</span></div>';
   h+='<p style="font-size:12px;color:var(--td);margin-bottom:12px">'+esc(subtitle)+'</p>';
   h+='<div style="display:grid;grid-template-columns:1fr;gap:8px">';
@@ -1007,7 +1059,7 @@ function renderFeed(){
       });
 
     if(picked.length>=3){
-      h+='<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><span style="font-size:13px;font-weight:600;color:var(--ts)">🔥 Top Highlights</span><p style="font-size:11px;color:var(--td);margin:2px 0 0">Automatically selected from today\'s biggest releases</p></div><div style="display:flex;gap:6px"><button onclick="document.getElementById(\'hc\').scrollBy({left:-320,behavior:\'smooth\'})" style="width:28px;height:28px;border-radius:50%;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button><button onclick="document.getElementById(\'hc\').scrollBy({left:320,behavior:\'smooth\'})" style="width:28px;height:28px;border-radius:50%;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">→</button></div></div>';
+      h+='<div data-analytics-section="top_highlights" style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><span style="font-size:13px;font-weight:600;color:var(--ts)">🔥 Top Highlights</span><p style="font-size:11px;color:var(--td);margin:2px 0 0">Automatically selected from today\'s biggest releases</p></div><div style="display:flex;gap:6px"><button onclick="document.getElementById(\'hc\').scrollBy({left:-320,behavior:\'smooth\'})" style="width:28px;height:28px;border-radius:50%;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button><button onclick="document.getElementById(\'hc\').scrollBy({left:320,behavior:\'smooth\'})" style="width:28px;height:28px;border-radius:50%;background:var(--el);border:1px solid var(--brd);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">→</button></div></div>';
       h+='<div class="hero-carousel" id="hc">';
       picked.forEach(r=>{
         const ri=R.indexOf(r);
@@ -1060,31 +1112,31 @@ function renderFeed(){
   h+='</div><p class="sub">'+dayN(vd)+' — <b>'+R.length+' releases</b></p>';
 
   // Search bar
-  h+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:180px;position:relative"><input class="finput" id="search-box" type="text" placeholder="🔍 Search releases..." value="'+esc(searchQ)+'" style="margin:0;padding-left:12px;padding-right:32px" oninput="searchQ=this.value;renderFeed()"><span onclick="searchQ=\'\';renderFeed()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--td);font-size:14px;display:'+(searchQ?'block':'none')+'">✕</span></div><select class="finput" style="width:auto;margin:0;min-width:130px" onchange="sortBy=this.value;renderFeed()"><option value="popularity"'+(sortBy==='popularity'?' selected':'')+'>Popular first</option><option value="rating"'+(sortBy==='rating'?' selected':'')+'>Highest rated</option><option value="alpha"'+(sortBy==='alpha'?' selected':'')+'>A → Z</option><option value="alpha-z"'+(sortBy==='alpha-z'?' selected':'')+'>Z → A</option><option value="type"'+(sortBy==='type'?' selected':'')+'>By type</option></select><label title="Search today and archive dates opened in this session" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap"><input type="checkbox" id="global-search" '+(globalSearch?'checked':'')+' onchange="globalSearch=this.checked;renderFeed()" style="accent-color:var(--accent)">Loaded dates</label></div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:180px;position:relative"><input class="finput" id="search-box" type="text" placeholder="🔍 Search releases..." value="'+esc(searchQ)+'" style="margin:0;padding-left:12px;padding-right:32px" oninput="searchQ=this.value;renderFeed();trackSearchUsage(\'feed\')"><span onclick="searchQ=\'\';renderFeed();trackSearchUsage(\'feed\')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--td);font-size:14px;display:'+(searchQ?'block':'none')+'">✕</span></div><select class="finput" style="width:auto;margin:0;min-width:130px" onchange="sortBy=this.value;applyFilter(\'sort\',sortBy)"><option value="popularity"'+(sortBy==='popularity'?' selected':'')+'>Popular first</option><option value="rating"'+(sortBy==='rating'?' selected':'')+'>Highest rated</option><option value="alpha"'+(sortBy==='alpha'?' selected':'')+'>A → Z</option><option value="alpha-z"'+(sortBy==='alpha-z'?' selected':'')+'>Z → A</option><option value="type"'+(sortBy==='type'?' selected':'')+'>By type</option></select><label title="Search today and archive dates opened in this session" style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap"><input type="checkbox" id="global-search" '+(globalSearch?'checked':'')+' onchange="globalSearch=this.checked;applyFilter(\'loaded_dates\',globalSearch)" style="accent-color:var(--accent)">Loaded dates</label></div>';
 
   // Advanced filters row
   const allGenres=new Set();R.forEach(r=>(r.genres||[]).forEach(g=>allGenres.add(g)));
   const sortedGenres=[...allGenres].sort();
   const allCountries=new Set();R.forEach(r=>((r.metadata||{}).countries||[]).forEach(c=>{if(c)allCountries.add(c)}));
   const sortedCountries=[...allCountries].sort((a,b)=>(CN[a]||a).localeCompare(CN[b]||b));
-  h+='<div style="display:flex;gap:6px;margin-bottom:14px;align-items:center;flex-wrap:wrap"><select class="finput" style="width:auto;margin:0;min-width:110px;font-size:11px;padding:5px 8px" onchange="filterGenre=this.value;renderFeed()"><option value="">All genres</option>';
+  h+='<div style="display:flex;gap:6px;margin-bottom:14px;align-items:center;flex-wrap:wrap"><select class="finput" style="width:auto;margin:0;min-width:110px;font-size:11px;padding:5px 8px" onchange="filterGenre=this.value;applyFilter(\'genre\',filterGenre||\'all\')"><option value="">All genres</option>';
   sortedGenres.forEach(g=>{h+='<option value="'+esc(g)+'"'+(filterGenre===g?' selected':'')+'>'+esc(g)+'</option>'});
   h+='</select>';
-  h+='<select class="finput" style="width:auto;margin:0;min-width:120px;font-size:11px;padding:5px 8px" onchange="filterCountry=this.value;renderFeed()"><option value="">All countries</option>';
+  h+='<select class="finput" style="width:auto;margin:0;min-width:120px;font-size:11px;padding:5px 8px" onchange="filterCountry=this.value;applyFilter(\'country\',filterCountry||\'all\')"><option value="">All countries</option>';
   sortedCountries.forEach(c=>{h+='<option value="'+esc(c)+'"'+(filterCountry===c?' selected':'')+'>'+countryFlag(c)+' '+(CN[c]||c)+'</option>'});
   h+='</select>';
-  h+='<label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap;padding:4px 8px;background:var('+(filterHasPoster?'--agl':'--el')+');border:1px solid var('+(filterHasPoster?'--accent':'--brd')+');border-radius:6px"><input type="checkbox" '+(filterHasPoster?'checked':'')+' onchange="filterHasPoster=this.checked;renderFeed()" style="accent-color:var(--accent)">Has poster</label>';
-  h+='<label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap;padding:4px 8px;background:var('+(filterHasSynopsis?'--agl':'--el')+');border:1px solid var('+(filterHasSynopsis?'--accent':'--brd')+');border-radius:6px"><input type="checkbox" '+(filterHasSynopsis?'checked':'')+' onchange="filterHasSynopsis=this.checked;renderFeed()" style="accent-color:var(--accent)">Has synopsis</label>';
+  h+='<label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap;padding:4px 8px;background:var('+(filterHasPoster?'--agl':'--el')+');border:1px solid var('+(filterHasPoster?'--accent':'--brd')+');border-radius:6px"><input type="checkbox" '+(filterHasPoster?'checked':'')+' onchange="filterHasPoster=this.checked;applyFilter(\'has_poster\',filterHasPoster)" style="accent-color:var(--accent)">Has poster</label>';
+  h+='<label style="display:flex;align-items:center;gap:3px;font-size:11px;color:var(--td);cursor:pointer;white-space:nowrap;padding:4px 8px;background:var('+(filterHasSynopsis?'--agl':'--el')+');border:1px solid var('+(filterHasSynopsis?'--accent':'--brd')+');border-radius:6px"><input type="checkbox" '+(filterHasSynopsis?'checked':'')+' onchange="filterHasSynopsis=this.checked;applyFilter(\'has_synopsis\',filterHasSynopsis)" style="accent-color:var(--accent)">Has synopsis</label>';
   const activeFilters=(filterGenre?1:0)+(filterCountry?1:0)+(filterHasPoster?1:0)+(filterHasSynopsis?1:0);
-  if(activeFilters)h+='<button onclick="filterGenre=\'\';filterCountry=\'\';filterHasPoster=false;filterHasSynopsis=false;renderFeed()" style="font-size:10px;color:var(--accent);padding:4px 8px;background:var(--agl);border:1px solid var(--accent);border-radius:6px">Clear filters ✕</button>';
+  if(activeFilters)h+='<button onclick="filterGenre=\'\';filterCountry=\'\';filterHasPoster=false;filterHasSynopsis=false;applyFilter(\'advanced\',\'cleared\')" style="font-size:10px;color:var(--accent);padding:4px 8px;background:var(--agl);border:1px solid var(--accent);border-radius:6px">Clear filters ✕</button>';
   h+='</div>';
 
   // Filter bar
-  h+='<div class="fbar"><button class="fc '+(cf==='all'?'on':'')+'" onclick="cf=\'all\';renderFeed()">All ('+R.length+')</button>';
+  h+='<div class="fbar" data-analytics-section="search_filters"><button class="fc '+(cf==='all'?'on':'')+'" onclick="cf=\'all\';applyFilter(\'media_type\',cf)">All ('+R.length+')</button>';
   for(const[t,c]of Object.entries(MC)){
     if(cn[t]){
       const dot=cf!==t?'<span class="dot" style="background:'+c.c+'"></span>':'';
-      h+='<button class="fc '+(cf===t?'on':'')+'" onclick="cf=\''+t+'\';renderFeed()">'+dot+c.l+' ('+cn[t]+')</button>';
+      h+='<button class="fc '+(cf===t?'on':'')+'" onclick="cf=\''+t+'\';applyFilter(\'media_type\',cf)">'+dot+c.l+' ('+cn[t]+')</button>';
     }
   }
   h+='</div>';
@@ -1113,6 +1165,7 @@ sections.forEach(function(s){
   }
 
   document.getElementById('p-feed').innerHTML=h;
+  observeAnalyticsSections();
   feedPage=1;
   if(!sectionedHome){
     setupFeedObserver();
@@ -1205,7 +1258,7 @@ async function openD(i){
   }
 
   if(['movie','tv','disc','game','music'].includes(r.media_type)){
-    h+='<a href="'+merchShakeLink(r.title)+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;background:linear-gradient(135deg,#fff,#f3f4f6);border:1px solid #d8dbe2;border-radius:12px;margin-bottom:16px;color:#171923;text-decoration:none"><span style="width:48px;height:48px;padding:4px;border-radius:10px;background:#fff;border:1px solid #d8dbe2;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="/assets/merchshake-mark-square.png" alt="MerchShake" style="display:block;width:100%;height:100%;object-fit:contain"></span><span style="flex:1;min-width:180px"><strong style="display:block;font-size:13px;margin-bottom:2px">Find physical media on MerchShake</strong><span style="display:block;font-size:11px;color:#626875">Search for '+esc(r.title)+' · Delivery within South Africa only</span></span><strong style="font-size:11px;white-space:nowrap">Search MerchShake →</strong></a>';
+    h+='<a href="'+merchShakeLink(r.title)+'" target="_blank" rel="noopener" onclick="trackEvent(\'merchshake_click\',{placement:\'release_detail\',media_type:\''+r.media_type+'\'})" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;background:linear-gradient(135deg,#fff,#f3f4f6);border:1px solid #d8dbe2;border-radius:12px;margin-bottom:16px;color:#171923;text-decoration:none"><span style="width:48px;height:48px;padding:4px;border-radius:10px;background:#fff;border:1px solid #d8dbe2;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img src="/assets/merchshake-mark-square.png" alt="MerchShake" style="display:block;width:100%;height:100%;object-fit:contain"></span><span style="flex:1;min-width:180px"><strong style="display:block;font-size:13px;margin-bottom:2px">Find physical media on MerchShake</strong><span style="display:block;font-size:11px;color:#626875">Search for '+esc(r.title)+' · Delivery within South Africa only</span></span><strong style="font-size:11px;white-space:nowrap">Search MerchShake →</strong></a>';
   }
 
     // Streaming availability
@@ -1478,6 +1531,7 @@ async function modDismissReports(cid){
 
 // ═══════ WATCHLIST ═══════
 async function toggleWL(){
+  trackEvent('watchlist_attempt',{authenticated:!!user,action:user&&cr&&isWatchlisted(releaseKey(cr))?'remove':'add'});
   if(!user){
     if(offerOnboarding())return;
     return showAuth('login');
@@ -1989,7 +2043,7 @@ function renderPrivacy(){
   h+='<p style="margin-bottom:16px;padding-left:16px">\u2022 <strong>Amazon Associates</strong> — affiliate links (Amazon privacy policy applies). We earn a small commission on qualifying purchases at no extra cost to you.</p>';
 
   h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">6. Cookies & Local Storage</h3>';
-  h+='<p style="margin-bottom:16px">We use browser localStorage to store your theme preference, onboarding status, and dismissed recommendations. Supabase uses a session token for authentication. We do not use tracking cookies or third-party analytics. YouTube embeds may set their own cookies.</p>';
+  h+='<p style="margin-bottom:16px">We use browser localStorage to store your theme preference, onboarding status, and dismissed recommendations. Supabase uses a session token for authentication. We collect anonymous first-party usage events such as searches, filter use, link clicks, sign-up progress, watchlist attempts, and sections reached. These events do not include search terms, release titles, account details, or tracking cookies. Cloudflare Web Analytics and YouTube embeds may process limited technical data under their own privacy policies.</p>';
 
   h+='<h3 style="font-family:\'Fraunces\',serif;font-size:17px;color:var(--text);margin:0 0 8px">7. Your Rights (GDPR / POPIA)</h3>';
   h+='<p style="margin-bottom:8px">Under the EU General Data Protection Regulation (GDPR) and South Africa\'s Protection of Personal Information Act (POPIA), you have the right to:</p>';
@@ -2644,6 +2698,11 @@ async function initSupabase(){
         if(user){await loadFollowing();await loadWatched()}
         renderNav();renderStreams();renderAccount();renderFeed();
         if(event==='SIGNED_IN'&&user){
+          const signupMethod=localStorage.getItem('unreeled-signup-pending');
+          if(signupMethod){
+            trackEvent('signup_completed',{method:signupMethod});
+            localStorage.removeItem('unreeled-signup-pending');
+          }
           closeModal();
           toast('Welcome'+(profile?' back, '+profile.username:'')+'!');
         }
