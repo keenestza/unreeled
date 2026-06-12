@@ -61,7 +61,7 @@ def get_user_emails():
     return {u["id"]: u.get("email", "") for u in users if u.get("email")}
 
 def match_releases(releases, subs, watchlist):
-    matched = {"watchlist": [], "subscription": []}
+    matched = {"watchlist": [], "subscription": [], "tv": []}
     sub_types = {s["subscription_value"] for s in subs if s["subscription_type"] == "media_type"}
     sub_genres = {s["subscription_value"].lower() for s in subs if s["subscription_type"] == "genre"}
     wl_titles = {w["release_title"].lower() for w in watchlist}
@@ -70,6 +70,9 @@ def match_releases(releases, subs, watchlist):
         title_lower = (r.get("title") or "").lower()
         if title_lower in wl_titles:
             matched["watchlist"].append(r)
+            continue
+        if r.get("media_type") == "tv":
+            matched["tv"].append(r)
             continue
         if r.get("media_type") in sub_types:
             matched["subscription"].append(r)
@@ -98,15 +101,19 @@ def tv_badge_html(r):
 def build_email_html(username, matched, date):
     wl = matched["watchlist"]
     sub = matched["subscription"][:20]
+    tv = matched["tv"]
     seen = set()
-    unique_wl, unique_sub = [], []
+    unique_wl, unique_sub, unique_tv = [], [], []
     for r in wl:
         k = (r.get("title",""), r.get("media_type",""))
         if k not in seen: seen.add(k); unique_wl.append(r)
     for r in sub:
         k = (r.get("title",""), r.get("media_type",""))
         if k not in seen: seen.add(k); unique_sub.append(r)
-    if not unique_wl and not unique_sub:
+    for r in tv:
+        k = (r.get("title",""), r.get("media_type",""))
+        if k not in seen: seen.add(k); unique_tv.append(r)
+    if not unique_wl and not unique_sub and not unique_tv:
         return None
 
     fdate = datetime.strptime(date, "%Y-%m-%d").strftime("%B %d, %Y")
@@ -144,9 +151,19 @@ def build_email_html(username, matched, date):
             html += '</div>'
         html += '</div>'
 
-    total = len(unique_wl) + len(unique_sub)
+    if unique_tv:
+        html += '<div style="padding:16px 0"><h2 style="color:#a855f7;font-size:16px;font-weight:700;margin:0 0 12px">\U0001f4fa All TV Releases</h2>'
+        for r in unique_tv:
+            title = r.get("title","Unknown")
+            genres = ", ".join((r.get("genres") or [])[:3])
+            html += f'<div style="background:#0f1014;border:1px solid #1e1f28;border-left:3px solid {MC["tv"]["color"]};border-radius:8px;padding:12px;margin-bottom:6px"><span style="font-size:14px;font-weight:600;color:#e8e8ec">{MC["tv"]["icon"]} {title}</span>{tv_badge_html(r)}'
+            if genres: html += f'<span style="color:#5e5e6e;font-size:11px;margin-left:8px">{genres}</span>'
+            html += '</div>'
+        html += '</div>'
+
+    total = len(unique_wl) + len(unique_sub) + len(unique_tv)
     html += f'''<div style="text-align:center;padding:24px 0"><a href="{SITE_URL}" style="display:inline-block;background:#ff6b35;color:#fff;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none">View All Releases \u2192</a></div>
-<div style="border-top:1px solid #1e1f28;padding:20px 0;text-align:center"><p style="color:#5e5e6e;font-size:11px;margin:0">You have {total} matching release{"s" if total!=1 else ""} today.<br><a href="{SITE_URL}" style="color:#ff6b35;text-decoration:none">Manage your subscriptions</a> to change what you receive.<br><br><a href="{SITE_URL}" style="color:#5e5e6e;text-decoration:underline">Unsubscribe from daily emails</a> — go to My Account and toggle off the Daily Email Digest.</p></div>
+<div style="border-top:1px solid #1e1f28;padding:20px 0;text-align:center"><p style="color:#5e5e6e;font-size:11px;margin:0">Today's digest contains {total} release{"s" if total!=1 else ""}.<br><a href="{SITE_URL}" style="color:#ff6b35;text-decoration:none">Manage your subscriptions</a> to change your personalized matches.<br><br><a href="{SITE_URL}" style="color:#5e5e6e;text-decoration:underline">Unsubscribe from daily emails</a> — go to My Account and toggle off the Daily Email Digest.</p></div>
 </div></body></html>'''
     return html
 
@@ -191,20 +208,21 @@ def main():
         if not email: skipped += 1; continue
 
         matched = match_releases(releases, data["subs"], data["wl"])
-        if not matched["watchlist"] and not matched["subscription"]: skipped += 1; continue
+        if not matched["watchlist"] and not matched["subscription"] and not matched["tv"]: skipped += 1; continue
 
         username = profile_map.get(uid, "there")
         html = build_email_html(username, matched, today)
         if not html: skipped += 1; continue
 
-        wc, sc = len(matched["watchlist"]), len(matched["subscription"])
+        wc, sc, tc = len(matched["watchlist"]), len(matched["subscription"]), len(matched["tv"])
         parts = []
         if wc: parts.append(f"{wc} watchlisted")
         if sc: parts.append(f"{sc} new")
-        subject = f"\U0001f3ac {' + '.join(parts)} release{'s' if (wc+sc)>1 else ''} — {fdate}"
+        if tc: parts.append(f"{tc} TV")
+        subject = f"\U0001f3ac {' + '.join(parts)} release{'s' if (wc+sc+tc)>1 else ''} — {fdate}"
 
         if send_email(email, subject, html):
-            sent += 1; logger.info(f"Sent to {email} ({wc} wl, {sc} sub)")
+            sent += 1; logger.info(f"Sent to {email} ({wc} wl, {sc} sub, {tc} TV)")
         else: errors += 1
 
     logger.info(f"Done: {sent} sent, {skipped} skipped, {errors} errors")
