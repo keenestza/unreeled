@@ -22,9 +22,33 @@ Usage:
 import json
 import glob
 import argparse
+import hashlib
 from pathlib import Path
 from datetime import datetime, timezone
 from collections import Counter
+
+
+MAX_RELEASE_SLUG_BYTES = 80
+
+
+def make_release_slug(title, max_bytes=MAX_RELEASE_SLUG_BYTES):
+    """Build a filesystem-safe slug capped by UTF-8 byte length."""
+    slug = title.lower().strip()
+    slug = "".join(c if c.isalnum() or c == " " else "" for c in slug)
+    slug = "-".join(slug.split())
+    if not slug:
+        return "", False
+
+    original_slug = slug
+    while len(slug.encode("utf-8")) > max_bytes:
+        slug = slug[:-1].rstrip("-")
+
+    return slug, slug != original_slug
+
+
+def release_slug_suffix(date_str, media_type, title):
+    seed = f"{date_str}|{media_type}|{title}"
+    return hashlib.sha1(seed.encode("utf-8")).hexdigest()[:8]
 
 
 def utcnow_iso():
@@ -314,14 +338,16 @@ def generate_release_pages(all_data, docs_dir):
             if not title:
                 continue
 
-            # Generate URL-safe slug
-            slug = title.lower().strip()
-            slug = "".join(c if c.isalnum() or c == " " else "" for c in slug)
-            slug = "-".join(slug.split())[:80]
+            media_type = r.get("media_type", "movie")
+
+            # Generate URL-safe slug. Cap by bytes, not characters, because
+            # Linux filename limits are byte-based.
+            slug, was_truncated = make_release_slug(title)
             if not slug:
                 continue
 
-            media_type = r.get("media_type", "movie")
+            if was_truncated:
+                slug = f"{slug}-{release_slug_suffix(date_str, media_type, title)}"
             page_slug = f"{date_str}-{media_type}-{slug}"
 
             synopsis = r.get("synopsis", "")
