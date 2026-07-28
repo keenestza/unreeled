@@ -22,9 +22,79 @@ Usage:
 import json
 import glob
 import argparse
+import hashlib
 from pathlib import Path
 from datetime import datetime, timezone
 from collections import Counter
+
+
+MAX_RELEASE_FILENAME_BYTES = 240
+MAX_RELEASE_SLUG_BYTES = 160
+RELEASE_SLUG_HASH_LENGTH = 16
+
+
+def _slugify(value, preserve_hyphens=False):
+    """Return a readable slug using the site's existing Unicode rules."""
+    value = str(value).lower().strip()
+    if preserve_hyphens:
+        value = value.replace("-", " ")
+    value = "".join(
+        c if c.isalnum() or c == " " else ""
+        for c in value
+    )
+    return "-".join(value.split())
+
+
+def _truncate_slug(slug, max_bytes, hash_seed):
+    """Truncate a slug by UTF-8 bytes and add a deterministic hash suffix."""
+    if len(slug.encode("utf-8")) <= max_bytes:
+        return slug
+
+    digest = hashlib.sha256(hash_seed.encode("utf-8")).hexdigest()
+    suffix = f"-{digest[:RELEASE_SLUG_HASH_LENGTH]}"
+    prefix_budget = max_bytes - len(suffix)
+    if prefix_budget < 1:
+        raise ValueError("Slug byte budget is too small for the hash suffix")
+
+    prefix = slug.encode("utf-8")[:prefix_budget].decode("utf-8", errors="ignore")
+    prefix = prefix.rstrip("-")
+    return f"{prefix}{suffix}" if prefix else digest[:max_bytes]
+
+
+def make_release_page_slug(date_str, media_type, title):
+    """Build a deterministic release slug whose filename is safely below NAME_MAX."""
+    date_slug = _truncate_slug(
+        _slugify(date_str, preserve_hyphens=True) or "unknown-date",
+        32,
+        str(date_str),
+    )
+    media_slug = _truncate_slug(
+        _slugify(media_type, preserve_hyphens=True) or "movie",
+        32,
+        str(media_type),
+    )
+    prefix = f"{date_slug}-{media_slug}-"
+    filename_overhead = len(f"{prefix}.html".encode("utf-8"))
+    slug_budget = min(
+        MAX_RELEASE_SLUG_BYTES,
+        MAX_RELEASE_FILENAME_BYTES - filename_overhead,
+    )
+
+    slug = _slugify(title)
+    if not slug:
+        return ""
+
+    hash_seed = f"{date_str}|{media_type}|{title}"
+    slug = _truncate_slug(slug, slug_budget, hash_seed)
+    page_slug = f"{prefix}{slug}"
+
+    filename_bytes = len(f"{page_slug}.html".encode("utf-8"))
+    if filename_bytes > MAX_RELEASE_FILENAME_BYTES:
+        raise ValueError(
+            f"Release filename is {filename_bytes} bytes; "
+            f"limit is {MAX_RELEASE_FILENAME_BYTES}"
+        )
+    return page_slug
 
 
 def utcnow_iso():
@@ -314,15 +384,10 @@ def generate_release_pages(all_data, docs_dir):
             if not title:
                 continue
 
-            # Generate URL-safe slug
-            slug = title.lower().strip()
-            slug = "".join(c if c.isalnum() or c == " " else "" for c in slug)
-            slug = "-".join(slug.split())[:80]
-            if not slug:
-                continue
-
             media_type = r.get("media_type", "movie")
-            page_slug = f"{date_str}-{media_type}-{slug}"
+            page_slug = make_release_page_slug(date_str, media_type, title)
+            if not page_slug:
+                continue
 
             synopsis = r.get("synopsis", "")
             genres = ", ".join(r.get("genres", [])[:5])
