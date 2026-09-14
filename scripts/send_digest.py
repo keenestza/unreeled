@@ -10,6 +10,7 @@ Usage: python scripts/send_digest.py
 """
 
 import os, json, logging, requests
+import time
 from datetime import datetime, timezone
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -34,11 +35,34 @@ MC = {
     "news": {"icon": "\U0001f4f0", "label": "News", "color": "#64748b"},
 }
 
-def sb_get(endpoint, params=None):
+def supabase_get(path, params=None):
+    """Retry transient read failures, but still fail if Supabase stays unavailable."""
     headers = {"apikey": SUPABASE_SERVICE_KEY, "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}", "Content-Type": "application/json"}
-    resp = requests.get(f"{SUPABASE_URL}/rest/v1/{endpoint}", headers=headers, params=params, timeout=30)
-    resp.raise_for_status()
-    return resp.json()
+    for attempt in range(1, 5):
+        try:
+            resp = requests.get(f"{SUPABASE_URL}/{path}", headers=headers, params=params, timeout=30)
+            resp.raise_for_status()
+        except requests.HTTPError as exc:
+            if exc.response is None or exc.response.status_code not in (502, 503, 504) or attempt == 4:
+                raise
+            reason = f"HTTP {exc.response.status_code}"
+            exc.response.close()
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            if attempt == 4:
+                raise
+            reason = type(exc).__name__
+        else:
+            try:
+                return resp.json()
+            finally:
+                resp.close()
+        delay = 2 ** attempt
+        logger.warning("Supabase GET %s failed (%s); retry %d/3 in %ds", path, reason, attempt, delay)
+        time.sleep(delay)
+
+
+def sb_get(endpoint, params=None):
+    return supabase_get(f"rest/v1/{endpoint}", params)
 
 def load_todays_releases():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -53,10 +77,7 @@ def load_todays_releases():
     return releases, today
 
 def get_user_emails():
-    headers = {"apikey": SUPABASE_SERVICE_KEY, "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}"}
-    resp = requests.get(f"{SUPABASE_URL}/auth/v1/admin/users", headers=headers, params={"per_page": 1000}, timeout=30)
-    resp.raise_for_status()
-    data = resp.json()
+    data = supabase_get("auth/v1/admin/users", {"per_page": 1000})
     users = data.get("users", data) if isinstance(data, dict) else data
     return {u["id"]: u.get("email", "") for u in users if u.get("email")}
 
